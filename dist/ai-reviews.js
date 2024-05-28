@@ -3765,8 +3765,8 @@
   async function getProductInfo(shopId, productId) {
     const docRef = doc(firestore, `stores/${shopId}/products/${productId}`);
     const docSnap = await getDoc(docRef);
-    const { resenas } = docSnap.data();
-    return { exist: docSnap.exists, resenas };
+    const { reviews } = docSnap.data() ?? {};
+    return { exist: docSnap.exists, reviews };
   }
   window.getStoreInfo = getStoreInfo;
   window.getProductInfo = getProductInfo;
