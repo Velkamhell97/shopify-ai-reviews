@@ -3753,12 +3753,23 @@
   };
   var app = initializeApp(firebaseConfig);
   var firestore = getFirestore(app);
-  async function getStoreInfo() {
-    const docRef = doc(firestore, "stores/85949186323");
+  async function getStoreInfo(shopId) {
+    const docRef = doc(firestore, `stores/${shopId}`);
     const docSnap = await getDoc(docRef);
-    console.log(docSnap.data());
+    if (!docSnap.exists) {
+      throw new Error("La tienda no se encuentra registrada");
+    }
+    const { active } = docSnap.data();
+    return { active };
+  }
+  async function getProductInfo(shopId, productId) {
+    const docRef = doc(firestore, `stores/${shopId}/products/${productId}`);
+    const docSnap = await getDoc(docRef);
+    const { resenas } = docSnap.data();
+    return { exist: docSnap.exists, resenas };
   }
   window.getStoreInfo = getStoreInfo;
+  window.getProductInfo = getProductInfo;
 })();
 /*! Bundled license information:
 
