@@ -3756,7 +3756,7 @@
   async function getStoreInfo(shopId) {
     const docRef = doc(firestore, `stores/${shopId}`);
     const docSnap = await getDoc(docRef);
-    if (!docSnap.exists) {
+    if (!docSnap.exists()) {
       throw new Error("La tienda no se encuentra registrada");
     }
     const { active } = docSnap.data();
@@ -3766,7 +3766,8 @@
     const docRef = doc(firestore, `stores/${shopId}/products/${productId}`);
     const docSnap = await getDoc(docRef);
     const { reviews } = docSnap.data() ?? {};
-    return { exist: docSnap.exists, reviews };
+    const exists = docSnap.exists();
+    return { exists, reviews };
   }
   window.getStoreInfo = getStoreInfo;
   window.getProductInfo = getProductInfo;
