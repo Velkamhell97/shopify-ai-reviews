@@ -68,9 +68,6 @@ const defaultReviews = [
   {author: "Andrés Mendoza",     text: "Este producto me ha facilitado mucho la vida. Llegó antes de lo previsto y en perfectas condiciones. Estoy muy satisfecho con la compra y lo recomendaré sin dudas a quienes buscan soluciones prácticas y de calidad."},
 ];
 
-const shopId = "{{ shop.id }}";
-const productId = "{{ product.id }}";
-
 const reviewsMediaRaw = document.querySelector("#reviews-media").textContent;
 const reviewsMedia = JSON.parse(reviewsMediaRaw);
 
@@ -177,7 +174,7 @@ function autoScroll() {
   }, 3000);
 }
 
-async function fetchReviews() {
+async function fetchReviews(shopId, productId) {
   const storeCache = storage.get(shopId);
 
   let store = null;
@@ -272,7 +269,12 @@ document.addEventListener('alpine:init', () => {
 
       try {
         this.images = reviewsMedia;
-        rawReviews = await fetchReviews();
+
+        const shopId = document.querySelector("#shop-id").value;
+        const productId = document.querySelector("#product-id").value;
+
+        rawReviews = await fetchReviews(shopId, productId);
+        
         this.reviews = formatReviews(rawReviews);
       } catch (error) {
         this.error = error;
