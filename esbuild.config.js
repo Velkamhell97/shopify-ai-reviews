@@ -1,5 +1,5 @@
 require('esbuild').build({
-  entryPoints: ['firebase/index.js'],
+  entryPoints: ['src/ai-reviews.js'],
   outfile: 'dist/ai-reviews.js',
   bundle: true,
 }).catch(() => process.exit(1))
