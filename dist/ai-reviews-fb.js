@@ -3753,8 +3753,8 @@
   };
   var app = initializeApp(firebaseConfig);
   var firestore = getFirestore(app);
-  async function getStoreInfo(shopId) {
-    const docRef = doc(firestore, `stores/${shopId}`);
+  async function getStoreInfo(storeId) {
+    const docRef = doc(firestore, `stores/${storeId}`);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) {
       throw new Error("La tienda no se encuentra registrada.");
@@ -3762,8 +3762,8 @@
     const { active } = docSnap.data();
     return { active };
   }
-  async function getProductInfo(shopId, productId) {
-    const docRef = doc(firestore, `stores/${shopId}/products/${productId}`);
+  async function getProductInfo(storeId, productId) {
+    const docRef = doc(firestore, `stores/${storeId}/products/${productId}`);
     const docSnap = await getDoc(docRef);
     const { reviews } = docSnap.data() ?? {};
     const exists = docSnap.exists();
@@ -3870,12 +3870,12 @@
       scrollToSlide(currentSlide);
     }, 3e3);
   }
-  async function fetchReviews(shopId, productId) {
-    const storeCache = storage.get(shopId);
+  async function fetchReviews(storeId, productId) {
+    const storeCache = storage.get(storeId);
     let store = null;
     if (!storeCache) {
-      store = await getStoreInfo(shopId);
-      storage.set(shopId, store);
+      store = await getStoreInfo(storeId);
+      storage.set(storeId, store);
     } else {
       store = storeCache;
     }
@@ -3886,7 +3886,7 @@
     let product = null;
     if (!productCache) {
       console.log("Cargando reviews");
-      product = await getProductInfo(shopId, productId);
+      product = await getProductInfo(storeId, productId);
       storage.set(productId, product);
     } else {
       product = productCache;
@@ -3941,9 +3941,9 @@
         });
         try {
           this.images = reviewsMedia;
-          const shopId = document.querySelector("#shop-id").value;
+          const storeId = document.querySelector("#shop-id").value;
           const productId = document.querySelector("#product-id").value;
-          rawReviews = await fetchReviews(shopId, productId);
+          rawReviews = await fetchReviews(storeId, productId);
           this.reviews = formatReviews(rawReviews);
         } catch (error) {
           this.error = error;
@@ -4010,7 +4010,7 @@
         this.reset();
         const form = Object.fromEntries(new FormData(this.$el));
         const body = {
-          shopId: form.shopId,
+          storeId: form.storeId,
           product: {
             id: form.productId,
             name: form.productName,
