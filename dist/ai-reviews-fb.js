@@ -3763,11 +3763,11 @@
       const reviews = product.data()?.reviews ?? [];
       const storeRef = doc(firestore, `stores/${storeId}`);
       const store = await getDoc(storeRef);
-      const remaining = store.data()?.remaining ?? 0;
+      const credits = store.data()?.credits ?? 0;
       return {
         active: true,
         exists: product.exists(),
-        remaining,
+        credits,
         reviews
       };
     } catch (error) {
