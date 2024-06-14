@@ -3758,10 +3758,18 @@
       if (!storeId || !productId) {
         return { error: "Faltan argumentos" };
       }
-      const ref = doc(firestore, `stores/${storeId}/products/${productId}`);
-      const snapshot = await getDoc(ref);
-      const product = snapshot.data();
-      return { active: true, exists: snapshot.exists(), reviews: product?.reviews ?? [] };
+      const productRef = doc(firestore, `stores/${storeId}/products/${productId}`);
+      const product = await getDoc(productRef);
+      const reviews = product.data()?.reviews ?? [];
+      const storeRef = doc(firestore, `stores/${storeId}`);
+      const store = await getDoc(storeRef);
+      const remaining = store.data()?.remaining ?? 0;
+      return {
+        active: true,
+        exists: product.exists(),
+        remaining,
+        reviews
+      };
     } catch (error) {
       if (error.code == "permission-denied") {
         return { error: "La tienda no esta activa, verifica el pago" };
