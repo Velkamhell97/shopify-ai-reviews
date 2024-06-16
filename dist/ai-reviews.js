@@ -7012,6 +7012,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     appId: "1:260432829218:web:477853af8134c60439e37b"
   };
   var app = initializeApp(firebaseConfig);
+  module_default.start();
   var Database = class {
     /**
      * @type {Firestore}
