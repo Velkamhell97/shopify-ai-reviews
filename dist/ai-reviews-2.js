@@ -3260,9 +3260,12 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   var module_default = src_default;
 
   // src/ai-reviews-2.js
-  document.addEventListener("alpine:init", () => {
-    module_default.data("aiReviews", () => ({
-      name: "Pedro"
-    }));
-  });
+  window.Alpine = module_default;
+  module_default.data("aiReviews", () => ({
+    init: () => {
+      console.log("Init alpine");
+    },
+    name: "Pedro"
+  }));
+  module_default.start();
 })();
