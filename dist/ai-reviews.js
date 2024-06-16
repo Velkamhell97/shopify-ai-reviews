@@ -332,9 +332,9 @@
      * and returns a node-style callback which will resolve or reject the Deferred's promise.
      */
     wrapCallback(callback) {
-      return (error, value) => {
-        if (error) {
-          this.reject(error);
+      return (error2, value) => {
+        if (error2) {
+          this.reject(error2);
         } else {
           this.resolve(value);
         }
@@ -342,9 +342,9 @@
           this.promise.catch(() => {
           });
           if (callback.length === 1) {
-            callback(error);
+            callback(error2);
           } else {
-            callback(error, value);
+            callback(error2, value);
           }
         }
       };
@@ -412,8 +412,8 @@
           var _a;
           reject(((_a = request.error) === null || _a === void 0 ? void 0 : _a.message) || "");
         };
-      } catch (error) {
-        reject(error);
+      } catch (error2) {
+        reject(error2);
       }
     });
   }
@@ -442,8 +442,8 @@
       const template = this.errors[code];
       const message = template ? replaceTemplate(template, customData) : "Error";
       const fullMessage = `${this.serviceName}: ${message} (${fullCode}).`;
-      const error = new FirebaseError(fullCode, fullMessage, customData);
-      return error;
+      const error2 = new FirebaseError(fullCode, fullMessage, customData);
+      return error2;
     }
   };
   function replaceTemplate(template, data) {
@@ -916,18 +916,18 @@
     const promise = new Promise((resolve, reject) => {
       const unlisten = () => {
         request.removeEventListener("success", success);
-        request.removeEventListener("error", error);
+        request.removeEventListener("error", error2);
       };
       const success = () => {
         resolve(wrap(request.result));
         unlisten();
       };
-      const error = () => {
+      const error2 = () => {
         reject(request.error);
         unlisten();
       };
       request.addEventListener("success", success);
-      request.addEventListener("error", error);
+      request.addEventListener("error", error2);
     });
     promise.then((value) => {
       if (value instanceof IDBCursor) {
@@ -944,20 +944,20 @@
     const done = new Promise((resolve, reject) => {
       const unlisten = () => {
         tx.removeEventListener("complete", complete);
-        tx.removeEventListener("error", error);
-        tx.removeEventListener("abort", error);
+        tx.removeEventListener("error", error2);
+        tx.removeEventListener("abort", error2);
       };
       const complete = () => {
         resolve();
         unlisten();
       };
-      const error = () => {
+      const error2 = () => {
         reject(tx.error || new DOMException("AbortError", "AbortError"));
         unlisten();
       };
       tx.addEventListener("complete", complete);
-      tx.addEventListener("error", error);
-      tx.addEventListener("abort", error);
+      tx.addEventListener("error", error2);
+      tx.addEventListener("abort", error2);
     });
     transactionDoneMap.set(tx, done);
   }
@@ -3752,225 +3752,727 @@
     appId: "1:260432829218:web:477853af8134c60439e37b"
   };
   var app = initializeApp(firebaseConfig);
-  var firestore = getFirestore(app);
-  async function getStoreInfo(storeId) {
-    const docRef = doc(firestore, `stores/${storeId}`);
-    const docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) {
-      throw new Error("La tienda no se encuentra registrada.");
+  var Database = class {
+    /**
+     * @type {Firestore}
+     */
+    #firestore;
+    /**
+     * @param {import("firebase/app").FirebaseApp} app
+     */
+    constructor(app2) {
+      this.#firestore = getFirestore(app2);
     }
-    const { active } = docSnap.data();
-    return { active };
-  }
-  async function getProductInfo(storeId, productId) {
-    const docRef = doc(firestore, `stores/${storeId}/products/${productId}`);
-    const docSnap = await getDoc(docRef);
-    const { reviews } = docSnap.data() ?? {};
-    const exists = docSnap.exists();
-    return { exists, reviews };
-  }
-  var defaultReviews = [
-    { author: "Mar\xEDa Gonz\xE1lez", text: "Desde que compr\xE9 este producto, he ahorrado tanto tiempo como dinero. La entrega lleg\xF3 rapid\xEDsimo y en perfectas condiciones. Es incre\xEDble c\xF3mo facilita mi d\xEDa a d\xEDa. \xA1Definitivamente vale la pena probarlo, no me arrepiento de la compra!" },
-    { author: "Carlos Ram\xEDrez", text: "Llevaba meses buscando algo as\xED y finalmente lo encontr\xE9 aqu\xED. La atenci\xF3n al cliente fue muy buena, despejaron todas mis dudas con rapidez y profesionalismo. Muy satisfecho con la compra, es justo lo que necesitaba para resolver mi problema" },
-    { author: "Laura Fern\xE1ndez", text: "No esperaba que este producto fuera de tanta calidad, pero ahora estoy muy satisfecha. La entrega fue r\xE1pida y sin complicaciones, lo que me dio mucha tranquilidad. Recomiendo este producto sin dudarlo, realmente super\xF3 mis expectativas iniciales." },
-    { author: "Juan Mart\xEDnez", text: "Nunca me fiaba de comprar en estas p\xE1ginas, pero este producto me hizo cambiar de opini\xF3n. El servicio al cliente fue muy amable y eficiente. Estoy muy contento con la compra y siento que puedo confiar en este sitio para futuras compras." },
-    { author: "Ana L\xF3pez", text: "Pens\xE9 que ser\xEDa una estafa, pero el producto lleg\xF3 en muy poco tiempo y fue tal como lo describen. Funcion\xF3 perfectamente desde el primer d\xEDa. Honestamente, estoy muy impresionado y definitivamente lo recomendar\xEDa a cualquiera." },
-    { author: "Luis P\xE9rez", text: "Este producto ha solucionado un problema que ten\xEDa desde hace tiempo. La entrega fue incre\xEDblemente r\xE1pida y eficiente. Realmente cambi\xF3 mi rutina diaria para mejor. Muy satisfecho con la compra y siempre lo recomiendo a amigos y conocidos." },
-    { author: "Marta S\xE1nchez", text: "Estaba buscando una soluci\xF3n a mi problema y este producto fue perfecto. El servicio al cliente fue muy servicial y atento, me ayudaron en todo momento. Lo recomiendo sin dudar, es una inversi\xF3n que realmente vale la pena." },
-    { author: "Diego Rivera", text: "El precio me pareci\xF3 muy razonable para la calidad que ofrece. Realmente ha sido una muy buena inversi\xF3n. He notado mejoras significativas en mi rutina diaria desde que lo uso. Es definitivamente algo que recomendar\xEDa a quien busque calidad a buen precio." },
-    { author: "Patricia G\xF3mez", text: "Es justo lo que necesitaba. La atenci\xF3n al cliente fue excelente y siempre estuvieron dispuestos a ayudar con mis dudas. Estoy muy satisfecho con mi compra y no dudar\xE9 en recomendar este producto a mis amigos y familiares." },
-    { author: "Javier Torres", text: "Ten\xEDa mis dudas pero este producto cumpli\xF3 con todas mis expectativas. La entrega fue muy r\xE1pida, lleg\xF3 antes de lo que esperaba y sin ning\xFAn inconveniente. Estoy muy contento con la compra y lo recomendar\xEDa sin dudar." },
-    { author: "Claudia Hern\xE1ndez", text: "Este producto ha sido de gran ayuda para mi d\xEDa a d\xEDa. La atenci\xF3n al cliente es fenomenal y resolvieron todas mis dudas inmediatamente. Lo recomiendo a quienes busquen una buena soluci\xF3n para facilitar su rutina diaria." },
-    { author: "Alberto Ruiz", text: "No era f\xE1cil encontrar algo as\xED, pero aqu\xED lo tienen. La entrega fue sorprendentemente r\xE1pida y eficiente, lo cual agradezco mucho. Muy feliz con mi compra, el producto funciona perfectamente y cumple con todas mis expectativas." },
-    { author: "Daniela Castillo", text: "La durabilidad de este producto es impresionante. Lo uso todos los d\xEDas y sigue como nuevo. Realmente lo recomendar\xEDa a cualquiera que busque un producto fiable y duradero. Estoy extremadamente satisfecho con mi compra." },
-    { author: "Pablo Vargas", text: "Me sorprendi\xF3 lo r\xE1pido que lleg\xF3 el paquete y la calidad del producto. El env\xEDo fue tan r\xE1pido que no tuve que esperar nada. Estoy muy satisfecho con la compra y el producto cumple todas mis expectativas." },
-    { author: "Sof\xEDa Morales", text: "Este producto ha sido clave para mejorar mi rutina diaria. Me ahorra mucho tiempo y esfuerzo, y la verdad es que fue una inversi\xF3n excelente. Sin duda, fue una buena compra que volver\xEDa a hacer sin pensarlo dos veces." },
-    { author: "Fernando Guti\xE9rrez", text: "La rapidez en la entrega me sorprendi\xF3 gratamente. El producto es de buena calidad y cumple su funci\xF3n perfectamente, justo lo que necesitaba. Definitivamente lo recomendar\xEDa a quienes buscan eficiencia y calidad en un mismo producto." },
-    { author: "Carolina Castro", text: "El producto es justo lo que necesitaba y la atenci\xF3n al cliente fue estupenda. Me ayudaron con todas mis dudas de forma r\xE1pida y efectiva. Lo recomendar\xE9 a mis amigos, estoy completamente satisfecho con mi experiencia de compra." },
-    { author: "Ricardo D\xEDaz", text: "Hab\xEDa probado otros y ninguno como este. La calidad del producto es excelente y cumpli\xF3 con todas mis expectativas. La entrega fue muy r\xE1pida y sin problemas. \xA1Lo recomiendo a cualquiera que busque calidad y eficiencia en un solo producto!" },
-    { author: "Elena Vargas", text: "Desde que lo tengo, he notado una mejora significativa en mis actividades diarias. La atenci\xF3n al cliente fue muy cordial y siempre estuvieron disponibles para ayudarme. Definitivamente lo recomendar\xE9, realmente ha marcado una diferencia en mi rutina." },
-    { author: "Andr\xE9s Mendoza", text: "Este producto me ha facilitado mucho la vida. Lleg\xF3 antes de lo previsto y en perfectas condiciones. Estoy muy satisfecho con la compra y lo recomendar\xE9 sin dudas a quienes buscan soluciones pr\xE1cticas y de calidad." }
-  ];
-  var reviewsMediaRaw = document.querySelector("#reviews-media").textContent;
-  var reviewsMedia = JSON.parse(reviewsMediaRaw);
-  for (let i = 0; i < reviewsMedia.length; i++) {
-    delete reviewsMedia[i].preview_image;
-  }
-  var [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
-  var mainInputs = mainSelector.querySelectorAll("input");
-  var secondaryInputs = secondarySelector.querySelectorAll("input");
-  mainSelector.addEventListener("change", (e) => {
-    const index = [...mainInputs].indexOf(e.target);
-    secondaryInputs[index].checked = true;
-  });
-  secondarySelector.addEventListener("change", (e) => {
-    e.stopImmediatePropagation();
-    const index = [...secondaryInputs].indexOf(e.target);
-    mainInputs[index].click();
-  });
-  var Storage = {
-    get(key) {
-      return this[key];
-    },
-    set(key, value) {
-      this[key] = value;
+    /**
+     * @param {string | undefined} storeId
+     * @param {string | undefined} productId
+     * @returns {Promise<SucessReviewsResponse|ErrorResponse>}
+     */
+    async reviews(storeId, productId) {
+      try {
+        if (!storeId || !productId) {
+          return { error: "Faltan argumentos" };
+        }
+        const productRef = doc(this.#firestore, `stores/${storeId}/products/${productId}`);
+        const product = await getDoc(productRef);
+        const reviews = product.data()?.reviews ?? [];
+        const storeRef = doc(this.#firestore, `stores/${storeId}`);
+        const store = await getDoc(storeRef);
+        const credits = store.data()?.credits ?? 0;
+        return { active: true, exists: product.exists(), credits, reviews };
+      } catch (error2) {
+        if (error2.code == "permission-denied") {
+          return { error: "La tienda no esta activa, verifica el pago" };
+        } else {
+          return { error: error2.message ?? error2.toString() };
+        }
+      }
     }
   };
-  var storage = Object.create(Storage);
-  function maxSlide() {
-    const columns = getComputedStyle(reviewsScroll).getPropertyValue("--review-columns");
-    return rawReviews.length - columns + 2;
-  }
-  function scrollToSlide(slideIndex) {
-    console.log("move to: " + slideIndex);
-    const currentSlide2 = document.querySelector(`.review-slide:nth-child(${slideIndex})`);
-    currentSlide2.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
-  }
-  var rawReviews = [];
-  var reviewsScroll = null;
-  var currentSlide = interval = collapsible = dialog = null;
-  function init() {
-    console.log("Javascript :: Init");
-    currentSlide = 2;
-    interval = null;
-    collapsible = document.querySelector("#reviews-collapsible");
-    const controlButtons = document.querySelectorAll(".reviews-paginator>button");
-    controlButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const direction = parseInt(button.dataset.direction);
-        const rows = getComputedStyle(reviewsScroll).getPropertyValue("--review-rows");
-        const newSlide = currentSlide + direction * (parseInt(rows) + 1);
-        if (newSlide < 2 || newSlide > maxSlide()) return;
-        currentSlide = newSlide;
-        scrollToSlide(currentSlide);
+  var firestore = new Database(app);
+  var ScrollController = class {
+    /**
+     * @type {boolean}
+     * @private
+     */
+    #initialized = false;
+    /**
+     * @type {HTMLElement}
+     * @private
+     */
+    #reviewsScroll;
+    /**
+     * @type {number}
+     * @private
+     */
+    #reviewsLength = 0;
+    /**
+     * @type {number}
+     * @private
+     */
+    #currentSlide = 2;
+    /**
+     * @type {?number}
+     * @private
+     */
+    #interval = null;
+    /**
+     * @type {any}
+     * @private
+     */
+    #pageChangedListener;
+    constructor() {
+      this.#pageChangedListener = this.#pageChangedHandler.bind(this);
+    }
+    /**
+     * @param {number} length
+     * @returns {void}
+     */
+    init(length) {
+      console.log("%cSCROLL CONTROLLER INIT", "color: #266624;");
+      this.#reviewsLength = length;
+      if (this.#initialized) return;
+      this.reload(false);
+      this.#initialized = true;
+    }
+    /**
+     * @param {boolean} reset
+     * @returns {void}
+     */
+    reload(reset) {
+      console.log("%cSCROLL CONTROLLER RELOAD", "color: #a16a1d;");
+      if (reset) this.#currentSlide = 2;
+      this.#reviewsScroll = document.querySelector(".reviews");
+      const autoplay = document.querySelector("#scroll-type").value === "auto";
+      if (autoplay) this.#play();
+      this.#setupControlButtons();
+    }
+    /**
+     * @returns {number}
+     */
+    get rows() {
+      const rows = getComputedStyle(this.#reviewsScroll).getPropertyValue("--review-rows");
+      return parseInt(rows);
+    }
+    /**
+     * @returns {number}
+     */
+    get maxSlide() {
+      const columns = getComputedStyle(this.#reviewsScroll).getPropertyValue("--review-columns");
+      return this.#reviewsLength - columns + 2;
+    }
+    /**
+     * @param {number} slideIndex
+     * @returns {void}
+     * @private
+     */
+    #scrollToSlide(slideIndex) {
+      console.log("MOVE TO: " + slideIndex);
+      const currentSlide = this.#reviewsScroll.querySelector(`.review-slide:nth-child(${slideIndex})`);
+      this.#reviewsScroll.scrollLeft = currentSlide.offsetLeft - this.#reviewsScroll.offsetLeft;
+    }
+    /**
+     * @returns {void}
+     * @private
+     */
+    #play() {
+      clearInterval(this.#interval);
+      this.#interval = setInterval(() => {
+        this.#currentSlide = this.#currentSlide + 1 + this.rows;
+        if (this.#currentSlide > this.maxSlide - 1) {
+          this.#currentSlide = 2;
+        }
+        this.#scrollToSlide(this.#currentSlide);
+      }, 3e3);
+    }
+    /**
+     * @param {Event} event
+     * @returns {void}
+     * @private
+     */
+    #pageChangedHandler(event) {
+      console.log("pressed");
+      const button = event.target.closest("button");
+      const direction = parseInt(button.dataset.direction);
+      const newSlide = this.#currentSlide + direction * (this.rows + 1);
+      if (newSlide < 2 || newSlide > this.maxSlide) return;
+      this.#currentSlide = newSlide;
+      this.#scrollToSlide(this.#currentSlide);
+    }
+    /**
+     * @returns {void}
+     * @private
+     */
+    #setupControlButtons() {
+      console.log("%cSETUP PAGINATOR", "color: #27549c;");
+      const paginatorButtons = document.querySelectorAll(".reviews-paginator__button");
+      paginatorButtons.forEach((button) => {
+        button.removeEventListener("click", this.#pageChangedListener);
+        button.addEventListener("click", this.#pageChangedListener);
       });
-    });
-    dialog = document.querySelector("#reviews-dialog");
-    dialog.addEventListener("click", (e) => {
-      if (e.target === dialog) dialog.close();
-    });
-  }
-  function dispose() {
-    console.log("Javascript :: Dispose");
-    clearInterval(interval);
-  }
-  init();
-  if (Shopify.designMode) {
-    document.addEventListener("shopify:section:load", init);
-    document.addEventListener("shopify:section:unload", dispose);
-  }
-  function autoScroll() {
-    interval = setInterval(() => {
-      const rows = getComputedStyle(reviewsScroll).getPropertyValue("--review-rows");
-      currentSlide = currentSlide + 1 + parseInt(rows);
-      if (currentSlide > maxSlide() - 1) {
-        currentSlide = 2;
-      }
-      scrollToSlide(currentSlide);
-    }, 3e3);
-  }
-  async function fetchReviews(storeId, productId) {
-    const storeCache = storage.get(storeId);
-    let store = null;
-    if (!storeCache) {
-      store = await getStoreInfo(storeId);
-      storage.set(storeId, store);
-    } else {
-      store = storeCache;
     }
-    if (!store.active) {
-      throw new Error("No se ha registrado el pago, por favor, cancele para continuar usando el programa.");
+  };
+  var scroll = new ScrollController();
+  var FormController = class {
+    /**
+     * @type {boolean}
+     * @private
+     */
+    #initialized = false;
+    /**
+     * @type {HTMLFormElement}
+     * @private
+     */
+    #form = null;
+    /**
+     * @type {Review}
+     * @private
+     */
+    #fields = { stars: 0, image: null };
+    /**
+     * @type {any}
+     * @private
+     */
+    #fileChangedListener;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    #imageLoaded = false;
+    /**
+     * @type {boolean}
+     */
+    submited = false;
+    /**
+     * @type {HTMLElement}
+     * @private
+     */
+    #formFile;
+    /**
+     * @type {HTMLTemplateElement}
+     * @private
+     */
+    #imageTemplate;
+    /**
+     * @type {HTMLTemplateElement}
+     * @private
+     */
+    #buttonTemplate;
+    constructor() {
+      this.#fileChangedListener = this.#fileChangedHandler.bind(this);
     }
-    const productCache = storage.get(productId);
-    let product = null;
-    if (!productCache) {
-      console.log("Cargando reviews");
-      product = await getProductInfo(storeId, productId);
-      storage.set(productId, product);
-    } else {
-      product = productCache;
+    /**
+     * @returns {void}
+     */
+    init() {
+      console.log("%cFORM CONTROLLER INIT", "color: #266624;");
+      if (this.#initialized) return;
+      this.reload();
+      this.#initialized = true;
     }
-    let reviews = null;
-    if (product?.exists) {
-      reviews = product.reviews;
-    } else {
-      reviews = defaultReviews;
+    /**
+     * @returns {void}
+     */
+    reload() {
+      console.log("%cFORM CONTROLLER RELOAD", "color: #a16a1d;");
+      this.#form = document.querySelector("#review-form");
+      this.#formFile = document.querySelector(".review-form__file");
+      this.#imageTemplate = this.#formFile.querySelector("#review-form__file-template--image");
+      this.#buttonTemplate = this.#formFile.querySelector("#review-form__file-template--button");
+      this.#setupStarsInput();
+      this.#setupFileInput();
     }
-    return reviews;
-  }
-  function formatReviews(unformattedReviews) {
-    const reviews = structuredClone(unformattedReviews);
-    const now = /* @__PURE__ */ new Date();
-    let today = now.getDate();
-    let month = now.getMonth();
-    const year = now.getFullYear();
-    if (today < 5) {
-      today = new Date(year, month, 0).getDate();
-    } else {
-      today--;
-      month++;
+    /**
+     * @returns {Review}
+     */
+    data() {
+      const { author, text } = Object.fromEntries(new FormData(this.#form));
+      const options = { year: "numeric", month: "long", day: "numeric" };
+      const datetime = new Intl.DateTimeFormat("es", options);
+      const date = datetime.format(/* @__PURE__ */ new Date());
+      const fields = { author, text, ...this.#fields, date };
+      return fields;
     }
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    for (let i = 0; i < reviews.length; i++) {
-      const day = Math.floor(Math.random() * today) + 1;
-      const date = /* @__PURE__ */ new Date(`${year}/${month}/${day}`);
-      const stars = Math.round(Math.random() * 1 + 4);
-      reviews[i].date = new Intl.DateTimeFormat("es", options).format(date);
-      reviews[i].stars = stars;
-    }
-    return reviews;
-  }
-  document.addEventListener("alpine:init", () => {
-    Alpine.data("reviewsData", () => ({
-      async init() {
-        console.log("Alpine :: Init");
-        this.$watch("reviews", () => {
-          if (!this.reviews.length) return;
-          reviewsScroll = document.querySelector(".reviews");
-          const autoplay = document.querySelector("#scroll-type").value === "auto";
-          if (autoplay) {
-            autoScroll();
+    /**
+     * Cleanup not necesary, classList.add prevent duplication
+     * @returns {void}
+     * @private
+     */
+    #setupStarsInput() {
+      console.log("%cSETUP STARS SELECTOR", "color: #27549c;");
+      const collection = document.querySelector(".review-form__stars-selector").children;
+      const formStars = [...collection];
+      formStars.shift();
+      for (let i = 0; i < formStars.length; i++) {
+        const star = formStars[i];
+        star.addEventListener("click", (_) => {
+          for (let i2 = 0; i2 < 5; i2++) {
+            formStars[i2].classList.remove("active");
+          }
+          const index = [...star.parentElement.childNodes].indexOf(star);
+          this.#fields.stars = index - 1;
+          for (let i2 = 0; i2 < this.#fields.stars; i2++) {
+            formStars[i2].classList.add("active");
           }
         });
+      }
+    }
+    /**
+     * Cleanup not necesary, classList.add prevent duplication
+     * @returns {void}
+     * @private
+     */
+    #onImageDeleted() {
+      this.#form.image = null;
+      this.#imageLoaded = false;
+      const formFileInput = this.#formFile.querySelector("#review-form__file-input");
+      formFileInput.value = "";
+      this.#formFile.querySelector(".review-form__file-content").remove();
+      this.#formFile.appendChild(this.#buttonTemplate.content.cloneNode(true));
+    }
+    /**
+     * @param {Event} event
+     * @returns {void}
+     * @private
+     */
+    #onImageLoaded(event) {
+      if (this.#imageLoaded) return;
+      this.#imageLoaded = true;
+      const image = event.target;
+      const aspectRatio = image.width / image.height;
+      this.#fields.image = {
+        src: image.src,
+        local: true,
+        width: image.width,
+        height: image.height,
+        aspectRatio
+      };
+      this.#formFile.querySelector(".review-form__file-button--upload").remove();
+      const formFileImage = this.#imageTemplate.content.cloneNode(true);
+      const container = formFileImage.querySelector(".review-form__file-content");
+      container.appendChild(image);
+      container.firstElementChild.addEventListener("click", this.#onImageDeleted.bind(this));
+      this.#formFile.appendChild(formFileImage);
+    }
+    /**
+     * @param {Event} event
+     * @returns {void}
+     * @private
+     */
+    #fileChangedHandler(event) {
+      const files = event.target.files;
+      if (!files.length) return;
+      const file = files[0];
+      if (file.size > 2097152) {
+        alert("La imagen es muy grande");
+        return;
+      }
+      const reader = new FileReader();
+      reader.addEventListener("load", (e) => {
+        const image = new Image();
+        image.onload = this.#onImageLoaded.bind(this);
+        image.src = reader.result;
+        image.alt = "Uploaded image";
+      }, false);
+      reader.readAsDataURL(file);
+    }
+    /**
+     * @returns {void}
+     * @private
+     */
+    #setupFileInput() {
+      console.log("%cSETUP FILE", "color: #27549c;");
+      const formFileInput = this.#formFile.querySelector("#review-form__file-input");
+      formFileInput.removeEventListener("change", this.#fileChangedListener);
+      formFileInput.addEventListener("change", this.#fileChangedListener);
+    }
+    /**
+     * @returns {void}
+     */
+    reset() {
+      const collection = document.querySelector(".review-form__stars-selector").children;
+      const formStars = [...collection];
+      for (let i = 0; i < formStars.length; i++) {
+        formStars[i].classList.remove("active");
+      }
+      this.#fields = { stars: 0, image: null };
+      this.#form.reset();
+      this.#imageLoaded = false;
+      this.#formFile.querySelector(".review-form__file-content").remove();
+      this.#formFile.appendChild(this.#buttonTemplate.content.cloneNode(true));
+    }
+  };
+  var form = new FormController();
+  var DoomController = class {
+    /**
+     * @type {boolean}
+     * @private
+     */
+    #initialized = false;
+    /**
+     * @type {HTMLElement}
+     * @private
+     */
+    #collapsible;
+    /**
+     * @type {HTMLElement}
+     * @private
+     */
+    #dialog;
+    constructor() {
+      this.init();
+    }
+    /**
+     * @returns {void}
+     */
+    init() {
+      console.log("%cDOOM CONTROLLER INIT", "color: #266624;");
+      if (this.#initialized) return;
+      this.reload();
+      this.#initialized = true;
+    }
+    /**
+     * @returns {void}
+     */
+    reload() {
+      console.log("%cDOOM CONTROLLER RELOAD", "color: #a16a1d;");
+      this.#collapsible = document.querySelector(".reviews-collapsible");
+      this.#dialog = document.querySelector("#reviews-dialog");
+      this.#setupDialog();
+      this.#setupVariants();
+    }
+    /**
+     * @returns {void}
+     */
+    openCollapsible() {
+      this.#collapsible.dataset.open = "true";
+    }
+    /**
+     * @returns {void}
+     */
+    closeCollapsible() {
+      this.#collapsible.dataset.open = "close";
+    }
+    /**
+     * @returns {void}
+     */
+    showModal() {
+      this.#dialog.showModal();
+    }
+    /**
+     * @returns {void}
+     */
+    closeModal() {
+      this.#dialog.close();
+    }
+    /**
+     * Cleanup not necesarry, closed dialog only works 1 time
+     * @returns {void}
+     * @private
+     */
+    #setupDialog() {
+      console.log("%cSETUP DIALOG", "color: #27549c;");
+      this.#dialog.addEventListener("click", (e) => {
+        if (e.target === this.#dialog) this.#dialog.close();
+      });
+    }
+    /**
+     * Cleanup not necesarry, checked true only works once and click in the same element
+     * @returns {void}
+     * @private
+     */
+    #setupVariants() {
+      console.log("%cSETUP VARIANTS", "color: #27549c;");
+      const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
+      const mainInputs = mainSelector.querySelectorAll("input");
+      const secondaryInputs = secondarySelector.querySelectorAll("input");
+      mainSelector.addEventListener("change", (e) => {
+        const index = [...mainInputs].indexOf(e.target);
+        secondaryInputs[index].checked = true;
+      });
+      secondarySelector.addEventListener("change", (e) => {
+        e.stopImmediatePropagation();
+        const index = [...secondaryInputs].indexOf(e.target);
+        mainInputs[index].click();
+      });
+    }
+  };
+  var doom = new DoomController();
+  var State = class {
+    /**
+     * @type {boolean}
+     * @private
+     */
+    #fetched = false;
+    /**
+     * @type {Database}
+     * @private
+     */
+    #firestore;
+    /**
+     * @type {Review[]}
+     * @private
+     */
+    #reviews = [];
+    /**
+     * @type {boolean}
+     */
+    active;
+    /**
+     * @type {boolean}
+     */
+    exists;
+    /**
+     * @type {number}
+     */
+    credits = 0;
+    /**
+     * @type {ReviewImage[]}
+     * @private
+     */
+    #images;
+    /**
+     * @type {any}
+     */
+    error;
+    /**
+     * @type {Review[]}
+     * @private
+     */
+    #defaultReviews = [
+      { author: "Mar\xEDa Gonz\xE1lez", text: "Desde que compr\xE9 este producto, he ahorrado tanto tiempo como dinero. La entrega lleg\xF3 rapid\xEDsimo y en perfectas condiciones. Es incre\xEDble c\xF3mo facilita mi d\xEDa a d\xEDa. \xA1Definitivamente vale la pena probarlo, no me arrepiento de la compra!" },
+      { author: "Carlos Ram\xEDrez", text: "Llevaba meses buscando algo as\xED y finalmente lo encontr\xE9 aqu\xED. La atenci\xF3n al cliente fue muy buena, despejaron todas mis dudas con rapidez y profesionalismo. Muy satisfecho con la compra, es justo lo que necesitaba para resolver mi problema" },
+      { author: "Laura Fern\xE1ndez", text: "No esperaba que este producto fuera de tanta calidad, pero ahora estoy muy satisfecha. La entrega fue r\xE1pida y sin complicaciones, lo que me dio mucha tranquilidad. Recomiendo este producto sin dudarlo, realmente super\xF3 mis expectativas iniciales." },
+      { author: "Juan Mart\xEDnez", text: "Nunca me fiaba de comprar en estas p\xE1ginas, pero este producto me hizo cambiar de opini\xF3n. El servicio al cliente fue muy amable y eficiente. Estoy muy contento con la compra y siento que puedo confiar en este sitio para futuras compras." },
+      { author: "Ana L\xF3pez", text: "Pens\xE9 que ser\xEDa una estafa, pero el producto lleg\xF3 en muy poco tiempo y fue tal como lo describen. Funcion\xF3 perfectamente desde el primer d\xEDa. Honestamente, estoy muy impresionado y definitivamente lo recomendar\xEDa a cualquiera." },
+      { author: "Luis P\xE9rez", text: "Este producto ha solucionado un problema que ten\xEDa desde hace tiempo. La entrega fue incre\xEDblemente r\xE1pida y eficiente. Realmente cambi\xF3 mi rutina diaria para mejor. Muy satisfecho con la compra y siempre lo recomiendo a amigos y conocidos." },
+      { author: "Marta S\xE1nchez", text: "Estaba buscando una soluci\xF3n a mi problema y este producto fue perfecto. El servicio al cliente fue muy servicial y atento, me ayudaron en todo momento. Lo recomiendo sin dudar, es una inversi\xF3n que realmente vale la pena." },
+      { author: "Diego Rivera", text: "El precio me pareci\xF3 muy razonable para la calidad que ofrece. Realmente ha sido una muy buena inversi\xF3n. He notado mejoras significativas en mi rutina diaria desde que lo uso. Es definitivamente algo que recomendar\xEDa a quien busque calidad a buen precio." },
+      { author: "Patricia G\xF3mez", text: "Es justo lo que necesitaba. La atenci\xF3n al cliente fue excelente y siempre estuvieron dispuestos a ayudar con mis dudas. Estoy muy satisfecho con mi compra y no dudar\xE9 en recomendar este producto a mis amigos y familiares." },
+      { author: "Javier Torres", text: "Ten\xEDa mis dudas pero este producto cumpli\xF3 con todas mis expectativas. La entrega fue muy r\xE1pida, lleg\xF3 antes de lo que esperaba y sin ning\xFAn inconveniente. Estoy muy contento con la compra y lo recomendar\xEDa sin dudar." },
+      { author: "Claudia Hern\xE1ndez", text: "Este producto ha sido de gran ayuda para mi d\xEDa a d\xEDa. La atenci\xF3n al cliente es fenomenal y resolvieron todas mis dudas inmediatamente. Lo recomiendo a quienes busquen una buena soluci\xF3n para facilitar su rutina diaria." },
+      { author: "Alberto Ruiz", text: "No era f\xE1cil encontrar algo as\xED, pero aqu\xED lo tienen. La entrega fue sorprendentemente r\xE1pida y eficiente, lo cual agradezco mucho. Muy feliz con mi compra, el producto funciona perfectamente y cumple con todas mis expectativas." },
+      { author: "Daniela Castillo", text: "La durabilidad de este producto es impresionante. Lo uso todos los d\xEDas y sigue como nuevo. Realmente lo recomendar\xEDa a cualquiera que busque un producto fiable y duradero. Estoy extremadamente satisfecho con mi compra." },
+      { author: "Pablo Vargas", text: "Me sorprendi\xF3 lo r\xE1pido que lleg\xF3 el paquete y la calidad del producto. El env\xEDo fue tan r\xE1pido que no tuve que esperar nada. Estoy muy satisfecho con la compra y el producto cumple todas mis expectativas." },
+      { author: "Sof\xEDa Morales", text: "Este producto ha sido clave para mejorar mi rutina diaria. Me ahorra mucho tiempo y esfuerzo, y la verdad es que fue una inversi\xF3n excelente. Sin duda, fue una buena compra que volver\xEDa a hacer sin pensarlo dos veces." },
+      { author: "Fernando Guti\xE9rrez", text: "La rapidez en la entrega me sorprendi\xF3 gratamente. El producto es de buena calidad y cumple su funci\xF3n perfectamente, justo lo que necesitaba. Definitivamente lo recomendar\xEDa a quienes buscan eficiencia y calidad en un mismo producto." },
+      { author: "Carolina Castro", text: "El producto es justo lo que necesitaba y la atenci\xF3n al cliente fue estupenda. Me ayudaron con todas mis dudas de forma r\xE1pida y efectiva. Lo recomendar\xE9 a mis amigos, estoy completamente satisfecho con mi experiencia de compra." },
+      { author: "Ricardo D\xEDaz", text: "Hab\xEDa probado otros y ninguno como este. La calidad del producto es excelente y cumpli\xF3 con todas mis expectativas. La entrega fue muy r\xE1pida y sin problemas. \xA1Lo recomiendo a cualquiera que busque calidad y eficiencia en un solo producto!" },
+      { author: "Elena Vargas", text: "Desde que lo tengo, he notado una mejora significativa en mis actividades diarias. La atenci\xF3n al cliente fue muy cordial y siempre estuvieron disponibles para ayudarme. Definitivamente lo recomendar\xE9, realmente ha marcado una diferencia en mi rutina." },
+      { author: "Andr\xE9s Mendoza", text: "Este producto me ha facilitado mucho la vida. Lleg\xF3 antes de lo previsto y en perfectas condiciones. Estoy muy satisfecho con la compra y lo recomendar\xE9 sin dudas a quienes buscan soluciones pr\xE1cticas y de calidad." }
+    ];
+    /**
+     * @param {Database} firestore
+     */
+    constructor(firestore2) {
+      this.#firestore = firestore2;
+      const images = JSON.parse(document.querySelector("#reviews-media").textContent);
+      for (let i = 0; i < images.length; i++) {
+        delete images[i].preview_image;
+      }
+      this.#images = images;
+    }
+    /**
+     * @returns {Promise<void>}
+     */
+    async init() {
+      await this.#fetchReviews();
+    }
+    /**
+     * @param {Review} review
+     * @returns {void}
+     */
+    add(review) {
+      this.#reviews.unshift(review);
+    }
+    /**
+     * @param {number} index
+     * @returns {void}
+     */
+    remove(index) {
+      this.#reviews.splice(index, 1);
+    }
+    /**
+     * @param {Review[]} value
+     */
+    set reviews(value) {
+      const reviews = structuredClone(value);
+      for (let i = 0; i < this.#images.length; i++) {
+        reviews[i].image = this.#images[i];
+      }
+      const now = /* @__PURE__ */ new Date();
+      let today = now.getDate();
+      let month = now.getMonth();
+      const year = now.getFullYear();
+      let offset = 1;
+      if (today < 5) {
+        today = new Date(year, month, 0).getDate() - 20;
+        offset = 20;
+      } else {
+        today--;
+        month++;
+      }
+      const options = { year: "numeric", month: "long", day: "numeric" };
+      const datetime = new Intl.DateTimeFormat("es", options);
+      const weight = 0.05;
+      for (let i = 0; i < reviews.length; i++) {
+        const day = Math.floor(Math.random() * today) + offset;
+        const date = /* @__PURE__ */ new Date(`${year}/${month}/${day}`);
+        const stars = Math.random() < weight ? 4 : 5;
+        reviews[i].date = datetime.format(date);
+        reviews[i].stars = stars;
+      }
+      this.#reviews = reviews;
+    }
+    /**
+     * @param {string[]} value
+     */
+    set names(value) {
+      for (let i = 0; i < value.length; i++) {
+        this.#reviews[i].author = value[i];
+      }
+    }
+    /**
+     * @returns {Review[]}
+     */
+    get reviews() {
+      return this.#reviews;
+    }
+    /**
+     * @returns {Review[]}
+     */
+    get copy() {
+      return structuredClone(this.#reviews);
+    }
+    /**
+     * @returns {Review[]}
+     */
+    get raw() {
+      const reviews = structuredClone(this.#reviews);
+      const raw = [];
+      for (let i = 0; i < reviews.length; i++) {
+        const { author, text } = reviews[i];
+        raw.push({ author, text });
+      }
+      return raw;
+    }
+    /**
+     * @returns {Promise<void>}
+     * @private
+     */
+    async #fetchReviews() {
+      if (!this.#fetched) {
+        console.log("%cCARGANDO REVIEWS...", "color: #5e3419;");
+        const shopId = document.querySelector("#shop-id").value;
+        const productId = document.querySelector("#product-id").value;
+        const response = await this.#firestore.reviews(shopId, productId);
+        if (response.error) {
+          this.error = error;
+          throw new Error(response.error);
+        }
+        let reviews = response.reviews;
+        if (!response.exists) {
+          reviews = this.#defaultReviews;
+        }
+        this.active = response.active;
+        this.exists = response.exists;
+        this.credits = response.credits;
+        this.reviews = reviews;
+        this.#fetched = true;
+      }
+    }
+  };
+  var state = new State(firestore);
+  var formReload = false;
+  var scrollReload = false;
+  function refresh() {
+    console.log("Javascript :: Reload");
+    formReload = true;
+    scrollReload = true;
+    doom.reload();
+  }
+  if (Shopify.designMode) {
+    document.addEventListener("shopify:section:load", refresh);
+  }
+  document.addEventListener("alpine:init", () => {
+    Alpine.data("aiReviews", () => ({
+      async init() {
+        console.log("Alpine :: Init");
+        this.$nextTick(() => {
+          form.init();
+          if (formReload) {
+            formReload = false;
+            form.reload();
+          }
+        });
+        this.$watch("initialized", () => {
+          if (!this.initialized && scrollReload) {
+            scrollReload = false;
+            scroll.reload(true);
+          }
+        });
+        this.$watch("reviews", () => {
+          const reviews = this.reviews;
+          if (!reviews.length) return;
+          this.calculateRating(reviews);
+          scroll.init(reviews.length);
+        });
         this.$watch("success", (value) => {
-          if (value) collapsible.dataset.open = "true";
+          if (value) doom.openCollapsible();
         });
         this.$watch("error", (value) => {
-          if (value) collapsible.dataset.open = "true";
+          if (value) doom.openCollapsible();
         });
         try {
-          this.images = reviewsMedia;
-          const storeId = document.querySelector("#shop-id").value;
-          const productId = document.querySelector("#product-id").value;
-          rawReviews = await fetchReviews(storeId, productId);
-          this.reviews = formatReviews(rawReviews);
-        } catch (error) {
-          this.error = error;
+          await state.init();
+          this.reviews = state.copy;
+          this.credits = state.credits;
+        } catch (error2) {
+          console.error(error2);
+          this.error = error2;
         } finally {
           this.loading = false;
-          this.initializing = false;
+          this.initialized = false;
         }
+      },
+      reviews: [],
+      credits: 0,
+      rating: {},
+      expandedReview: null,
+      country: Shopify.country,
+      submited: form.submited,
+      initialized: true,
+      loading: true,
+      success: null,
+      error: null,
+      calculateRating(reviews) {
+        const rating = { average: "5.0", individuals: [0, 0, 0, 0, 0] };
+        let sum = 0;
+        for (let i = 0; i < reviews.length; i++) {
+          const stars = reviews[i].stars;
+          sum = sum + stars;
+          rating.individuals[stars - 1] = rating.individuals[stars - 1] + 1;
+        }
+        for (let i = 0; i < 5; i++) {
+          const value = rating.individuals[i];
+          rating.individuals[i] = { value, per: value / reviews.length * 100 };
+        }
+        const average = sum / reviews.length;
+        rating.average = average.toFixed(1);
+        this.rating = rating;
       },
       toggleDialog(selected) {
         if (selected) {
           this.expandedReview = selected;
-          dialog.showModal();
+          doom.showModal();
         } else {
-          dialog.close();
+          doom.closeModal();
           this.expandedReview = null;
         }
       },
-      reviews: [],
-      images: [],
-      expandedReview: null,
-      country: Shopify.country,
-      initializing: true,
-      loading: true,
-      success: null,
-      error: null,
       reset() {
         this.loading = true;
-        collapsible.dataset.open = "false";
+        doom.closeCollapsible();
         setTimeout(() => {
           this.success = null;
           this.error = null;
@@ -3979,27 +4481,57 @@
       async generateReviews() {
         if (this.loading) return;
         this.reset();
-        const form = Object.fromEntries(new FormData(this.$el));
-        if (!form.prompt) return;
+        const form2 = Object.fromEntries(new FormData(this.$el));
+        if (!form2.prompt) return;
+        console.log(form2);
         try {
           const response = await fetch(
-            `https://us-central1-shopify-reviews-422715.cloudfunctions.net/generateReviews${this.country}`,
+            `https://velkamhell-aireviews.com/api/reviews/generate`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(form)
+              body: JSON.stringify(form2)
             }
           );
           const json = await response.json();
           if (!json.ok) {
-            throw new Error(json.error);
+            const error2 = json.error;
+            throw new Error(error2?.message ?? error2);
           }
-          rawReviews = json.reviews;
-          storage.set(form.productId, { exists: true, reviews: rawReviews });
-          this.reviews = formatReviews(rawReviews);
+          state.reviews = json.reviews;
+          state.credits = json.credits;
+          this.reviews = state.copy;
+          this.credits = this.credits - 1;
           this.success = { message: "Rese\xF1as generadas exitosamente." };
-        } catch (error) {
-          this.error = error;
+        } catch (error2) {
+          this.error = error2;
+        } finally {
+          this.loading = false;
+        }
+      },
+      async generateNames() {
+        if (this.loading) return;
+        this.reset();
+        const form2 = Object.fromEntries(new FormData(this.$el));
+        try {
+          const response = await fetch(
+            `https://velkamhell-aireviews.com/api/utils/names`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(form2)
+            }
+          );
+          const json = await response.json();
+          if (!json.ok) {
+            const error2 = json.error;
+            throw new Error(error2?.message ?? error2);
+          }
+          state.names = json.names;
+          this.reviews = state.copy;
+          this.success = { message: "Nombres generadas exitosamente." };
+        } catch (error2) {
+          this.error = error2;
         } finally {
           this.loading = false;
         }
@@ -4007,18 +4539,18 @@
       async saveReviews() {
         if (this.loading) return;
         this.reset();
-        const form = Object.fromEntries(new FormData(this.$el));
+        const form2 = Object.fromEntries(new FormData(this.$el));
         const body = {
-          storeId: form.storeId,
+          shopId: form2.shopId,
           product: {
-            id: form.productId,
-            name: form.productName,
-            reviews: rawReviews
+            id: form2.productId,
+            name: form2.productName,
+            reviews: state.raw
           }
         };
         try {
           const response = await fetch(
-            "https://us-central1-shopify-reviews-422715.cloudfunctions.net/saveReviews",
+            "https://velkamhell-aireviews.com/api/reviews",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -4030,12 +4562,1334 @@
             throw new Error(json.error);
           }
           this.success = { message: "Rese\xF1as guardadas exitosamente." };
-        } catch (error) {
-          this.error = error;
+        } catch (error2) {
+          this.error = error2;
         } finally {
           this.loading = false;
         }
+      },
+      addReview() {
+        const review = form.data();
+        state.add(review);
+        this.reviews.unshift(review);
+        form.reset();
+        form.submited = true;
+        this.submited = true;
+      },
+      removeReview(index) {
+        this.reviews.splice(index, 1);
+        state.remove(index);
       }
     }));
   });
 })();
+/*! Bundled license information:
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2022 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2021 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2022 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2022 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2019 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/util/dist/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2021 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/component/dist/esm/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2019 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/logger/dist/esm/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/app/dist/esm/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2019 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/app/dist/esm/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2019 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2023 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/app/dist/esm/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2019 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/app/dist/esm/index.esm2017.js:
+  (**
+   * @license
+   * Copyright 2021 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2019 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+firebase/app/dist/esm/index.esm.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+  * @license
+  * Copyright 2020 Google LLC
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  *   http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  *)
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2023 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2023 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2023 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2022 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2022 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2019 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2018 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2022 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2022 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2022 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2019 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/firestore/dist/lite/index.browser.esm2017.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+*/
