@@ -7654,6 +7654,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   if (Shopify.designMode) {
     document.addEventListener("shopify:section:load", refresh);
   }
+  console.log("FINAL");
   document.addEventListener("alpine:init", () => {
     module_default.data("aiReviews", () => ({
       async init() {
