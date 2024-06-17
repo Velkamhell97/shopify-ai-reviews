@@ -772,8 +772,6 @@
         if (this.loading) return;
         this.reset();
         const form2 = Object.fromEntries(new FormData(this.$el));
-        console.log({ review: state.reviews, raw: state.raw });
-        console.log({ ...form2, reviews: state.raw });
         const body = {
           storeId: form2.storeId,
           product: {
@@ -782,6 +780,7 @@
             reviews: state.raw
           }
         };
+        console.log(body);
         try {
           const response = await fetch(
             "https://velkamhell-aireviews.com/api/reviews",
