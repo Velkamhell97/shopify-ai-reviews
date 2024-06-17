@@ -740,6 +740,7 @@
         if (this.loading) return;
         this.reset();
         const form2 = Object.fromEntries(new FormData(this.$el));
+        console.log(form2);
         try {
           const response = await fetch(
             `https://velkamhell-aireviews.com/api/utils/names`,
@@ -754,6 +755,7 @@
             const error = json.error;
             throw new Error(error?.message ?? error);
           }
+          console.log(json);
           state.names = json.names;
           this.reviews = state.copy;
           this.success = { message: "Nombres generadas exitosamente." };
