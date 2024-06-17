@@ -9,7 +9,6 @@
       rating: {},
       expandedReview: null,
       country: Shopify.country,
-      submited: form.submited,
       initialized: true,
       loading: true,
       success: null,
