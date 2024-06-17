@@ -589,9 +589,9 @@
       async #fetchReviews() {
         if (!this.#fetched) {
           console.log("%cCARGANDO REVIEWS...", "color: #5e3419;");
-          const shopId = document.querySelector("#shop-id").value;
+          const storeId = document.querySelector("#store-id").value;
           const productId = document.querySelector("#product-id").value;
-          const response = await this.#database.reviews(shopId, productId);
+          const response = await this.#database.reviews(storeId, productId);
           if (hasError(response)) {
             this.error = response.error;
             throw new Error(this.error);
@@ -775,7 +775,7 @@
         console.log({ review: state.reviews, raw: state.raw });
         console.log({ ...form2, reviews: state.raw });
         const body = {
-          shopId: form2.shopId,
+          storeId: form2.storeId,
           product: {
             id: form2.productId,
             name: form2.productName,
