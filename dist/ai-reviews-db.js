@@ -3775,4 +3775,4 @@
   }
   window.firestore = { reviews };
 })();
-/*! For license information please see LICENCE.txt */
+/*! For license information please see https://github.com/Velkamhell97/shopify-ai-reviews/tree/main/dist/LICENSE.txt */
