@@ -456,7 +456,7 @@
   
     > .review-slide {
       margin-bottom: 1.5rem;
-      display: inline-block;
+      display: inline-flex !important;
     }
 
     & .review-slide__image {

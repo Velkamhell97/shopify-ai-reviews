@@ -59,7 +59,11 @@
         if (reset) this.#currentSlide = 2;
         this.#reviewsScroll = document.querySelector(".reviews");
         const autoplay = document.querySelector("#scroll-type").value === "auto";
-        if (autoplay) this.#play();
+        if (autoplay) {
+          this.#play();
+        } else {
+          this.#stop();
+        }
         this.#setupControlButtons();
       }
       /**
@@ -99,6 +103,13 @@
           }
           this.#scrollToSlide(this.#currentSlide);
         }, 3e3);
+      }
+      /**
+       * @returns {void}
+       * @private
+       */
+      #stop() {
+        clearInterval(this.#interval);
       }
       /**
        * @param {Event} event
@@ -651,7 +662,7 @@
         }
       },
       reviews: [],
-      credits: 0,
+      credits: state.credits,
       rating: {},
       expandedReview: null,
       country: Shopify.country,
@@ -798,4 +809,3 @@
     }));
   });
 })();
-/*! For license information please see ai-reviews.js.LEGAL.txt */
