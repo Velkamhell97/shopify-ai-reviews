@@ -772,6 +772,7 @@
         if (this.loading) return;
         this.reset();
         const form2 = Object.fromEntries(new FormData(this.$el));
+        console.log(form2);
         const body = {
           shopId: form2.shopId,
           product: {
