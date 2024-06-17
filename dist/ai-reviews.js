@@ -724,6 +724,7 @@
             const error = json.error;
             throw new Error(error?.message ?? error);
           }
+          console.log(json);
           state.reviews = json.reviews;
           state.credits = json.credits;
           this.reviews = state.copy;
@@ -749,7 +750,6 @@
             }
           );
           const json = await response.json();
-          console.log(json);
           if (!json.ok) {
             const error = json.error;
             throw new Error(error?.message ?? error);
