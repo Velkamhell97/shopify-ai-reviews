@@ -749,6 +749,7 @@
             }
           );
           const json = await response.json();
+          console.log(json);
           if (!json.ok) {
             const error = json.error;
             throw new Error(error?.message ?? error);
