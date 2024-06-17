@@ -706,13 +706,13 @@
       },
       async generateReviews() {
         if (this.loading) return;
-        this.reset();
-        const form2 = Object.fromEntries(new FormData(this.$el));
         try {
+          const form2 = Object.fromEntries(new FormData(this.$el));
           if (!form2.prompt) {
             throw new Error("Debes incluir una descripcion del producto");
           }
           ;
+          this.reset();
           console.log(form2);
           const response = await fetch(
             `https://velkamhell-aireviews.com/api/reviews/generate`,
