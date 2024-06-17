@@ -3742,7 +3742,7 @@
     registerVersion("firestore-lite", "4.6.3", ""), registerVersion("firestore-lite", "4.6.3", "esm2017");
   }();
 
-  // src/ai-reviews-fb.js
+  // src/ai-reviews-db.js
   var firebaseConfig = {
     apiKey: "AIzaSyBfj1JWIPDwo4Fz7LKO1PhTKOIRI_MpzTs",
     authDomain: "shopify-reviews-422715.firebaseapp.com",
@@ -3753,23 +3753,18 @@
   };
   var app = initializeApp(firebaseConfig);
   var firestore = getFirestore(app);
-  async function getReviews(storeId, productId) {
+  async function reviews(storeId, productId) {
     try {
       if (!storeId || !productId) {
         return { error: "Faltan argumentos" };
       }
       const productRef = doc(firestore, `stores/${storeId}/products/${productId}`);
       const product = await getDoc(productRef);
-      const reviews = product.data()?.reviews ?? [];
+      const reviews2 = product.data()?.reviews ?? [];
       const storeRef = doc(firestore, `stores/${storeId}`);
       const store = await getDoc(storeRef);
       const credits = store.data()?.credits ?? 0;
-      return {
-        active: true,
-        exists: product.exists(),
-        credits,
-        reviews
-      };
+      return { active: true, exists: product.exists(), credits, reviews: reviews2 };
     } catch (error) {
       if (error.code == "permission-denied") {
         return { error: "La tienda no esta activa, verifica el pago" };
@@ -3778,7 +3773,7 @@
       }
     }
   }
-  window.AiReviews = { fetch: getReviews };
+  window.firestore = { reviews };
 })();
 /*! Bundled license information:
 

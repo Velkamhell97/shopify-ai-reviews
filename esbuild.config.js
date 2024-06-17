@@ -1,5 +1,5 @@
 require('esbuild').build({
-  entryPoints: ['src/ai-reviews-2.js'],
-  outfile: 'dist/ai-reviews-2.js',
+  entryPoints: ['src/ai-reviews-db.js', 'src/ai-reviews.js'],
+  outdir: "dist",
   bundle: true,
 }).catch(() => process.exit(1))
