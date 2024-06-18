@@ -713,13 +713,13 @@
           }
           ;
           this.reset();
-          console.log(form2);
+          console.log({ ...form2, country: Shopify.country });
           const response = await fetch(
             `https://api.velkamhell-aireviews.com/reviews/generate`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(form2)
+              body: JSON.stringify({ ...form2, country: Shopify.country })
             }
           );
           const json = await response.json();
@@ -743,14 +743,14 @@
         if (this.loading) return;
         this.reset();
         const form2 = Object.fromEntries(new FormData(this.$el));
-        console.log(form2);
+        console.log({ ...form2, country: Shopify.country });
         try {
           const response = await fetch(
             `https://api.velkamhell-aireviews.com/utils/names`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(form2)
+              body: JSON.stringify({ ...form2, country: Shopify.country })
             }
           );
           const json = await response.json();
