@@ -715,7 +715,7 @@
           this.reset();
           console.log(form2);
           const response = await fetch(
-            `https://velkamhell-aireviews.com/api/reviews/generate`,
+            `https://api.velkamhell-aireviews.com/reviews/generate`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -746,7 +746,7 @@
         console.log(form2);
         try {
           const response = await fetch(
-            `https://velkamhell-aireviews.com/api/utils/names`,
+            `https://api.velkamhell-aireviews.com/utils/names`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -783,7 +783,7 @@
         console.log(body);
         try {
           const response = await fetch(
-            "https://velkamhell-aireviews.com/api/reviews",
+            "https://api.velkamhell-aireviews.com/reviews",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
