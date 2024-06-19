@@ -12,6 +12,8 @@
   .reviews-input {
     all: unset;
     padding: 1rem;
+    border-width: 1px;
+    border-style: solid;
     border-radius: 0.5rem;
     transition: box-shadow 200ms;
 
