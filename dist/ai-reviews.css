@@ -112,7 +112,7 @@
 
   @media screen and (width >= 750px) {
     .reviews-actions {
-      justify-content: end;
+      justify-content: end !important;
     }
   }
   /*#endregion*/
