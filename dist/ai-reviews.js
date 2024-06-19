@@ -473,9 +473,9 @@
        */
       exists;
       /**
-       * @type {number}
+       * @type {string}
        */
-      credits = 0;
+      country;
       /**
        * @type {ReviewImage[]}
        * @private
@@ -626,7 +626,7 @@
           }
           this.active = response.active;
           this.exists = response.exists;
-          this.credits = response.credits;
+          this.country = response.country;
           this.reviews = reviews;
           this.#fetched = true;
         }
@@ -676,7 +676,6 @@
         try {
           await state.init();
           this.reviews = state.copy;
-          this.credits = state.credits;
         } catch (error) {
           console.error(error);
           this.error = error;
@@ -686,10 +685,9 @@
         }
       },
       reviews: [],
-      credits: state.credits,
       rating: {},
       expandedReview: null,
-      country: Shopify.country,
+      country: state.country,
       submited: form.submited,
       initialized: true,
       loading: true,
@@ -737,13 +735,13 @@
           }
           ;
           this.reset();
-          console.log({ ...form2, country: Shopify.country });
+          console.log({ ...form2, country: state.country });
           const response = await fetch(
             `https://api.velkamhell-aireviews.com/reviews/generate`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...form2, country: Shopify.country })
+              body: JSON.stringify({ ...form2, country: state.country })
             }
           );
           const json = await response.json();
@@ -753,9 +751,7 @@
           }
           console.log(json);
           state.reviews = json.reviews;
-          state.credits = json.credits;
           this.reviews = state.copy;
-          this.credits = this.credits - 1;
           this.success = { message: "Rese\xF1as generadas exitosamente." };
         } catch (error) {
           this.error = error;
@@ -767,14 +763,14 @@
         if (this.loading) return;
         this.reset();
         const form2 = Object.fromEntries(new FormData(this.$el));
-        console.log({ ...form2, country: Shopify.country });
+        console.log({ ...form2, country: state.country });
         try {
           const response = await fetch(
             `https://api.velkamhell-aireviews.com/utils/names`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...form2, country: Shopify.country })
+              body: JSON.stringify({ ...form2, country: state.country })
             }
           );
           const json = await response.json();
