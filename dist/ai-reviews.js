@@ -339,7 +339,12 @@
        * @type {HTMLElement}
        * @private
        */
-      #collapsible;
+      #infoCollapsible;
+      /**
+       * @type {HTMLElement}
+       * @private
+       */
+      #formCollapssible;
       /**
        * @type {HTMLElement}
        * @private
@@ -362,8 +367,9 @@
        */
       reload() {
         console.log("%cDOOM CONTROLLER RELOAD", "color: #a16a1d;");
-        this.#collapsible = document.querySelector(".reviews-collapsible");
+        this.#infoCollapsible = document.querySelector("#reviews-info-collapsible");
         this.#dialog = document.querySelector("#reviews-dialog");
+        this.#setupCollapsibles();
         this.#setupDialog();
         this.#setupVariants();
       }
@@ -371,13 +377,13 @@
        * @returns {void}
        */
       openCollapsible() {
-        this.#collapsible.dataset.open = "true";
+        this.#infoCollapsible.dataset.open = "true";
       }
       /**
        * @returns {void}
        */
       closeCollapsible() {
-        this.#collapsible.dataset.open = "close";
+        this.#infoCollapsible.dataset.open = "close";
       }
       /**
        * @returns {void}
@@ -390,6 +396,24 @@
        */
       closeModal() {
         this.#dialog.close();
+      }
+      /**
+       * Cleanup not necesarry, closed dialog only works 1 time
+       * @returns {void}
+       * @private
+       */
+      #setupCollapsibles() {
+        const collapsible = document.querySelector("#reviews-form-collapsable");
+        const control = collapsible.previousSibling;
+        control.addEventListener("click", (_) => {
+          if (collapsible.dataset.open === "true") {
+            collapsible.dataset.open = "false";
+            control.textContent = "Escribe tu valoraci\xF3n";
+          } else {
+            collapsible.dataset.open = "true";
+            control.textContent = "Cerrar formulario";
+          }
+        });
       }
       /**
        * Cleanup not necesarry, closed dialog only works 1 time
