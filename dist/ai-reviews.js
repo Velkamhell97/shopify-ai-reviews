@@ -676,6 +676,7 @@
         try {
           await state.init();
           this.reviews = state.copy;
+          this.country = state.country;
         } catch (error) {
           console.error(error);
           this.error = error;
