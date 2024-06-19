@@ -406,7 +406,7 @@
         console.log("%cSETUP COLLAPSIBLES", "color: #27549c;");
         const collapsible = document.querySelector("#reviews-form-collapsible");
         console.log(collapsible);
-        const control = collapsible.previousSibling;
+        const control = collapsible.previousElementSibling;
         console.log(control);
         control.addEventListener("click", (_) => {
           if (collapsible.dataset.open === "true") {
