@@ -516,6 +516,7 @@
        * @param {Database} database
        */
       constructor(database2) {
+        console.log("%cSTATE CONTROLLER INIT", "color: #266624;");
         this.#database = database2;
         const images = JSON.parse(document.querySelector("#reviews-media").textContent);
         for (let i = 0; i < images.length; i++) {
