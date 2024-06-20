@@ -632,6 +632,16 @@
           this.#fetched = true;
         }
       }
+      /**
+       * @returns {void}
+       */
+      rate() {
+        const weight = 0.05;
+        for (let i = 0; i < this.#reviews.length; i++) {
+          const stars = Math.random() < weight ? 4 : 5;
+          this.#reviews[i].stars = stars;
+        }
+      }
     }
     const state = new State(database);
     let formReload = false;
@@ -790,6 +800,10 @@
         } finally {
           this.loading = false;
         }
+      },
+      generateStars() {
+        state.rate();
+        this.reviews = state.copy;
       },
       async saveReviews() {
         if (this.loading) return;
