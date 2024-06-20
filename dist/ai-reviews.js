@@ -739,13 +739,14 @@
           this.reset();
           console.log({ ...form2, country: state.country });
           const response = await fetch(
-            `https://api.velkamhell-aireviews.com/reviews/generate`,
+            `https://api.velkamhell-aireviews.com/stores`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ ...form2, country: state.country })
             }
           );
+          return;
           const json = await response.json();
           if (!json.ok) {
             const error = json.error;
