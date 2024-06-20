@@ -749,20 +749,18 @@
           this.reset();
           console.log({ ...form2, country: state.country });
           const response = await fetch(
-            `https://api.velkamhell-aireviews.com/stores`,
+            `https://api.velkamhell-aireviews.com/reviews/generate`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ ...form2, country: state.country })
             }
           );
-          return;
           const json = await response.json();
           if (!json.ok) {
             const error = json.error;
             throw new Error(error?.message ?? error);
           }
-          console.log(json);
           state.reviews = json.reviews;
           this.reviews = state.copy;
           this.success = { message: "Rese\xF1as generadas exitosamente." };
