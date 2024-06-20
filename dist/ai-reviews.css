@@ -434,48 +434,6 @@
   }
   
   .reviews-layout-3 {
-    --gap: 1rem;
-    --review-columns: 1;
-    --review-rows: 1;
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: calc((100% - (var(--review-columns) - 1) * var(--gap)) / var(--review-columns));
-    grid-template-rows: max-content max-content;
-    gap: var(--gap);
-    padding: 1rem 1rem;
-    scroll-padding: 1rem;
-  
-    > .review-slide {
-      display: grid;
-      grid-template-rows: repeat(3, min-content) 1fr;
-      grid-template-columns: 40% 1fr;
-      column-gap: 1rem;
-
-      > *:not(.review-slide__image) {
-        padding-right: 0.5rem;
-      }
-    }
-
-    & .review-slide__image {
-      grid-row: span 4;
-
-      > img {
-        border-radius: 0.5rem 0rem 0px 0.5rem;
-      }
-    }
-
-    & .review-slide__body {
-      display: -webkit-box;
-      -webkit-line-clamp: 5;
-      -webkit-box-orient: vertical;
-    }
-    
-    @media (width >= 750px) {
-      --review-columns: 2;
-    }
-  }
-
-  .reviews-layout-4 {
     --review-columns: 1;
     column-count: var(--review-columns);
     -webkit-column-count: var(--review-columns);
