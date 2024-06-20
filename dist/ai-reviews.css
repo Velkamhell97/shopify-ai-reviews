@@ -104,7 +104,7 @@
   }
 
   .reviews-actions__button--util {
-    transition: box-shadow 0.2s, background-color 0.2s;
+    transition: border-color 0.2s, background-color 0.2s;
 
     &:disabled {
       opacity: 0.6;
