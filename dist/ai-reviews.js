@@ -236,8 +236,9 @@
        * @private
        */
       #starHandler(e) {
-        const formStars = [this.#starsSelector.children];
+        const formStars = [...this.#starsSelector.children];
         const star = e.target.closest("span");
+        console.log(star);
         for (let i = 0; i < 5; i++) {
           formStars[i].classList.remove("active");
         }
@@ -253,8 +254,9 @@
        */
       #setupStarsInput() {
         console.log("%cSETUP STARS SELECTOR", "color: #27549c;");
-        const formStars = [this.#starsSelector.children];
+        const formStars = [...this.#starsSelector.children];
         formStars.shift();
+        console.log(formStars.length);
         for (let i = 0; i < formStars.length; i++) {
           const star = formStars[i];
           star.removeEventListener("click", this.#starListener);
