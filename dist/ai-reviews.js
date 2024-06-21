@@ -189,10 +189,10 @@
        */
       #starListener;
       /**
-       * @type {HTMLElement}
+       * @type {Element[]}
        * @private
        */
-      #starsSelector;
+      #formStars;
       constructor() {
         this.#fileChangedListener = this.#fileChangedHandler.bind(this);
         this.#starListener = this.#starHandler.bind(this);
@@ -215,7 +215,7 @@
         this.#formFile = document.querySelector(".review-form__file");
         this.#imageTemplate = this.#formFile.querySelector("#review-form__file-template--image");
         this.#buttonTemplate = this.#formFile.querySelector("#review-form__file-template--button");
-        this.#starsSelector = document.querySelector(".review-form__stars-selector");
+        this.#formStars = [...document.querySelector(".review-form__stars-selector").children].shift();
         this.#setupStarsInput();
         this.#setupFileInput();
       }
@@ -236,16 +236,15 @@
        * @private
        */
       #starHandler(e) {
-        const formStars = [...this.#starsSelector.children];
         const star = e.target.closest("span");
         console.log(star);
         for (let i = 0; i < 5; i++) {
-          formStars[i].classList.remove("active");
+          this.#formStars[i].classList.remove("active");
         }
-        const index = formStars.indexOf(star);
+        const index = this.#formStars.indexOf(star);
         this.#fields.stars = index - 1;
         for (let i = 0; i < this.#fields.stars; i++) {
-          formStars[i].classList.add("active");
+          this.#formStars[i].classList.add("active");
         }
       }
       /**
@@ -254,11 +253,9 @@
        */
       #setupStarsInput() {
         console.log("%cSETUP STARS SELECTOR", "color: #27549c;");
-        const formStars = [...this.#starsSelector.children];
-        formStars.shift();
-        console.log(formStars.length);
-        for (let i = 0; i < formStars.length; i++) {
-          const star = formStars[i];
+        console.log(this.#formStars.length);
+        for (let i = 0; i < this.#formStars.length; i++) {
+          const star = this.#formStars[i];
           star.removeEventListener("click", this.#starListener);
           star.addEventListener("click", this.#starListener);
         }
@@ -335,9 +332,8 @@
        * @returns {void}
        */
       reset() {
-        const formStars = [this.#starsSelector.children];
-        for (let i = 0; i < formStars.length; i++) {
-          formStars[i].classList.remove("active");
+        for (let i = 0; i < this.#formStars.length; i++) {
+          this.#formStars[i].classList.remove("active");
         }
         this.#fields = { stars: 0, image: null };
         this.#imageLoaded = false;
