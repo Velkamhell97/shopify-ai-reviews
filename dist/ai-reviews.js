@@ -12,11 +12,6 @@
        */
       #initialized = false;
       /**
-       * @type {HTMLElement}
-       * @private
-       */
-      #reviewsScroll;
-      /**
        * @type {number}
        * @private
        */
@@ -31,6 +26,11 @@
        * @private
        */
       #interval = null;
+      /**
+       * @type {HTMLElement}
+       * @private
+       */
+      #reviewsScroll;
       /**
        * @type {any}
        * @private
@@ -112,13 +112,12 @@
         clearInterval(this.#interval);
       }
       /**
-       * @param {Event} event
+       * @param {Event} e
        * @returns {void}
        * @private
        */
-      #pageChangedHandler(event) {
-        console.log("pressed");
-        const button = event.target.closest("button");
+      #pageChangedHandler(e) {
+        const button = e.target.closest("button");
         const direction = parseInt(button.dataset.direction);
         const newSlide = this.#currentSlide + direction * (this.rows + 1);
         if (newSlide < 2 || newSlide > this.maxSlide) return;
@@ -156,11 +155,6 @@
        */
       #fields = { stars: 0, image: null };
       /**
-       * @type {any}
-       * @private
-       */
-      #fileChangedListener;
-      /**
        * @type {boolean}
        * @private
        */
@@ -169,11 +163,6 @@
        * @type {boolean}
        */
       submited = false;
-      /**
-       * @type {HTMLElement}
-       * @private
-       */
-      #formFile;
       /**
        * @type {HTMLTemplateElement}
        * @private
@@ -184,8 +173,29 @@
        * @private
        */
       #buttonTemplate;
+      /**
+       * @type {any}
+       * @private
+       */
+      #fileChangedListener;
+      /**
+       * @type {HTMLElement}
+       * @private
+       */
+      #formFile;
+      /**
+       * @type {any}
+       * @private
+       */
+      #starListener;
+      /**
+       * @type {HTMLElement}
+       * @private
+       */
+      #starsSelector;
       constructor() {
         this.#fileChangedListener = this.#fileChangedHandler.bind(this);
+        this.#starListener = this.#starHandler.bind(this);
       }
       /**
        * @returns {void}
@@ -205,6 +215,7 @@
         this.#formFile = document.querySelector(".review-form__file");
         this.#imageTemplate = this.#formFile.querySelector("#review-form__file-template--image");
         this.#buttonTemplate = this.#formFile.querySelector("#review-form__file-template--button");
+        this.#starsSelector = document.querySelector(".review-form__stars-selector");
         this.#setupStarsInput();
         this.#setupFileInput();
       }
@@ -220,31 +231,37 @@
         return fields;
       }
       /**
-       * Cleanup not necesary, classList.add prevent duplication
+       * @param {Event} e
+       * @returns {any} 
+       * @private
+       */
+      #starHandler(e) {
+        const formStars = [this.#starsSelector.children];
+        const star = e.target.closest("span");
+        for (let i = 0; i < 5; i++) {
+          formStars[i].classList.remove("active");
+        }
+        const index = formStars.indexOf(star);
+        this.#fields.stars = index - 1;
+        for (let i = 0; i < this.#fields.stars; i++) {
+          formStars[i].classList.add("active");
+        }
+      }
+      /**
        * @returns {void}
        * @private
        */
       #setupStarsInput() {
         console.log("%cSETUP STARS SELECTOR", "color: #27549c;");
-        const collection = document.querySelector(".review-form__stars-selector").children;
-        const formStars = [...collection];
+        const formStars = [this.#starsSelector.children];
         formStars.shift();
         for (let i = 0; i < formStars.length; i++) {
           const star = formStars[i];
-          star.addEventListener("click", (_) => {
-            for (let i2 = 0; i2 < 5; i2++) {
-              formStars[i2].classList.remove("active");
-            }
-            const index = [...star.parentElement.childNodes].indexOf(star);
-            this.#fields.stars = index - 1;
-            for (let i2 = 0; i2 < this.#fields.stars; i2++) {
-              formStars[i2].classList.add("active");
-            }
-          });
+          star.removeEventListener("click", this.#starListener);
+          star.addEventListener("click", this.#starListener);
         }
       }
       /**
-       * Cleanup not necesary, classList.add prevent duplication
        * @returns {void}
        * @private
        */
@@ -316,14 +333,13 @@
        * @returns {void}
        */
       reset() {
-        const collection = document.querySelector(".review-form__stars-selector").children;
-        const formStars = [...collection];
+        const formStars = [this.#starsSelector.children];
         for (let i = 0; i < formStars.length; i++) {
           formStars[i].classList.remove("active");
         }
         this.#fields = { stars: 0, image: null };
-        this.#form.reset();
         this.#imageLoaded = false;
+        this.#form.reset();
         this.#formFile.querySelector(".review-form__file-content").remove();
         this.#formFile.appendChild(this.#buttonTemplate.content.cloneNode(true));
       }
@@ -341,16 +357,45 @@
        */
       #infoCollapsible;
       /**
-       * @type {HTMLElement}
+       * @type {any}
        * @private
        */
-      #formCollapssible;
+      #formCollapsibleListener;
+      /**
+       * @type {any}
+       * @private
+       */
+      #dialogListener;
       /**
        * @type {HTMLElement}
        * @private
        */
       #dialog;
+      /**
+       * @type {any}
+       * @private
+       */
+      #mainSelectorListener;
+      /**
+       * @type {HTMLElement}
+       * @private
+       */
+      #mainSelector;
+      /**
+       * @type {any}
+       * @private
+       */
+      #secondarySelectorListener;
+      /**
+       * @type {HTMLElement}
+       * @private
+       */
+      #secondarySelector;
       constructor() {
+        this.#formCollapsibleListener = this.#formCollapsibleHandler.bind(this);
+        this.#dialogListener = this.#dialogHandler.bind(this);
+        this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
+        this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
         this.init();
       }
       /**
@@ -369,6 +414,9 @@
         console.log("%cDOOM CONTROLLER RELOAD", "color: #a16a1d;");
         this.#infoCollapsible = document.querySelector("#reviews-info-collapsible");
         this.#dialog = document.querySelector("#reviews-dialog");
+        const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
+        this.#mainSelector = mainSelector;
+        this.#secondarySelector = secondarySelector;
         this.#setupCollapsibles();
         this.#setupDialog();
         this.#setupVariants();
@@ -398,68 +446,93 @@
         this.#dialog.close();
       }
       /**
-       * Cleanup not necesarry, closed dialog only works 1 time
+       * @param {Event} e
+       * @returns {void}
+       * @private
+       */
+      #formCollapsibleHandler(e) {
+        const formCollapsibleControl = e.target.closest("button");
+        const formCollapsible = formCollapsibleControl.nextElementSibling;
+        if (formCollapsible.dataset.open === "true") {
+          formCollapsible.dataset.open = "false";
+          formCollapsibleControl.textContent = "Escribe tu valoraci\xF3n";
+        } else {
+          formCollapsible.dataset.open = "true";
+          formCollapsibleControl.textContent = "Cerrar formulario";
+        }
+      }
+      /**
        * @returns {void}
        * @private
        */
       #setupCollapsibles() {
         console.log("%cSETUP COLLAPSIBLES", "color: #27549c;");
-        const collapsible = document.querySelector("#reviews-form-collapsible");
-        const control = collapsible.previousElementSibling;
-        control.addEventListener("click", (_) => {
-          if (collapsible.dataset.open === "true") {
-            collapsible.dataset.open = "false";
-            control.textContent = "Escribe tu valoraci\xF3n";
-          } else {
-            collapsible.dataset.open = "true";
-            control.textContent = "Cerrar formulario";
-          }
-        });
+        const formCollapsibleControl = document.querySelector("#reviews-form-collapsible");
+        formCollapsibleControl.removeEventListener("click", this.#formCollapsibleListener);
+        formCollapsibleControl.addEventListener("click", this.#formCollapsibleListener);
       }
       /**
-       * Cleanup not necesarry, closed dialog only works 1 time
+       * @param {Event} e
+       * @returns {void}
+       * @private
+       */
+      #dialogHandler(e) {
+        if (e.target === this.#dialog) this.#dialog.close();
+      }
+      /**
        * @returns {void}
        * @private
        */
       #setupDialog() {
         console.log("%cSETUP DIALOG", "color: #27549c;");
-        this.#dialog.addEventListener("click", (e) => {
-          if (e.target === this.#dialog) this.#dialog.close();
-        });
+        this.#dialog.removeEventListener("click", this.#dialogListener);
+        this.#dialog.addEventListener("click", this.#dialogListener);
       }
       /**
-       * Cleanup not necesarry, checked true only works once and click in the same element
+       * @returns {void}
+       * @private
+       */
+      #mainSelectorHandler(e) {
+        const mainInputs = this.#mainSelector.querySelectorAll("input");
+        const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
+        const index = [...mainInputs].indexOf(e.target);
+        secondaryInputs[index].checked = true;
+      }
+      /**
+       * @returns {void}
+       * @private
+       */
+      #secondarySelectorHandler(e) {
+        e.stopImmediatePropagation();
+        const mainInputs = this.#mainSelector.querySelectorAll("input");
+        const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
+        const index = [...secondaryInputs].indexOf(e.target);
+        mainInputs[index].click();
+      }
+      /**
        * @returns {void}
        * @private
        */
       #setupVariants() {
         console.log("%cSETUP VARIANTS", "color: #27549c;");
-        const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
-        const mainInputs = mainSelector.querySelectorAll("input");
-        const secondaryInputs = secondarySelector.querySelectorAll("input");
-        mainSelector.addEventListener("change", (e) => {
-          const index = [...mainInputs].indexOf(e.target);
-          secondaryInputs[index].checked = true;
-        });
-        secondarySelector.addEventListener("change", (e) => {
-          e.stopImmediatePropagation();
-          const index = [...secondaryInputs].indexOf(e.target);
-          mainInputs[index].click();
-        });
+        this.#mainSelector.removeEventListener("change", this.#mainSelectorListener);
+        this.#mainSelector.addEventListener("change", this.#mainSelectorListener);
+        this.#secondarySelector.removeEventListener("change", this.#secondarySelectorListener);
+        this.#secondarySelector.addEventListener("change", this.#secondarySelectorListener);
       }
     }
     const doom = new DoomController();
     class State {
       /**
-       * @type {boolean}
-       * @private
-       */
-      #fetched = false;
-      /**
        * @type {Database}
        * @private
        */
       #database;
+      /**
+       * @type {boolean}
+       * @private
+       */
+      #fetched = false;
       /**
        * @type {Review[]}
        * @private
