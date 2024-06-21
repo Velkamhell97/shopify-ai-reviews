@@ -1,0 +1,1195 @@
+{% comment %} {{ 'ai-reviews.css' | asset_url | stylesheet_tag }} {% endcomment %}
+
+<link href="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@64244e16db7dac5949de7dab5589a60ed72ed1e4/dist/ai-reviews.css" rel="stylesheet" crossorigin="anonymous">
+
+<script defer src="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@288b56c065d9080d67c7996a1801f1efdca631f6/dist/ai-reviews-db.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.0/dist/cdn.min.js"></script>
+
+{% liquid
+  assign reviews = section.settings
+  assign title = section.blocks.first.settings
+
+  assign to = product.metafields.custom.image_reviews_length
+  assign from = to | times: -1
+  assign reviewsMedia = product.media | slice: from, to
+%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    background-color: {{ reviews.background_color | default: 'transparent' }};
+    --color-background: {{ reviews.background_color | default: '#fff' | color_to_rgb }};
+    --color-foreground: {{ reviews.header_color | default: '#000' | color_to_rgb }};
+    --button-background: {{ reviews.buttons_background | default: "black" }};
+    --button-foreground: {{ reviews.buttons_color | default: "white" }};
+  }
+
+  .reviews-wrapper {
+    /* background-color: {{ reviews.background_color | default: 'transparent' }}; */
+    margin-top: {{ reviews.margin_top }}px;
+    margin-bottom: {{ reviews.margin_bottom }}px;
+    padding-block: {{ reviews.padding_vertical }}px;
+    {% if reviews.padding_horizontal != 0 %}
+      padding-inline: {{ reviews.padding_horizontal }}px;
+    {% endif %}
+  }
+
+  .reviews-header__title {
+    font-size: {{ title.text_size_mobile }}rem;
+    text-align: {{ reviews.header_align }};
+
+    @media screen and (width >= 750px) {
+      font-size: {{ title.text_size_desktop }}rem;
+    }
+  }
+
+  .reviews-header, .review-form {
+    color: {{ reviews.header_color | default: "inherit" }};
+  }
+
+  .reviews-rating__average-stars, .reviews-rating__individual-stars, .review-form__stars-selector, .review-slide__rating {
+    color: {{ reviews.stars_color | default: 'inherit' }};
+  }
+
+  .reviews-rating__bars {
+    background-color: {{ reviews.bars_color | default: "#000" | color_modify: 'alpha', 0.15 }};
+
+    > div {
+      background-color: {{ reviews.bars_color | default: "#000" }};
+    }
+  }
+
+  .reviews-form-control, .reviews-paginator__button, .review-form__file-button--delete, .review-form__submit, .reviews-dialog__button--close {
+    background-color: var(--button-background);
+    color: var(--button-foreground);
+  }
+
+  .reviews-actions__button--util {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    border: 1px solid color-mix(in srgb, var(--color-foreground) 50%, white);
+    
+    &:not(:disabled):hover {
+      background-color: color-mix(in srgb, var(--color-foreground) 10%, white);
+      border: 1px solid var(--color-foreground);
+    }
+  }
+
+  .review-form__submit:disabled {
+    background-color: {{ reviews.buttons_background | default: "black" | color_modify: 'alpha', 0.30 }};
+    pointer-events:none;
+  }
+
+  .review-form__submit:hover {
+    box-shadow: inset 0 0 0 150px rgba(255, 255, 255, 0.1), 0 0 0 1px var(--button-background);
+  }
+
+  .reviews-input {
+    box-shadow: 0 0 0 1px {{ reviews.border_color | default: "#c3c3c3" }};
+  }
+
+  .reviews-input:focus-visible {
+    box-shadow: 0 0 0 2px {{ reviews.border_color | default: "#c3c3c3" }} !important;
+  }
+
+  .review-slide {
+    background-color: {{ reviews.review_background | default: 'transparent' }};
+    color: {{ reviews.review_color | default: 'inherit' }};
+  }
+
+  .review-slide__author {
+    font-size: {{ reviews.review_author_size_mobile }}rem;
+    {% if reviews.author_bold %}
+    font-weight: bold;
+    {% endif %}
+  }
+
+  .review-slide__rating > span {
+    width: {{ reviews.stars_size }}px;
+    height: {{ reviews.stars_size }}px;
+  }
+
+  .review-slide__date {
+    font-size: {{ reviews.review_description_size_mobile }}rem;
+  }
+
+  .review-slide__body {
+    font-size: {{ reviews.review_description_size_mobile }}rem;
+  }
+
+  @media screen and (width >= 750px) {
+    .review-slide__author {
+      font-size: {{ reviews.review_author_size_desktop }}rem;
+    }
+
+    .review-slide__date {
+      font-size: {{ reviews.review_description_size_desktop }}rem;
+    }
+    
+    .review-slide__body {
+      font-size: {{ reviews.review_description_size_desktop }}rem;
+    }
+  }
+{% endstyle %}
+
+<div class="reviews-wrapper flex-col gap-4 page-width" x-data="aiReviews">
+  <input id="store-id" type="hidden" value="{{ shop.id }}">
+  <input id="product-id" type="hidden" value="{{ product.id }}">
+  <input id="scroll-type" type="hidden" name="scroll" value="{{ reviews.scroll }}">
+
+  {% if request.design_mode %}
+    <!-- SAVE & GENERATE BUTTONS -->
+    <div class="reviews-actions row-center justify-center gap-4 flex-wrap">
+      <div class="row-center gap-4">
+        <form @submit.prevent="saveReviews">
+          <input type="hidden" name="storeId" value="{{ shop.id }}">
+          <input type="hidden" name="productId" value="{{ product.id }}">
+          <input type="hidden" name="productName" value="{{ product.title }}">
+    
+          <button type="submit" class="reviews-button reviews-actions__button--save" :disabled="loading">
+            <span class="review-icon">
+              <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+              </svg>
+            </span>
+    
+            Guardar
+          </button>
+        </form>
+    
+        <form @submit.prevent="generateReviews">
+          <input type="hidden" name="storeId" value="{{ shop.id }}">
+          <input type="hidden" name="productId" value="{{ product.id }}">
+          <input type="hidden" name="llm" value="{{ reviews.llm }}">
+          <input type="hidden" name="style" value="{{ reviews.style }}">
+          <input type="hidden" name="prompt" value="{{ reviews.prompt }}">
+          <input type="hidden" name="gender" value="{{ reviews.gender }}">
+          <input type="hidden" name="length" value="{{ reviews.length }}">
+          <input type="hidden" name="words" value="{{ reviews.words }}">
+          <input type="hidden" name="custom" value="{{ reviews.custom }}">
+    
+          <button type="submit" class="reviews-button reviews-actions__button--generate" :disabled="loading">
+            <span class="review-icon">
+              <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"></path>
+              </svg>
+            </span>
+    
+            Generar
+          </button>
+        </form>
+      </div>
+
+      <div class="row-center gap-4">
+        <form @submit.prevent="generateNames">
+          <input type="hidden" name="storeId" value="{{ shop.id }}">
+          <input type="hidden" name="productId" value="{{ product.id }}">
+          <input type="hidden" name="llm" value="{{ reviews.llm }}">
+          <input type="hidden" name="gender" value="{{ reviews.gender }}">
+          <input type="hidden" name="length" value="{{ reviews.length }}">
+    
+          <button type="submit" class="reviews-button reviews-actions__button--util" :disabled="loading">
+            <span class="review-icon">
+              <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"></path>
+              </svg>
+            </span>
+    
+            Nombres
+          </button>
+        </form>
+  
+        <button type="button" @click="generateStars" class="reviews-button reviews-actions__button--util" disabed>
+          <span class="review-icon">
+            <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"></path>
+            </svg>
+          </span>
+  
+          Estrellas
+        </button>
+      </div>
+    </div>
+    
+    <!-- ERROR & SUCCESS COLLAPSIBLE -->
+    <div id="reviews-info-collapsible" class="reviews-collapsible">
+      <div :class="error ? 'error-container' : success ? 'success-container' : ''" class="collapsible-content rounded-lg">
+        <p class="m-0 p-4" x-text="error ? error.message : success ? success.message : ''"></p>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- HEADER & RATING -->
+  <div class="reviews-header flex-col gap-4">
+    <h2 class="reviews-header__title text-inherit bold m-0">{{ title.text }}</h2>
+
+    <div class="reviews-rating flex-center items-center flex-wrap" style="gap: 2rem">
+      <!-- AVERAGE -->
+      <div class="col-center">
+        <div class="flex items-center gap-3">
+          <span class="reviews-rating__average" x-text="rating.average ?? '5.0'"></span>
+
+          <div class="reviews-rating__average-stars flex gap-1">
+            <template x-for="i in 5">
+              <span class="review-icon--large">
+                <svg data-slot="icon" fill="currentColor" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"></path>
+                </svg>
+              </span>
+            </template>
+          </div>
+        </div>
+
+        <span class="reviews-rating__caption" x-text="`Basado en ${reviews.length} valoraciones`"></span>
+      </div>   
+      
+      <!-- INDIVIDUAL -->
+      <div class="flex-col" style="flex-direction: column-reverse;">
+        <template x-for="i in 5">
+          <div class="flex items-center gap-4">
+            <div class="reviews-rating__individual-stars flex items-center">
+              <template x-for="j in 5">
+                <span class="review-icon">
+                  <svg data-slot="icon" :fill="i >= j ? 'currentColor' : 'none'" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"></path>
+                  </svg>
+                </span>
+              </template>
+            </div>
+
+            <div class="reviews-rating__bars">
+              <div :style="`width: ${rating.individuals ? rating.individuals[i-1].per : 0}%`"> </div>
+            </div>
+
+            <span class="reivews-rating__individual" class="bold" x-text="`(${rating.individuals ? rating.individuals[i-1].value : 0})`"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW FORM -->
+  <div class="flex-col gap-4" style="padding-block:1rem">
+    <button class="reviews-form-control reviews-button reviews-actions__button--generate">
+      Escribe tu valoración
+    </button>
+  
+    <div id="reviews-form-collapsible" class="reviews-collapsible">
+      <div class="collapsible-content review-form flex-col">
+        <form @submit.prevent="addReview" id="review-form" class="flex flex-wrap gap-4">
+          <div class="review-form__file flex-center relative">
+            <input id="review-form__file-input" type="file" style="display:none">
+            
+            <label class="review-form__file-button--upload flex-col items-center leading-sm" tabindex="0" for="review-form__file-input">
+              Sube una imagen
+              <span>Maximo 2MB</span>
+            </label>
+    
+            <template id="review-form__file-template--button">
+              <label class="review-form__file-button--upload flex-col items-center leading-sm" tabindex="0" for="review-form__file-input">
+                Sube una imagen
+                <span>Maximo 2MB</span>
+              </label>
+            </template>
+    
+    
+            <template id="review-form__file-template--image"> 
+              <div class="review-form__file-content">
+                <button type="button" class="reviews-button review-form__file-button--delete">
+                  <span class="review-icon">
+                    <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+                    </svg>
+                  </span>
+                </button>
+              </div>          
+            </template>
+          </div>
+    
+          <div class="review-form__content flex-col gap-4">
+            <div class="flex items-center gap-4">
+              <label>Puntuación:</label>
+              <div class="review-form__stars-selector flex">
+                <template x-for="i in 5">
+                  <span class="review-icon">
+                    <svg data-slot="icon" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"></path>
+                    </svg>
+                  </span>
+                </template>
+              </div>
+            </div>
+    
+            <div class="flex-col">
+              <label for="review-author">Nombre</label>
+              <input class="reviews-input" id="review-author" name="author" type="text" required>
+            </div>
+    
+            <div class="flex-col">
+              <label for="review-text">Descripción</label>
+              <textarea class="reviews-input" id="review-text" name="text" type="text" rows="3" style="resize:none;" required></textarea>
+            </div>
+    
+            <button type="submit" class="reviews-button review-form__submit" :disabled="submited">
+              Subir Reseña
+            </button>
+            
+            <span class="review-form__conditions">* Se revisara que el cliente haya adquirido el producto para aprobar su reseña. Se eliminara cualquier reseña con contenido obseno o lenguaje ofensivo</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGINATOR CONTROLS / SWIPE INDICATOR -->
+  {%- if reviews.scroll == 'manual' and reviews.layout != 'layout-4' -%}
+    <div class="reviews-paginator flex justify-between">
+      <button type="button" class="reviews-button reviews-paginator__button" data-direction="-1">
+        <span class="review-icon">
+          <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+          </svg>
+        </span>
+      </button>
+  
+      <button type="button" class="reviews-button reviews-paginator__button" data-direction="1">
+        <span class="review-icon">
+          <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+          </svg>
+        </span>
+      </button>
+    </div>
+  {% endif %}
+
+  {%- if reviews.scroll == 'snap' and reviews.layout != 'layout-4' -%}
+    <div class="reviews-paginator__arrow row-center self-end">
+      Desliza
+
+      <span class="review-icon">
+        <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"></path>
+        </svg>
+      </span>
+    </div>
+  {% endif %}
+
+   <!-- LOADING PLACEHOLDER -->
+   <template x-if="initialized">
+    <div class="reviews-placeholder flex-center">
+      <img src="https://res.cloudinary.com/dwzr9lray/image/upload/v1716827727/Shopify/starts-loading.gif" width="150" height="55" alt="loading">
+    </div>
+  </template>
+
+  {%- case reviews.layout -%}
+    {%- when 'layout-1' -%}
+      <template x-if="!initialized">
+        <div class="reviews reviews-scroll__{{ reviews.scroll }} reviews-layout-1 flex">
+          <!-- SLIDES -->
+          <template x-if="false" x-for="(review, index) in reviews">
+            <div class="review-slide flex-col flex-none gap-3 p-4 rounded-lg">
+              {%- if request.design_mode -%}
+                <button class="reviews-button review-slide__button--delete" @click="removeReview(index)">
+                  <span class="review-icon">
+                    <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+                    </svg>
+                  </span>
+                </button>
+              {%- endif -%}
+  
+              <!-- IMAGE -->
+              <template x-if="review?.image">
+                <div class="review-slide__image rounded-lg overflow-hidden" :style="`aspect-ratio: ${review.image.aspect_ratio}`" @click="toggleDialog({...review, image: review.image})">
+                  <template x-if="review.image.local"> 
+                    <img :src="review.image.src" :width="review.image.width" :height="review.image.height"
+                      :alt="`Product review ${index}`"
+                      loading="lazy"
+                    >
+                  </template>
+
+                  <template x-if="!review.image.local">
+                    <img :src="`${review.image.src}&width=900`" :width="review.image.width" :height="review.image.height"
+                      :srcset="`${review.image.src}&width=300 300w, ${review.image.src}&width=500 500w, ${review.image.src}&width=750 750w, ${review.image.src}&width=900 900w`"
+                      sizes="(max-width: 600px) 50vw, (max-width: 900px) 33.33vw, 25vw"
+                      :alt="`Product review ${index}`"
+                      loading="lazy"
+                    >
+                  </template>
+                </div>
+              </template>
+              {%- if reviews.show_placeholder -%}
+                <template x-if="!review?.image">
+                  <div class="review-silde__image">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                </template>
+              {%- endif -%}
+  
+              <div class="flex-col gap-2">
+                <!-- HEADER -->
+                <div class="flex-col leading-sm">
+                  <div class="row-center gap-3" style="margin-bottom: 2px">
+                    <span class="review-icon">
+                      <svg data-slot="icon" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path clip-rule="evenodd" fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.844-8.791a.75.75 0 0 0-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 1 0-1.114 1.004l2.25 2.5a.75.75 0 0 0 1.15-.043l4.25-5.5Z"></path>
+                      </svg>
+                    </span>
+                    
+                    <span class="review-slide__author" x-text="review.author"></span>
+                    
+                    <img :src="`https://res.cloudinary.com/dwzr9lray/image/upload/v1716677958/Shopify/country_flags/${country}.svg`" width="24" height="24" alt="country-flag" loading="lazy">
+                  </div>
+  
+                  <span class="review-slide__date" x-text="review.date"></span>
+  
+                  <div class="review-slide__rating flex" style="margin-left: -2px; gap: 1px">
+                    <template x-for="i in 5">
+                      <span>
+                        <svg data-slot="icon" :fill="i <= review.stars ? 'currentColor' : 'none'" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"></path>
+                        </svg>
+                      </span>
+                    </template>
+                  </div>
+                </div>
+  
+                <!-- BODY -->
+                <div class="review-slide__body leading-md">
+                  <p class="m-0" x-text="review.text"></p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    {%- when 'layout-2' -%}
+      <template x-if="!initialized">
+        <div class="reviews reviews-scroll__{{ reviews.scroll }} reviews-layout-2 flex">
+          <!-- SLIDES -->
+          <template x-for="(review, index) in reviews">
+            <div class="review-slide flex-col flex-none gap-3 p-4 rounded-lg">
+              {%- if request.design_mode -%}
+                <button class="reviews-button review-slide__button--delete" @click="removeReview(index)">
+                  <span class="review-icon">
+                    <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+                    </svg>
+                  </span>
+                </button>
+              {%- endif -%}
+  
+              <!-- HEADER -->
+              <div class="flex-col" style="padding-top: 0.5rem;">
+                <div class="row-center gap-3">
+                  <span class="review-icon">
+                    <svg data-slot="icon" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path clip-rule="evenodd" fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.844-8.791a.75.75 0 0 0-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 1 0-1.114 1.004l2.25 2.5a.75.75 0 0 0 1.15-.043l4.25-5.5Z"></path>
+                    </svg>
+                  </span>
+                  
+                  <span class="review-slide__author" x-text="review.author"></span>
+                  
+                  <img :src="`https://res.cloudinary.com/dwzr9lray/image/upload/v1716677958/Shopify/country_flags/${country}.svg`" width="20" height="20" alt="country-flag" loading="lazy">
+                </div>
+  
+                <div class="review-slide__rating flex" style="gap:1px;">
+                  <template x-for="i in 5">
+                    <span>
+                      <svg data-slot="icon" :fill="i <= review.stars ? 'currentColor' : 'none'" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"></path>
+                      </svg>
+                    </span>
+                  </template>
+                </div>
+              </div>
+  
+              <!-- IMAGE -->
+              <template x-if="review?.image">
+                <div class="review-slide__image rounded-lg overflow-hidden" :style="`aspect-ratio: ${review.image.aspect_ratio}`" @click="toggleDialog({...review, image: review.image})">
+                  <template x-if="review.image.local"> 
+                    <img :src="review.image.src" :width="review.image.width" :height="review.image.height"
+                      :alt="`Product review ${index}`"
+                      loading="lazy"
+                    >
+                  </template>
+
+                  <template x-if="!review.image.local">
+                    <img :src="`${review.image.src}&width=900`" :width="review.image.width" :height="review.image.height"
+                      :srcset="`${review.image.src}&width=300 300w, ${review.image.src}&width=500 500w, ${review.image.src}&width=750 750w, ${review.image.src}&width=900 900w`"
+                      sizes="(max-width: 600px) 50vw, (max-width: 900px) 33.33vw, 25vw"
+                      :alt="`Product review ${index}`"
+                      loading="lazy"
+                    >
+                  </template>
+                </div>
+              </template>
+              {%- if reviews.show_placeholder -%}
+                <template x-if="!review?.image">
+                  <div class="review-slide__image">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                </template>
+              {%- endif -%}
+  
+              <!-- BODY -->
+              <div class="review-slide__body leading-md">
+                <p class="m-0" x-text="review.text"></p>
+              </div>
+  
+              <!-- DATE -->
+              <div class="flex flex-1 align-end">
+                <span class="review-slide__date" x-text="review.date"></span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    {% when 'layout-3' -%}
+      <template x-if="!initialized">
+        <div class="reviews reviews-scroll__{{ reviews.scroll }} reviews-layout-3">
+          <!-- SLIDES -->
+          <template x-for="(review, index) in reviews">
+            <div class="review-slide rounded-lg">
+              {%- if request.design_mode -%}
+                <button class="reviews-button review-slide__button--delete" @click="removeReview(index)">
+                  <span class="review-icon">
+                    <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+                    </svg>
+                  </span>
+                </button>
+              {%- endif -%}
+    
+              <!-- IMAGE -->
+              <template x-if="review?.image">
+                <div class="review-slide__image" @click="toggleDialog({...review, image: review.image})">
+                  <img :src="`${review.image.src}&width=900`" :width="review.image.width" :height="review.image.height"
+                    :srcset="`${review.image.src}&width=300 300w, ${review.image.src}&width=500 500w, ${review.image.src}&width=750 750w, ${review.image.src}&width=900 900w`"
+                    sizes="(max-width: 600px) 50vw, (max-width: 900px) 33.33vw, 25vw"
+                    :alt="`Product review ${index}`"
+                    loading="lazy"
+                  >
+                </div>
+              </template>
+              {%- if reviews.show_placeholder -%}
+                <template x-if="!review?.image">
+                  <div class="review-slide__image">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                </template>
+              {%- endif -%}
+    
+              <!-- HEADER -->
+              <div class="flex-col" style="padding-top: 0.5rem;">
+                <div class="row-center gap-3">
+                  <span class="review-icon">
+                    <svg data-slot="icon" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path clip-rule="evenodd" fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.844-8.791a.75.75 0 0 0-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 1 0-1.114 1.004l2.25 2.5a.75.75 0 0 0 1.15-.043l4.25-5.5Z"></path>
+                    </svg>
+                  </span>
+                  
+                  <span class="review-slide__author" x-text="review.author"></span>
+                  
+                  <img :src="`https://res.cloudinary.com/dwzr9lray/image/upload/v1716677958/Shopify/country_flags/${country}.svg`" width="20" height="20" alt="country-flag" loading="lazy">
+                </div>
+    
+                <div class="review-slide__rating flex" style="gap:1px;">
+                  <template x-for="i in 5">
+                    <span>
+                      <svg data-slot="icon" :fill="i <= review.stars ? 'currentColor' : 'none'" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"></path>
+                      </svg>
+                    </span>
+                  </template>
+                </div>
+              </div>
+    
+              <!-- BODY -->
+              <div class="review-slide__body leading-md overflow-hidden" style="padding-block:0.5rem">
+                <p class="m-0" x-text="review.text"></p>
+              </div>
+    
+              <!-- DATE -->
+              <span class="review-slide__date" x-text="review.date"></span>
+            </div>
+          </template>
+        </div>
+      </template>
+    {%- when 'layout-4' -%}
+      <template x-if="!initialized">
+        <div class="reviews reviews-layout-4">
+          <!-- SLIDES -->
+          <template x-for="(review, index) in reviews">
+            <div class="review-slide flex-col rounded-lg">
+              {%- if request.design_mode -%}
+                <button class="reviews-button review-slide__button--delete" @click="removeReview(index)">
+                  <span class="review-icon">
+                    <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+                    </svg>
+                  </span>
+                </button>
+              {%- endif -%}
+    
+              <!-- IMAGE -->
+              <template x-if="review?.image">
+                <div class="review-slide__image" @click="toggleDialog({...review, image: review.image})">
+                  <img :src="`${review.image.src}&width=900`" :width="review.image.width" :height="review.image.height"
+                    :srcset="`${review.image.src}&width=300 300w, ${review.image.src}&width=500 500w, ${review.image.src}&width=750 750w, ${review.image.src}&width=900 900w`"
+                    sizes="(max-width: 600px) 50vw, (max-width: 900px) 33.33vw, 25vw"
+                    :alt="`Product review ${index}`"
+                    loading="lazy"
+                  >
+                </div>
+              </template>
+    
+              <div class="flex-col p-4 gap-3">
+                <!-- HEADER -->
+                <div class="flex-col">
+                  <div class="row-center gap-3">
+                    <span class="review-icon">
+                      <svg data-slot="icon" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path clip-rule="evenodd" fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.844-8.791a.75.75 0 0 0-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 1 0-1.114 1.004l2.25 2.5a.75.75 0 0 0 1.15-.043l4.25-5.5Z"></path>
+                      </svg>
+                    </span>
+                    
+                    <span class="review-slide__author" x-text="review.author"></span>
+                    
+                    <img :src="`https://res.cloudinary.com/dwzr9lray/image/upload/v1716677958/Shopify/country_flags/${country}.svg`" width="20" height="20" alt="country-flag" loading="lazy">
+                  </div>
+      
+                  <div class="review-slide__rating flex" style="gap:1px;">
+                    <template x-for="i in 5">
+                      <span>
+                        <svg data-slot="icon" :fill="i <= review.stars ? 'currentColor' : 'none'" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"></path>
+                        </svg>
+                      </span>
+                    </template>
+                  </div>
+                </div>
+                
+                <!-- BODY -->
+                <div class="review-slide__body leading-md overflow-hidden">
+                  <p class="m-0" x-text="review.text"></p>
+                </div>
+                
+                <!-- DATE -->
+                <span class="review-slide__date" x-text="review.date"></span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+  {%- endcase -%}
+
+  <!-- DIALOG -->
+  <dialog id="reviews-dialog">
+    {%- assign product_form_id = 'product-form-' | append: section.id -%}
+
+    <button class="reviews-button reviews-dialog__button--close" @click="toggleDialog(null)">
+      <span class="review-icon">
+        <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+        </svg>
+      </span>
+    </button>
+
+    <!-- PRODUCT INFO -->
+    <product-info
+      id="ProductInfo-{{ section.id }}"
+      data-section="{{ section.id }}"
+      data-url="{{ product.url }}"
+      class="relative"
+    >
+      <div class="reviews-dialog__wrapper flex-col gap-4"> 
+        <!-- IMAGE -->
+        <template x-if="expandedReview">
+          <div class="reviews-dialog__image rounded-lg overflow-hidden">
+            <img class="review-image w-full" :src="`${expandedReview.image.src}&width=900`"
+              :srcset="`${expandedReview.image.src}&width=300 300w, ${expandedReview.image.src}&width=500 500w, ${expandedReview.image.src}&width=750 750w, ${expandedReview.image.src}&width=900 900w`"
+              sizes="(max-width: 600px) calc(100vw - 3rem), (max-width: 900px) calc(80vw - 3rem), 60vw"
+              :alt="`Product review expanded`"
+            >
+          </div>
+        </template>
+       
+        <div class="reviews-dialog__content flex-col flex-1 gap-4">
+          <!-- HEADER -->
+          <div class="flex-col">
+            <div class="row-center gap-3">
+              <span class="review-icon">
+                <svg data-slot="icon" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path clip-rule="evenodd" fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.844-8.791a.75.75 0 0 0-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 1 0-1.114 1.004l2.25 2.5a.75.75 0 0 0 1.15-.043l4.25-5.5Z"></path>
+                </svg>
+              </span>
+              
+              <span class="review-slide__author" x-text="expandedReview?.author"></span>
+              
+              <img :src="`https://res.cloudinary.com/dwzr9lray/image/upload/v1716677958/Shopify/country_flags/${country}.svg`" width="20" height="20" alt="country-flag" loading="lazy">
+            </div>
+
+            <div class="review-slide__rating flex" style="gap:1px;">
+              <template x-for="i in 5">
+                <span class="review-icon--small">
+                  <svg data-slot="icon" :fill="i <= (expandedReview?.stars ?? 5) ? 'currentColor' : 'none'" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"></path>
+                  </svg>
+                </span>
+              </template>
+            </div>
+          </div>
+
+          <!-- BODY -->
+          <div class="review-slide__body leading-md overflow-hidden">
+            <p class="m-0" x-text="expandedReview?.text"></p>
+          </div>
+
+          <hr style="margin: 0;">
+
+          <!-- PRODUCT FORM -->
+          <div class="flex-col">
+            <div>
+              {% render 'product-variant-picker',
+                product: product,
+                block: section.blocks.last,
+                product_form_id: product_form_id
+              %}
+            </div>
+
+            <div @click="toggleDialog(null)">
+              <a href="/rsi-btn-hook"></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </product-info>
+  </dialog>
+
+  <!-- MEDIA JSON -->
+  <script id="reviews-media">
+    {{ reviewsMedia | json }}
+  </script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@c302f5d9245e89b6693472e872429f7114af7282/dist/ai-reviews.js"></script>
+
+{% schema %}
+  {
+    "name": "Reseñas",
+    "limit": 1,
+    "settings": [
+      {
+        "type": "select",
+        "id": "llm",
+        "label": "Modelo",
+        "options": [
+          {
+            "value": "GPT",
+            "label": "ChatGPT (OpenAI)"
+          },
+          {
+            "value": "Llama",
+            "label": "Llama (Meta)"
+          }
+        ],
+        "default": "GPT"
+      },
+      {
+        "type": "select",
+        "id": "style",
+        "label": "Estilo",
+        "options": [
+          {
+            "value": "neutral",
+            "label": "Neutro"
+          },
+          {
+            "value": "incredulous",
+            "label": "Incredulo"
+          },
+          {
+            "value": "story",
+            "label": "Historia"
+          },
+          {
+            "value": "mixed",
+            "label": "Mixto"
+          }
+        ],
+        "default": "neutral"
+      },
+      {
+        "type": "textarea",
+        "id": "prompt",
+        "label": "Descripción del producto"
+      },
+      {
+        "type": "checkbox",
+        "id": "custom",
+        "label": "Prompt personalizado",
+        "info": "Pasa directamente un prompt a la inteligencia artificial; el número de reseñas y palabras pueden variar",
+        "default": false
+      },
+      {
+        "type": "select",
+        "id": "gender",
+        "label": "Género",
+        "options": [
+          {
+            "value": "unespecified",
+            "label": "Cualquiera"
+          },
+          {
+            "value": "male",
+            "label": "Masculino"
+          },
+          {
+            "value": "female",
+            "label": "Femenino"
+          }
+        ],
+        "default": "unespecified"
+      },
+      {
+        "type": "range",
+        "id": "length",
+        "min": 5,
+        "max": 20,
+        "step": 5,
+        "unit": "res",
+        "label": "Número de reseñas",
+        "default": 5
+      },
+      {
+        "type": "range",
+        "id": "words",
+        "min": 20,
+        "max": 150,
+        "step": 10,
+        "unit": "pal",
+        "label": "Número de palabras",
+        "default": 30
+      },
+
+
+      {
+        "type": "header",
+        "content": "Estilo"
+      },
+      {
+        "type": "select",
+        "id": "layout",
+        "label": "Diseño",
+        "options": [
+          {
+            "value": "layout-1",
+            "label": "Diseño 1"
+          },
+          {
+            "value": "layout-2",
+            "label": "Diseño 2"
+          },
+          {
+            "value": "layout-3",
+            "label": "Diseño 3"
+          },
+          {
+            "value": "layout-4",
+            "label": "Diseño 4"
+          }
+        ],
+        "default": "layout-2"
+      },
+      {
+        "type": "select",
+        "id": "scroll",
+        "label": "Desplazamiento",
+        "options": [
+          {
+            "value": "auto",
+            "label": "Automático"
+          },
+          {
+            "value": "manual",
+            "label": "Botones"
+          },
+          {
+            "value": "snap",
+            "label": "Deslizar"
+          }
+        ],
+        "default": "manual"
+      },
+
+
+      {
+        "type": "header",
+        "content": "Encabezado"
+      },
+      {
+        "type": "text_alignment",
+        "id": "header_align",
+        "label": "Alineación del título",
+        "default": "center"
+      },
+      {
+        "type": "color",
+        "id": "header_color",
+        "label": "Color del texto"
+      },
+      {
+        "type": "color",
+        "id": "bars_color",
+        "label": "Color de las barras"
+      },
+      {
+        "type": "color",
+        "id": "buttons_background",
+        "label": "Color de boton"
+      },
+      {
+        "type": "color",
+        "id": "buttons_color",
+        "label": "Color de texto boton"
+      },
+
+      {
+        "type": "header",
+        "content": "Reseñas"
+      },
+      {
+        "type": "color",
+        "id": "review_background",
+        "label": "Color de fondo"
+      },
+      {
+        "type": "color",
+        "id": "review_color",
+        "label": "Color del texto"
+      },
+      {
+        "type": "color",
+        "id": "border_color",
+        "label": "Color bordes formulario"
+      },
+      {
+        "type": "color",
+        "id": "stars_color",
+        "label": "Color estrellas"
+      },
+      {
+        "type": "range",
+        "id": "stars_size",
+        "label": "Tamaño estrellas",
+        "min": 20,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "default": 20
+      },
+      {
+        "type": "checkbox",
+        "id": "show_placeholder",
+        "label": "Mostrar imagenes vacias",
+        "default": false
+      },
+
+
+      {
+        "type": "header",
+        "content": "Texto"
+      },
+      {
+        "type": "range",
+        "id": "review_author_size_mobile",
+        "label": "Tamaño autor celular",
+        "min": 0,
+        "max": 3,
+        "step": 0.1,
+        "unit": "rem",
+        "default": 1.8
+      },
+      {
+        "type": "range",
+        "id": "review_author_size_desktop",
+        "label": "Tamaño autor computador",
+        "min": 0,
+        "max": 5,
+        "step": 0.1,
+        "unit": "rem",
+        "default": 2
+      },
+      {
+        "type": "checkbox",
+        "id": "author_bold",
+        "label": "Autor en negrilla",
+        "default": false
+      },
+      {
+        "type": "range",
+        "id": "review_description_size_mobile",
+        "label": "Tamaño descripción celular",
+        "min": 0,
+        "max": 3,
+        "step": 0.1,
+        "unit": "rem",
+        "default": 1.5
+      },
+      {
+        "type": "range",
+        "id": "review_description_size_desktop",
+        "label": "Tamaño descripción computador",
+        "min": 0,
+        "max": 5,
+        "step": 0.1,
+        "unit": "rem",
+        "default": 1.8
+      },
+
+
+      {
+        "type": "header",
+        "content": "General"
+      },
+      {
+        "type": "color",
+        "id": "background_color",
+        "label": "Color de fondo"
+      },
+      {
+        "type": "range",
+        "id": "margin_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Separación superior",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "margin_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Separación inferior",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "padding_vertical",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Relleno vertical",
+        "default": 20
+      },
+      {
+        "type": "range",
+        "id": "padding_horizontal",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Relleno horizontal",
+        "default": 0
+      }
+    ],
+    "blocks": [
+      {
+        "name": "Título",
+        "type": "title",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "inline_richtext",
+            "id": "text",
+            "label": "Título",
+            "default": "Valoraciones"
+          },
+          {
+            "type": "range",
+            "id": "text_size_mobile",
+            "label": "Tamaño del texto celular",
+            "min": 0,
+            "max": 5,
+            "step": 0.1,
+            "unit": "rem",
+            "default": 2
+          },
+          {
+            "type": "range",
+            "id": "text_size_desktop",
+            "label": "Tamaño del texto computador",
+            "min": 0,
+            "max": 5,
+            "step": 0.1,
+            "unit": "rem",
+            "default": 3
+          }
+        ]
+      },
+
+      {
+        "type": "variant_picker",
+        "name": "t:sections.main-product.blocks.variant_picker.name",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "select",
+            "id": "picker_type",
+            "options": [
+              {
+                "value": "dropdown",
+                "label": "t:sections.main-product.blocks.variant_picker.settings.picker_type.options__1.label"
+              },
+              {
+                "value": "button",
+                "label": "t:sections.main-product.blocks.variant_picker.settings.picker_type.options__2.label"
+              }
+            ],
+            "default": "button",
+            "label": "t:sections.main-product.blocks.variant_picker.settings.picker_type.label"
+          },
+          {
+            "id": "swatch_shape",
+            "label": "t:sections.main-product.blocks.variant_picker.settings.swatch_shape.label",
+            "type": "select",
+            "info": "t:sections.main-product.blocks.variant_picker.settings.swatch_shape.info",
+            "options": [
+              {
+                "value": "circle",
+                "label": "t:sections.main-product.blocks.variant_picker.settings.swatch_shape.options__1.label"
+              },
+              {
+                "value": "square",
+                "label": "t:sections.main-product.blocks.variant_picker.settings.swatch_shape.options__2.label"
+              },
+              {
+                "value": "none",
+                "label": "t:sections.main-product.blocks.variant_picker.settings.swatch_shape.options__3.label"
+              }
+            ],
+            "default": "circle"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "AI Reviews Lite",
+        "blocks": [
+          {
+            "type": "title"
+          },
+          {
+            "type": "variant_picker"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

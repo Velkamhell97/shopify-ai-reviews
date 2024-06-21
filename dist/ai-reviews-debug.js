@@ -1,5 +1,5 @@
 (() => {
-  // src/ai-reviews.js
+  // src/ai-reviews-debug.js
   document.addEventListener("alpine:init", () => {
     function hasError(response) {
       return "error" in response;
@@ -44,6 +44,7 @@
        * @returns {void}
        */
       init(length) {
+        console.log("%cSCROLL CONTROLLER INIT", "color: #266624;");
         this.#reviewsLength = length;
         if (this.#initialized) return;
         this.reload(false);
@@ -54,6 +55,7 @@
        * @returns {void}
        */
       reload(reset) {
+        console.log("%cSCROLL CONTROLLER RELOAD", "color: #a16a1d;");
         if (reset) this.#currentSlide = 2;
         this.#reviewsScroll = document.querySelector(".reviews");
         const autoplay = document.querySelector("#scroll-type").value === "auto";
@@ -84,6 +86,7 @@
        * @private
        */
       #scrollToSlide(slideIndex) {
+        console.log("MOVE TO: " + slideIndex);
         const currentSlide = this.#reviewsScroll.querySelector(`.review-slide:nth-child(${slideIndex})`);
         this.#reviewsScroll.scrollLeft = currentSlide.offsetLeft - this.#reviewsScroll.offsetLeft;
       }
@@ -126,6 +129,7 @@
        * @private
        */
       #setupControlButtons() {
+        console.log("%cSETUP PAGINATOR", "color: #27549c;");
         const paginatorButtons = document.querySelectorAll(".reviews-paginator__button");
         paginatorButtons.forEach((button) => {
           button.removeEventListener("click", this.#pageChangedListener);
@@ -197,6 +201,7 @@
        * @returns {void}
        */
       init() {
+        console.log("%cFORM CONTROLLER INIT", "color: #266624;");
         if (this.#initialized) return;
         this.reload();
         this.#initialized = true;
@@ -205,6 +210,7 @@
        * @returns {void}
        */
       reload() {
+        console.log("%cFORM CONTROLLER RELOAD", "color: #a16a1d;");
         this.#form = document.querySelector("#review-form");
         this.#formFile = document.querySelector(".review-form__file");
         this.#imageTemplate = this.#formFile.querySelector("#review-form__file-template--image");
@@ -246,6 +252,7 @@
        * @private
        */
       #setupStarsInput() {
+        console.log("%cSETUP STARS SELECTOR", "color: #27549c;");
         for (let i = 0; i < this.#formStars.length; i++) {
           const star = this.#formStars[i];
           star.removeEventListener("click", this.#starListener);
@@ -315,6 +322,7 @@
        * @private
        */
       #setupFileInput() {
+        console.log("%cSETUP FILE", "color: #27549c;");
         const formFileInput = this.#formFile.querySelector("#review-form__file-input");
         formFileInput.removeEventListener("change", this.#fileChangedListener);
         formFileInput.addEventListener("change", this.#fileChangedListener);
@@ -391,6 +399,7 @@
        * @returns {void}
        */
       init() {
+        console.log("%cDOOM CONTROLLER INIT", "color: #266624;");
         if (this.#initialized) return;
         this.reload();
         this.#initialized = true;
@@ -399,6 +408,7 @@
        * @returns {void}
        */
       reload() {
+        console.log("%cDOOM CONTROLLER RELOAD", "color: #a16a1d;");
         this.#infoCollapsible = document.querySelector("#reviews-info-collapsible");
         this.#dialog = document.querySelector("#reviews-dialog");
         const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
@@ -453,6 +463,7 @@
        * @private
        */
       #setupCollapsibles() {
+        console.log("%cSETUP COLLAPSIBLES", "color: #27549c;");
         const formCollapsibleControl = document.querySelector("#reviews-form-collapsible");
         formCollapsibleControl.removeEventListener("click", this.#formCollapsibleListener);
         formCollapsibleControl.addEventListener("click", this.#formCollapsibleListener);
@@ -470,6 +481,7 @@
        * @private
        */
       #setupDialog() {
+        console.log("%cSETUP DIALOG", "color: #27549c;");
         this.#dialog.removeEventListener("click", this.#dialogListener);
         this.#dialog.addEventListener("click", this.#dialogListener);
       }
@@ -499,6 +511,7 @@
        * @private
        */
       #setupVariants() {
+        console.log("%cSETUP VARIANTS", "color: #27549c;");
         this.#mainSelector.removeEventListener("change", this.#mainSelectorListener);
         this.#mainSelector.addEventListener("change", this.#mainSelectorListener);
         this.#secondarySelector.removeEventListener("change", this.#secondarySelectorListener);
@@ -573,6 +586,7 @@
        * @param {Database} database
        */
       constructor(database2) {
+        console.log("%cSTATE CONTROLLER INIT", "color: #266624;");
         this.#database = database2;
         const images = JSON.parse(document.querySelector("#reviews-media").textContent);
         for (let i = 0; i < images.length; i++) {
@@ -670,6 +684,7 @@
        */
       async #fetchReviews() {
         if (!this.#fetched) {
+          console.log("%cCARGANDO REVIEWS...", "color: #5e3419;");
           const storeId = document.querySelector("#store-id").value;
           const productId = document.querySelector("#product-id").value;
           const response = await this.#database.reviews(storeId, productId);
@@ -703,6 +718,7 @@
     let formReload = false;
     let scrollReload = false;
     function refresh() {
+      console.log("Javascript :: Reload");
       formReload = true;
       scrollReload = true;
       doom.reload();
@@ -713,6 +729,7 @@
     ;
     Alpine.data("aiReviews", () => ({
       async init() {
+        console.log("Alpine :: Init");
         this.$nextTick(() => {
           form.init();
           if (formReload) {
@@ -801,6 +818,7 @@
           }
           ;
           this.reset();
+          console.log({ ...form2, country: state.country });
           const response = await fetch(
             `https://api.velkamhell-aireviews.com/reviews/generate`,
             {
@@ -814,6 +832,7 @@
             const error = json.error;
             throw new Error(error?.message ?? error);
           }
+          console.log(json);
           state.reviews = json.reviews;
           this.reviews = state.copy;
           this.success = { message: "Rese\xF1as generadas exitosamente." };
@@ -827,6 +846,7 @@
         if (this.loading) return;
         this.reset();
         const form2 = Object.fromEntries(new FormData(this.$el));
+        console.log({ ...form2, country: state.country });
         try {
           const response = await fetch(
             `https://api.velkamhell-aireviews.com/utils/names`,
@@ -841,6 +861,7 @@
             const error = json.error;
             throw new Error(error?.message ?? error);
           }
+          console.log(json);
           state.names = json.names;
           this.reviews = state.copy;
           this.success = { message: "Nombres generadas exitosamente." };
@@ -866,6 +887,7 @@
             reviews: state.raw
           }
         };
+        console.log(body);
         try {
           const response = await fetch(
             "https://api.velkamhell-aireviews.com/reviews",
