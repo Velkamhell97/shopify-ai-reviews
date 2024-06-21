@@ -216,7 +216,6 @@
         this.#imageTemplate = this.#formFile.querySelector("#review-form__file-template--image");
         this.#buttonTemplate = this.#formFile.querySelector("#review-form__file-template--button");
         this.#formStars = [...document.querySelector(".review-form__stars-selector").children];
-        console.log(this.#formStars);
         this.#formStars.shift();
         this.#setupStarsInput();
         this.#setupFileInput();
@@ -240,11 +239,13 @@
       #starHandler(e) {
         const star = e.target.closest("span");
         console.log(star);
+        console.log(this.#formStars.length);
         for (let i = 0; i < 5; i++) {
           this.#formStars[i].classList.remove("active");
         }
         const index = this.#formStars.indexOf(star);
-        this.#fields.stars = index - 1;
+        console.log(index);
+        this.#fields.stars = index + 1;
         for (let i = 0; i < this.#fields.stars; i++) {
           this.#formStars[i].classList.add("active");
         }
