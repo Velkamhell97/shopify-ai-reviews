@@ -215,7 +215,9 @@
         this.#formFile = document.querySelector(".review-form__file");
         this.#imageTemplate = this.#formFile.querySelector("#review-form__file-template--image");
         this.#buttonTemplate = this.#formFile.querySelector("#review-form__file-template--button");
-        this.#formStars = [...document.querySelector(".review-form__stars-selector").children].shift();
+        this.#formStars = [...document.querySelector(".review-form__stars-selector").children];
+        console.log(this.#formStars);
+        this.#formStars.shift();
         this.#setupStarsInput();
         this.#setupFileInput();
       }
