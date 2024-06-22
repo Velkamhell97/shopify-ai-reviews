@@ -582,8 +582,8 @@
         for (let i = 0; i < images.length; i++) {
           const image = images[i];
           console.log(image);
-          image.src = `${image.src}&width=900`;
           image.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
+          image.src = `${image.src}&width=900`;
           delete image.preview_image;
           console.log(image);
         }
