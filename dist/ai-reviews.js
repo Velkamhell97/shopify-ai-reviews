@@ -576,7 +576,9 @@
       constructor(database2) {
         this.#database = database2;
         const images = JSON.parse(document.querySelector("#reviews-media").textContent);
+        console.log(images);
         if (!images) return;
+        console.log(images);
         for (let i = 0; i < images.length; i++) {
           const image = images[i];
           console.log(image);
