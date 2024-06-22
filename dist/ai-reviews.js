@@ -579,9 +579,10 @@
         if (!images) return;
         for (let i = 0; i < images.length; i++) {
           const image = images[i];
-          delete image.preview_image;
+          console.log(image);
           image.src = `${image.src}&width=900`;
           images.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
+          console.log(image);
         }
         this.#images = images;
         console.log(this.#images);
@@ -636,7 +637,7 @@
           reviews[i].date = datetime.format(date);
           reviews[i].stars = stars;
         }
-        console.log(this.#reviews);
+        console.log(reviews);
         this.#reviews = reviews;
       }
       /**
