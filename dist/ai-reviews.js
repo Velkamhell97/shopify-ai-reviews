@@ -157,6 +157,7 @@
       #imageLoaded = false;
       /**
        * @type {boolean}
+       * @readonly
        */
       submited = false;
       /**
@@ -276,7 +277,6 @@
         const aspectRatio = image.width / image.height;
         this.#fields.image = {
           src: image.src,
-          local: true,
           width: image.width,
           height: image.height,
           aspectRatio,
@@ -519,11 +519,6 @@
        */
       #fetched = false;
       /**
-       * @type {Review[]}
-       * @private
-       */
-      #reviews = [];
-      /**
        * @type {boolean}
        */
       active;
@@ -536,14 +531,19 @@
        */
       country;
       /**
+       * @type {boolean}
+       */
+      customRating;
+      /**
+       * @type {Review[]}
+       * @private
+       */
+      #reviews = [];
+      /**
        * @type {ReviewImage[]}
        * @private
        */
       #images = [];
-      /**
-       * @type {any}
-       */
-      error;
       /**
        * @type {Review[]}
        * @private
@@ -570,6 +570,10 @@
         { author: "Elena Vargas", text: "Desde que lo tengo, he notado una mejora significativa en mis actividades diarias. La atenci\xF3n al cliente fue muy cordial y siempre estuvieron disponibles para ayudarme. Definitivamente lo recomendar\xE9, realmente ha marcado una diferencia en mi rutina." },
         { author: "Andr\xE9s Mendoza", text: "Este producto me ha facilitado mucho la vida. Lleg\xF3 antes de lo previsto y en perfectas condiciones. Estoy muy satisfecho con la compra y lo recomendar\xE9 sin dudas a quienes buscan soluciones pr\xE1cticas y de calidad." }
       ];
+      /**
+       * @type {any}
+       */
+      error;
       /**
        * @param {Database} database
        */
@@ -614,35 +618,25 @@
           reviews[i].image = this.#images[i];
         }
         const now = /* @__PURE__ */ new Date();
-        let today = now.getDate();
-        let month = now.getMonth();
-        const year = now.getFullYear();
-        let offset = 1;
-        if (today < 5) {
-          today = new Date(year, month, 0).getDate() - 20;
-          offset = 20;
-        } else {
-          today--;
-          month++;
-        }
+        const dayinMillis = 864e5;
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
         const weight = 0.05;
         for (let i = 0; i < reviews.length; i++) {
-          const day = Math.floor(Math.random() * today) + offset;
-          const date = /* @__PURE__ */ new Date(`${year}/${month}/${day}`);
+          const randomTime = Math.floor(Math.random() * 11) * dayinMillis;
+          const date = new Date(now.getTime() - randomTime);
           const stars = Math.random() < weight ? 4 : 5;
           reviews[i].date = datetime.format(date);
           reviews[i].stars = stars;
         }
-        console.log(reviews);
+        this.customRating = "unlocked";
         this.#reviews = reviews;
       }
       /**
        * @param {string[]} value
        */
       set names(value) {
-        for (let i = 0; i < value.length; i++) {
+        for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
           this.#reviews[i].author = value[i];
         }
       }
@@ -703,6 +697,7 @@
           const stars = Math.random() < weight ? 4 : 5;
           this.#reviews[i].stars = stars;
         }
+        this.customRating = "locking";
       }
     }
     const state = new State(database);
@@ -735,7 +730,12 @@
         this.$watch("reviews", () => {
           const reviews = this.reviews;
           if (!reviews.length) return;
-          this.calculateRating(reviews);
+          if (state.customRating !== "locked") {
+            this.calculateRating(reviews);
+          }
+          if (state.customRating === "locking") {
+            state.customRating = "locked";
+          }
           scroll.init(reviews.length);
         });
         this.$watch("success", (value) => {
@@ -746,8 +746,8 @@
         });
         try {
           await state.init();
-          this.reviews = state.copy;
           this.country = state.country;
+          this.reviews = state.copy;
         } catch (error) {
           console.error(error);
           this.error = error;
@@ -797,6 +797,38 @@
           this.success = null;
           this.error = null;
         }, 300);
+      },
+      async saveReviews() {
+        if (this.loading) return;
+        this.reset();
+        const form2 = Object.fromEntries(new FormData(this.$el));
+        const body = {
+          storeId: form2.storeId,
+          product: {
+            id: form2.productId,
+            name: form2.productName,
+            reviews: state.raw
+          }
+        };
+        try {
+          const response = await fetch(
+            "https://api.velkamhell-aireviews.com/reviews",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body)
+            }
+          );
+          const json = await response.json();
+          if (!json.ok) {
+            throw new Error(json.error);
+          }
+          this.success = { message: "Rese\xF1as guardadas exitosamente." };
+        } catch (error) {
+          this.error = error;
+        } finally {
+          this.loading = false;
+        }
       },
       async generateReviews() {
         if (this.loading) return;
@@ -859,38 +891,6 @@
       generateStars() {
         state.rate();
         this.reviews = state.copy;
-      },
-      async saveReviews() {
-        if (this.loading) return;
-        this.reset();
-        const form2 = Object.fromEntries(new FormData(this.$el));
-        const body = {
-          storeId: form2.storeId,
-          product: {
-            id: form2.productId,
-            name: form2.productName,
-            reviews: state.raw
-          }
-        };
-        try {
-          const response = await fetch(
-            "https://api.velkamhell-aireviews.com/reviews",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(body)
-            }
-          );
-          const json = await response.json();
-          if (!json.ok) {
-            throw new Error(json.error);
-          }
-          this.success = { message: "Rese\xF1as guardadas exitosamente." };
-        } catch (error) {
-          this.error = error;
-        } finally {
-          this.loading = false;
-        }
       },
       addReview() {
         const review = form.data();
