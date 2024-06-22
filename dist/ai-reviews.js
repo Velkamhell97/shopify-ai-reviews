@@ -279,7 +279,8 @@
           local: true,
           width: image.width,
           height: image.height,
-          aspectRatio
+          aspectRatio,
+          srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
         };
         this.#formFile.querySelector(".review-form__file-button--upload").remove();
         const formFileImage = this.#imageTemplate.content.cloneNode(true);
@@ -538,7 +539,7 @@
        * @type {ReviewImage[]}
        * @private
        */
-      #images;
+      #images = [];
       /**
        * @type {any}
        */
@@ -575,8 +576,12 @@
       constructor(database2) {
         this.#database = database2;
         const images = JSON.parse(document.querySelector("#reviews-media").textContent);
+        if (!images) return;
         for (let i = 0; i < images.length; i++) {
-          delete images[i].preview_image;
+          const image = images[i];
+          delete image.preview_image;
+          image.src = `${image.src}&width=900`;
+          images.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
         }
         this.#images = images;
       }
