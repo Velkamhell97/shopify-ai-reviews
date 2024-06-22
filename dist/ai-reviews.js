@@ -583,7 +583,8 @@
           const image = images[i];
           console.log(image);
           image.src = `${image.src}&width=900`;
-          images.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
+          image.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
+          delete image.preview_image;
           console.log(image);
         }
         this.#images = images;
