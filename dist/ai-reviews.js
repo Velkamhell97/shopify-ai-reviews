@@ -584,6 +584,7 @@
           images.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
         }
         this.#images = images;
+        console.log(this.#images);
       }
       /**
        * @returns {Promise<void>}
@@ -635,6 +636,7 @@
           reviews[i].date = datetime.format(date);
           reviews[i].stars = stars;
         }
+        console.log(this.#reviews);
         this.#reviews = reviews;
       }
       /**
