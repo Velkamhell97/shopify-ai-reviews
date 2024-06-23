@@ -735,6 +735,7 @@
         });
         this.$watch("initialized", () => {
           if (!this.initialized) return;
+          console.log(state.lastExpanded);
           if (scrollReload) {
             scrollReload = false;
             scroll.reload(true);
@@ -792,7 +793,7 @@
       },
       expand(review) {
         if (review) {
-          this.lastExpanded = review;
+          state.lastExpanded = review;
           this.expandedReview = review;
           modal.show();
         } else {
