@@ -204,10 +204,7 @@
        * @private
        */
       #showImage(image) {
-        console.log("load");
         const aspectRatio = image.width / image.height;
-        console.log(this.#fields);
-        return;
         this.#fields.images = [
           {
             src: image.src,
@@ -229,7 +226,6 @@
        * @returns {void}
        */
       uploadImage(event) {
-        console.log("upload");
         const files = event.target.files;
         if (!files.length) return;
         const file = files[0];
@@ -408,6 +404,7 @@
         const direction = parseInt(button.dataset.direction);
         const newSlide = this.#currentSlide + direction * 1;
         console.log(newSlide);
+        console.log(this.#maxSlide);
         if (newSlide < 2 || newSlide > this.#maxSlide) return;
         this.#currentSlide = newSlide;
         this.#scrollToSlide(this.#currentSlide);
@@ -929,7 +926,8 @@
         this.reviews = state.copy;
       },
       addReview(review) {
-        console.log(review);
+        state.add(review);
+        this.reviews.unshift(review);
       },
       removeReview(index) {
         state.remove(index);
