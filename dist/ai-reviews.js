@@ -132,7 +132,7 @@
        * @type {boolean}
        * @readonly
        */
-      submited = false;
+      submitted = false;
       /**
        * @type {HTMLElement}
        * @private
@@ -204,6 +204,7 @@
        * @private
        */
       #onImageLoaded(event) {
+        console.log("load");
         const image = event.target;
         const aspectRatio = image.width / image.height;
         this.#fields.images = [
@@ -227,6 +228,7 @@
        * @returns {void}
        */
       uploadImage(event) {
+        console.log("upload");
         const files = event.target.files;
         if (!files.length) return;
         const file = files[0];
@@ -715,7 +717,7 @@
       }
     }));
     Alpine.data("form", () => ({
-      submited: false,
+      submitted: false,
       toggle(e) {
         form.toggle(e);
       },
@@ -730,10 +732,9 @@
       },
       submit() {
         const review = form.data();
-        state.add(review);
-        this.reviews.unshift(review);
+        this.$dispatch("form-submitted", review);
         form.reset();
-        form.submited = true;
+        form.submitted = true;
         this.submited = true;
       }
     }));
@@ -923,9 +924,12 @@
         state.rate();
         this.reviews = state.copy;
       },
+      addReview(review) {
+        console.log(review);
+      },
       removeReview(index) {
-        this.reviews.splice(index, 1);
         state.remove(index);
+        this.reviews.splice(index, 1);
       }
     }));
   });
