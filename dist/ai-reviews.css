@@ -425,17 +425,17 @@
 
   /*#region Layouts */
   .reviews-layout-1, .reviews-layout-2 {
-    --gap: 1rem;
+    --gap: 0rem;
     --columns: 1;
-    gap: var(--gap);
-    padding: 1rem 1rem;
-    scroll-padding: 1rem;
-    align-items: start;
+    /* gap: var(--gap); */
+    /* padding: 1rem 1rem; */
+    /* scroll-padding: 1rem; */
+    /* align-items: start; */
     
-    > .review-slide {
+    /* > .review-slide {
       width: calc((100% - (var(--columns) - 1) * var(--gap)) / var(--columns));
       margin-right: 5px;
-    }
+    } */
 
     & .review-slide__image {
       height: 230px;
