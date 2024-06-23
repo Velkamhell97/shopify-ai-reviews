@@ -35,8 +35,7 @@
        * @param {number} length
        * @returns {void}
        */
-      init(length) {
-        this.#maxSlide = length;
+      init() {
         if (this.#initialized) return;
         this.reload(false);
         this.#initialized = true;
@@ -78,9 +77,21 @@
         this.#scrollable.scrollLeft = currentSlide.offsetLeft - this.#scrollable.offsetLeft;
       }
       /**
+       * @param {Event} e
        * @returns {void}
-       * @private
        */
+      move(e) {
+        const button = e.target.closest("button");
+        const direction = parseInt(button.dataset.direction);
+        const newSlide = this.#currentSlide + direction * 1;
+        if (newSlide < 2 || newSlide > this.maxSlide) return;
+        this.#currentSlide = newSlide;
+        this.#scrollToSlide(this.#currentSlide);
+      }
+      /**
+      * @returns {void}
+      * @private
+      */
       #play() {
         clearInterval(this.#interval);
         this.#interval = setInterval(() => {
@@ -97,18 +108,6 @@
        */
       #stop() {
         clearInterval(this.#interval);
-      }
-      /**
-       * @param {Event} e
-       * @returns {void}
-       */
-      move(e) {
-        const button = e.target.closest("button");
-        const direction = parseInt(button.dataset.direction);
-        const newSlide = this.#currentSlide + direction * 1;
-        if (newSlide < 2 || newSlide > this.maxSlide) return;
-        this.#currentSlide = newSlide;
-        this.#scrollToSlide(this.#currentSlide);
       }
     }
     const scroll = new ScrollController();
@@ -329,11 +328,6 @@
        * @type {any}
        * @private
        */
-      #dialogListener;
-      /**
-       * @type {any}
-       * @private
-       */
       #mainSelectorListener;
       /**
        * @type {any}
@@ -341,7 +335,6 @@
        */
       #secondarySelectorListener;
       constructor() {
-        this.#dialogListener = this.#dialogHandler.bind(this);
         this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
         this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
         this.#maxSlide = parseInt(document.querySelector("#images-per-review").value) + 1;
@@ -367,12 +360,6 @@
         this.#setupVariants();
       }
       /**
-       * @returns {number}
-       */
-      get currentSlide() {
-        return this.#currentSlide - 1;
-      }
-      /**
        * @returns {void}
        */
       show() {
@@ -383,7 +370,12 @@
        */
       hide() {
         this.#dialog.close();
-        this.#currentSlide = 2;
+      }
+      /**
+       * @returns {number}
+       */
+      get currentSlide() {
+        return this.#currentSlide - 1;
       }
       /**
        * @param {number} slideIndex
@@ -405,22 +397,6 @@
         if (newSlide < 2 || newSlide > this.#maxSlide) return;
         this.#currentSlide = newSlide;
         this.#scrollToSlide(this.#currentSlide);
-      }
-      /**
-       * @param {Event} e
-       * @returns {void}
-       * @private
-       */
-      #dialogHandler(e) {
-        if (e.target === this.#dialog) this.#dialog.close();
-      }
-      /**
-       * @returns {void}
-       * @private
-       */
-      #setupDialog() {
-        this.#dialog.removeEventListener("click", this.#dialogListener);
-        this.#dialog.addEventListener("click", this.#dialogListener);
       }
       /**
        * @returns {void}
@@ -521,9 +497,9 @@
        */
       country;
       /**
-       * @type {boolean}
+       * @type {string}
        */
-      customRating;
+      average;
       /**
        * @type {Review[]}
        * @private
@@ -603,7 +579,7 @@
        * @param {Review[]} value
        */
       set reviews(value) {
-        const reviews = structuredClone(value);
+        const reviews2 = structuredClone(value);
         const imagesPerReview = document.querySelector("#images-per-review").value ?? 1;
         const chunks = [];
         for (let i = 0; i < this.#images.length; i += 2) {
@@ -611,22 +587,22 @@
           chunks.push(chunk);
         }
         for (let i = 0; i < chunks.length; i++) {
-          reviews[i].images = chunks[i];
+          reviews2[i].images = chunks[i];
         }
         const now = /* @__PURE__ */ new Date();
         const dayinMillis = 864e5;
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
         const weight = 0.05;
-        for (let i = 0; i < reviews.length; i++) {
+        for (let i = 0; i < reviews2.length; i++) {
           const randomTime = Math.floor(Math.random() * 11) * dayinMillis;
           const date = new Date(now.getTime() - randomTime);
           const stars = Math.random() < weight ? 4 : 5;
-          reviews[i].date = datetime.format(date);
-          reviews[i].stars = stars;
+          reviews2[i].date = datetime.format(date);
+          reviews2[i].stars = stars;
         }
-        this.customRating = "unlocked";
-        this.#reviews = reviews;
+        this.average = "0.0";
+        this.#reviews = reviews2;
       }
       /**
        * @param {string[]} value
@@ -652,10 +628,10 @@
        * @returns {Review[]}
        */
       get raw() {
-        const reviews = structuredClone(this.#reviews);
+        const reviews2 = structuredClone(this.#reviews);
         const raw = [];
-        for (let i = 0; i < reviews.length; i++) {
-          const { author, text } = reviews[i];
+        for (let i = 0; i < reviews2.length; i++) {
+          const { author, text } = reviews2[i];
           raw.push({ author, text });
         }
         return raw;
@@ -673,14 +649,14 @@
             this.error = response.error;
             throw new Error(this.error);
           }
-          let reviews = response.reviews;
+          let reviews2 = response.reviews;
           if (!response.exists) {
-            reviews = this.#defaultReviews;
+            reviews2 = this.#defaultReviews;
           }
           this.active = response.active;
           this.exists = response.exists;
           this.country = response.country;
-          this.reviews = reviews;
+          this.reviews = reviews2;
           this.#fetched = true;
         }
       }
@@ -689,11 +665,13 @@
        */
       rate() {
         const weight = 0.05;
+        let sum = 0;
         for (let i = 0; i < this.#reviews.length; i++) {
           const stars = Math.random() < weight ? 4 : 5;
           this.#reviews[i].stars = stars;
+          sum = sum + stars;
         }
-        this.customRating = "locking";
+        this.average = (sum / reviews.length).toFixed(1);
       }
     }
     const state = new State(database);
@@ -753,21 +731,19 @@
           }
         });
         this.$watch("initialized", () => {
-          if (!this.initialized && scrollReload) {
+          if (!this.initialized) return;
+          if (scrollReload) {
             scrollReload = false;
             scroll.reload(true);
           }
         });
         this.$watch("reviews", () => {
-          const reviews = this.reviews;
-          if (!reviews.length) return;
-          if (state.customRating !== "locked") {
-            this.calculateRating(reviews);
+          const reviews2 = this.reviews;
+          if (!reviews2.length) return;
+          if (state.average !== this.rating.average) {
+            this.rate(reviews2);
           }
-          if (state.customRating === "locking") {
-            state.customRating = "locked";
-          }
-          scroll.init(reviews.length);
+          scroll.maxSlide = reviews2.length;
         });
         this.$watch("success", (value) => {
           if (value) doom.openCollapsible();
@@ -795,19 +771,19 @@
       loading: true,
       success: null,
       error: null,
-      calculateRating(reviews) {
+      rate(reviews2) {
         const rating = { average: "5.0", individuals: [0, 0, 0, 0, 0] };
         let sum = 0;
-        for (let i = 0; i < reviews.length; i++) {
-          const stars = reviews[i].stars;
+        for (let i = 0; i < reviews2.length; i++) {
+          const stars = reviews2[i].stars;
           sum = sum + stars;
           rating.individuals[stars - 1] = rating.individuals[stars - 1] + 1;
         }
         for (let i = 0; i < 5; i++) {
           const value = rating.individuals[i];
-          rating.individuals[i] = { value, per: value / reviews.length * 100 };
+          rating.individuals[i] = { value, per: value / reviews2.length * 100 };
         }
-        const average = sum / reviews.length;
+        const average = sum / reviews2.length;
         rating.average = average.toFixed(1);
         this.rating = rating;
       },
