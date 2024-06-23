@@ -692,10 +692,13 @@
       set reviews(value) {
         const reviews = structuredClone(value);
         const imagesPerReview = document.querySelector("#images-per-review").value ?? 1;
-        console.log(imagesPerReview);
+        const chunks = [];
         for (let i = 0; i < this.#images.length; i += imagesPerReview) {
           const chunk = this.#images.slice(i, i + imagesPerReview);
-          reviews[i].images = chunk;
+          chunks.push(chunk);
+        }
+        for (let i = 0; i < chunks.length; i++) {
+          reviews[i].images = chunks[i];
         }
         const now = /* @__PURE__ */ new Date();
         const dayinMillis = 864e5;
