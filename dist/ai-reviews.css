@@ -56,6 +56,34 @@
     font-size: 14px;
   }
 
+  .custom-slideshow {
+    display: flex;
+
+    > .slideshow-slide {
+      flex: none;
+      width: calc((100% - (var(--columns) - 1) * var(--gap)) / var(--columns));
+    }
+  }
+
+  .slideshow-manual, .slideshow-auto {
+    overflow: hidden;
+    scroll-behavior: smooth;
+  }
+
+  .slideshow-snap {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    > .slideshow-slide {
+      scroll-snap-align: start;
+    }
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   .review-icon--small {
     display: inline-flex;
     width: 15px;

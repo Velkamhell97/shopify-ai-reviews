@@ -1,5 +1,55 @@
 (() => {
   // src/ai-reviews.js
+  var CustomSlideshow = class extends HTMLElement {
+    #currentSlide = 2;
+    #interval = null;
+    #slideshow;
+    static observedAttributes = ["autoplay"];
+    constructor() {
+      super();
+      this.#slideshow = this.querySelector(".slideshow-scrollable");
+    }
+    connectedCallback() {
+      console.log("Custom element added to page.");
+    }
+    disconnectedCallback() {
+      this.#pause();
+    }
+    attributeChangedCallback(name, _, newValue) {
+      switch (name) {
+        case "autoplay":
+          newValue !== null ? this.#play() : this.#pause();
+          break;
+      }
+    }
+    nextSlide(reset) {
+      const newSlide = this.#currentSlide + 1;
+      const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
+      if (!currentSlide) {
+        if (reset) this.#currentSlide = 2;
+        return;
+      }
+      ;
+      this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
+      this.#currentSlide = newSlide;
+    }
+    previousSlide() {
+      const newSlide = this.#currentSlide - 1;
+      if (newSlide < 2) return;
+      const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
+      this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
+      this.#currentSlide = newSlide;
+    }
+    #play() {
+      clearInterval(this.#interval);
+      return;
+      this.#interval = setInterval(this.nextSlide.bind(this, true), 3e3);
+    }
+    #pause() {
+      clearInterval(this.#interval);
+    }
+  };
+  customElements.define("custom-slideshow", CustomSlideshow);
   document.addEventListener("alpine:init", () => {
     function hasError(response) {
       return "error" in response;
