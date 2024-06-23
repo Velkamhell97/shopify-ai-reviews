@@ -62,7 +62,6 @@
         } else {
           this.#stop();
         }
-        this.#setupControlButtons();
       }
       /**
        * @returns {number}
@@ -810,7 +809,8 @@
     }
     ;
     Alpine.data("scroll", () => ({
-      move() {
+      move(e) {
+        console.log(e);
         console.log("Hola");
       }
     }));
