@@ -357,7 +357,6 @@
         const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
         this.#mainSelector = mainSelector;
         this.#secondarySelector = secondarySelector;
-        this.#setupVariants();
       }
       /**
        * @returns {void}
