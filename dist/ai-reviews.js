@@ -235,10 +235,11 @@
           alert(`Solo pueden subirse ${imagesPerReview} archivo(s)`);
           return;
         }
-        const invalidSize = files.some((f) => f.size > 2097152);
-        if (invalidSize) {
-          alert("Uno de los archivos es muy grande, maximo 2MB");
-          return;
+        for (let i = 0; i < files.length; i++) {
+          if (files[i].size > 2097152) {
+            alert("Uno de los archivos es muy grande, maximo 2MB");
+            return;
+          }
         }
         if (files.length > 1) {
           const caption = this.#fileWrapper.querySelector(".images-length-caption");
