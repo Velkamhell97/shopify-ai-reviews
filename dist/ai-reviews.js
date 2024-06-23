@@ -241,11 +241,7 @@
             return;
           }
         }
-        if (files.length > 1) {
-          const caption = this.#fileWrapper.querySelector(".images-length-caption");
-          caption.textContent = `${files.length} Imagenes`;
-          caption.style.display = "block";
-        } else {
+        if (files.length === 1) {
           this.#fields.single = true;
         }
         for (let i = 0; i < files.length; i++) {
@@ -255,6 +251,12 @@
             image.onload = () => {
               image.onload = null;
               this.#showImage(image);
+              if (i === 1) {
+                const caption = this.#fileWrapper.querySelector(".images-length-caption");
+                if (!caption) return;
+                caption.textContent = `${files.length} Imagenes`;
+                caption.style.display = "block";
+              }
             };
             image.src = reader.result;
             image.alt = "Uploaded image";
