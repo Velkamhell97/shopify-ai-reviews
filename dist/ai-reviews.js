@@ -108,6 +108,14 @@
       #stop() {
         clearInterval(this.#interval);
       }
+      move(e) {
+        const button = e.target.closest("button");
+        const direction = parseInt(button.dataset.direction);
+        const newSlide = this.#currentSlide + direction * (this.rows + 1);
+        if (newSlide < 2 || newSlide > this.maxSlide) return;
+        this.#currentSlide = newSlide;
+        this.#scrollToSlide(this.#currentSlide);
+      }
       /**
        * @param {Event} e
        * @returns {void}
@@ -345,7 +353,7 @@
        * @type {number}
        * @private
        */
-      #maxSlide = 100;
+      #maxSlide;
       /**
        * @type {number}
        * @private
@@ -396,6 +404,7 @@
         this.#pageChangedListener = this.#pageChangedHandler.bind(this);
         this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
         this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
+        this.#maxSlide = document.querySelector("#images-per-review").value + 1;
         this.init();
       }
       /**
@@ -403,7 +412,6 @@
        */
       init() {
         if (this.#initialized) return;
-        this.#maxSlide = document.querySelector("#images-per-review").value + 1;
         this.reload();
         this.#initialized = true;
       }
@@ -439,7 +447,6 @@
        */
       #scrollToSlide(slideIndex) {
         const currentSlide = this.#slideshow.querySelector(`.dialog-image:nth-child(${slideIndex})`);
-        console.log(currentSlide);
         this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       }
       /**
@@ -993,6 +1000,11 @@
       removeReview(index) {
         this.reviews.splice(index, 1);
         state.remove(index);
+      }
+    }));
+    Alpine.data("scroll", () => ({
+      move() {
+        console.log("Hola");
       }
     }));
   });
