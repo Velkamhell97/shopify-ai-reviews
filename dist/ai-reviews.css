@@ -318,6 +318,10 @@
     fill: currentColor;
   }
 
+  .review-form__stars-selector > span:has(~ span.active) {
+    fill: currentColor;
+  }
+
   .review-form__submit {
     margin-top: 0.5rem;
     padding-block: 0.75rem;
