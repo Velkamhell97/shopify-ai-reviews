@@ -126,7 +126,7 @@
        * @type {Review}
        * @private
        */
-      #fields = { stars: 0, image: null };
+      #fields = { stars: 0, images: [] };
       /**
        * @type {boolean}
        * @readonly
@@ -199,20 +199,23 @@
       }
       /**
        * @param {Event} event
+       * @param {number} index
        * @returns {void}
        * @private
        */
       #showImage(image) {
         const aspectRatio = image.width / image.height;
-        this.#fields.images = [
-          {
-            src: image.src,
-            width: image.width,
-            height: image.height,
-            aspectRatio,
-            srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
-          }
-        ];
+        const loadedImage = {
+          src: image.src,
+          width: image.width,
+          height: image.height,
+          aspectRatio,
+          srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
+        };
+        this.#fields.images = [...this.#fields.images, loadedImage];
+        if (this.#fields.images.length > 1) {
+          return;
+        }
         const fileButton = this.#fileWrapper.querySelector(".review-form__file-button--upload");
         fileButton.remove();
         const fileImage = this.#imageTemplate.content.cloneNode(true);
@@ -227,30 +230,47 @@
       uploadImage(event) {
         const files = event.target.files;
         if (!files.length) return;
-        const file = files[0];
-        if (file.size > 2097152) {
-          alert("La imagen es muy grande");
+        const imagesPerReview = parseInt(document.querySelector("#images-per-review").value);
+        if (files.length > imagesPerReview) {
+          alert(`Solo pueden subirse ${imagesPerReview} archivo(s)`);
           return;
         }
-        const reader = new FileReader();
-        reader.addEventListener("load", (e) => {
-          const image = new Image();
-          image.onload = () => {
-            image.onload = null;
-            this.#showImage(image);
-          };
-          image.src = reader.result;
-          image.alt = "Uploaded image";
-        }, false);
-        reader.readAsDataURL(file);
+        const invalidSize = files.some((f) => f.size > 2097152);
+        if (invalidSize) {
+          alert("Uno de los archivos es muy grande, maximo 2MB");
+          return;
+        }
+        if (files.length > 1) {
+          const caption = this.#fileWrapper.querySelector(".images-length-caption");
+          caption.textContent = `${files.length} Imagenes`;
+          caption.style.display = "block";
+        } else {
+          this.#fields.single = true;
+        }
+        for (let i = 0; i < files.length; i++) {
+          const reader = new FileReader();
+          reader.addEventListener("load", (e) => {
+            const image = new Image();
+            image.onload = () => {
+              image.onload = null;
+              this.#showImage(image);
+            };
+            image.src = reader.result;
+            image.alt = "Uploaded image";
+          }, false);
+          reader.readAsDataURL(files[i]);
+        }
       }
       /**
        * @returns {void}
        */
       deleteImage() {
-        this.#form.image = null;
+        this.#form.images = [];
+        this.#form.single = false;
         const file = this.#fileWrapper.querySelector("input");
         file.value = "";
+        const caption = this.#fileWrapper.querySelector(".images-length-caption");
+        caption.style.display = "none";
         const fileImage = this.#fileWrapper.querySelector(".review-form__file-content");
         fileImage.remove();
         const fileButton = this.#buttonTemplate.content.cloneNode(true);
@@ -278,10 +298,12 @@
         for (let i = 0; i < this.#stars.length; i++) {
           this.#stars[i].classList.remove("active");
         }
-        this.#fields = { stars: 0, image: null };
+        this.#fields = { stars: 0, images: [] };
         this.#form.reset();
         const fileImage = this.#fileWrapper.querySelector(".review-form__file-content");
         if (!fileImage) return;
+        const caption = this.#fileWrapper.querySelector(".images-length-caption");
+        caption.style.display = "none";
         fileImage.remove();
         const fileButton = this.#buttonTemplate.content.cloneNode(true);
         this.#fileWrapper.appendChild(fileButton);
@@ -583,14 +605,17 @@
        */
       set reviews(value) {
         const reviews2 = structuredClone(value);
-        const imagesPerReview = document.querySelector("#images-per-review").value ?? 1;
+        const imagesPerReview = parseInt(document.querySelector("#images-per-review").value);
         const chunks = [];
-        for (let i = 0; i < this.#images.length; i += 2) {
-          const chunk = this.#images.slice(i, i + 2);
+        for (let i = 0; i < this.#images.length; i += imagesPerReview) {
+          const chunk = this.#images.slice(i, i + imagesPerReview);
           chunks.push(chunk);
         }
         for (let i = 0; i < chunks.length; i++) {
           reviews2[i].images = chunks[i];
+          if (chunks.length === 1) {
+            reviews2[i].single = true;
+          }
         }
         const now = /* @__PURE__ */ new Date();
         const dayinMillis = 864e5;

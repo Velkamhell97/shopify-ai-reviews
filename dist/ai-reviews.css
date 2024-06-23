@@ -44,6 +44,17 @@
     color: #0a3622;
   }
 
+  .images-length-caption {
+    padding: 0.5rem 1rem;
+    border-bottom-left-radius: 0.5rem;
+    color: white;
+    background-color: rgba(128, 128, 128, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    position: absolute;
+    top: 0;
+    font-size: 14px;
+  }
+
   .review-icon--small {
     display: inline-flex;
     width: 15px;
@@ -374,17 +385,6 @@
       width: 100%;
       height: 100%;
     }
-  }
-  
-  .review-slide__image-caption {
-    padding: 1rem;
-    border-bottom-left-radius: 0.5rem;
-    color: white;
-    background-color: rgba(128, 128, 128, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.7);
-    position: absolute;
-    top: 0;
-    right: 0;
   }
   /*#endregion */
 
