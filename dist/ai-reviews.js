@@ -809,6 +809,11 @@
       document.addEventListener("shopify:section:load", refresh);
     }
     ;
+    Alpine.data("scroll", () => ({
+      move() {
+        console.log("Hola");
+      }
+    }));
     Alpine.data("aiReviews", () => ({
       async init() {
         this.$nextTick(() => {
@@ -1000,11 +1005,6 @@
       removeReview(index) {
         this.reviews.splice(index, 1);
         state.remove(index);
-      }
-    }));
-    Alpine.data("scroll", () => ({
-      move() {
-        console.log("Hola");
       }
     }));
   });
