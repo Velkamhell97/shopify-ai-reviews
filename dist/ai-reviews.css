@@ -47,6 +47,7 @@
   .images-length-caption {
     padding: 0.5rem 1rem;
     border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
     color: white;
     background-color: rgba(128, 128, 128, 0.5);
     border: 2px solid rgba(255, 255, 255, 0.7);

@@ -268,8 +268,8 @@
        * @returns {void}
        */
       deleteImage() {
-        this.#form.images = [];
-        this.#form.single = false;
+        this.#fields.images = [];
+        this.#fields.single = false;
         const file = this.#fileWrapper.querySelector("input");
         file.value = "";
         const caption = this.#fileWrapper.querySelector(".images-length-caption");
