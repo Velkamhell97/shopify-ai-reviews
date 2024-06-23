@@ -344,7 +344,7 @@
         this.#dialogListener = this.#dialogHandler.bind(this);
         this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
         this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
-        this.#maxSlide = document.querySelector("#images-per-review").value + 1;
+        this.#maxSlide = parseInt(document.querySelector("#images-per-review").value) + 1;
         this.init();
       }
       /**
@@ -364,7 +364,6 @@
         const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
         this.#mainSelector = mainSelector;
         this.#secondarySelector = secondarySelector;
-        this.#setupDialog();
         this.#setupVariants();
       }
       /**
@@ -403,8 +402,6 @@
         const button = e.target.closest("button");
         const direction = parseInt(button.dataset.direction);
         const newSlide = this.#currentSlide + direction * 1;
-        console.log(newSlide);
-        console.log(this.#maxSlide);
         if (newSlide < 2 || newSlide > this.#maxSlide) return;
         this.#currentSlide = newSlide;
         this.#scrollToSlide(this.#currentSlide);
