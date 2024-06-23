@@ -412,7 +412,7 @@
        */
       reload() {
         this.#dialog = document.querySelector("#reviews-dialog");
-        this.#slideshow = document.querySelector("#dialog-slideshow");
+        this.#slideshow = document.querySelector(".dialog-slideshow");
         const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
         this.#mainSelector = mainSelector;
         this.#secondarySelector = secondarySelector;
