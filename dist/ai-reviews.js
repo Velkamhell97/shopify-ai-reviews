@@ -15,7 +15,7 @@
        * @type {number}
        * @private
        */
-      #reviewsLength = 0;
+      #maxSlide = 0;
       /**
        * @type {number}
        * @private
@@ -30,21 +30,13 @@
        * @type {HTMLElement}
        * @private
        */
-      #reviewsScroll;
-      /**
-       * @type {any}
-       * @private
-       */
-      #pageChangedListener;
-      constructor() {
-        this.#pageChangedListener = this.#pageChangedHandler.bind(this);
-      }
+      #scrollable;
       /**
        * @param {number} length
        * @returns {void}
        */
       init(length) {
-        this.#reviewsLength = length;
+        this.#maxSlide = length;
         if (this.#initialized) return;
         this.reload(false);
         this.#initialized = true;
@@ -55,7 +47,7 @@
        */
       reload(reset) {
         if (reset) this.#currentSlide = 2;
-        this.#reviewsScroll = document.querySelector(".reviews");
+        this.#scrollable = document.querySelector(".reviews");
         const autoplay = document.querySelector("#scroll-type").value === "auto";
         if (autoplay) {
           this.#play();
@@ -66,16 +58,15 @@
       /**
        * @returns {number}
        */
-      get rows() {
-        const rows = getComputedStyle(this.#reviewsScroll).getPropertyValue("--review-rows");
-        return parseInt(rows);
+      get maxSlide() {
+        const columns = getComputedStyle(this.#scrollable).getPropertyValue("--columns");
+        return this.#maxSlide - columns + 2;
       }
       /**
-       * @returns {number}
+       * @param {number} value
        */
-      get maxSlide() {
-        const columns = getComputedStyle(this.#reviewsScroll).getPropertyValue("--review-columns");
-        return this.#reviewsLength - columns + 2;
+      set maxSlide(value) {
+        this.#maxSlide = value;
       }
       /**
        * @param {number} slideIndex
@@ -83,8 +74,8 @@
        * @private
        */
       #scrollToSlide(slideIndex) {
-        const currentSlide = this.#reviewsScroll.querySelector(`.review-slide:nth-child(${slideIndex})`);
-        this.#reviewsScroll.scrollLeft = currentSlide.offsetLeft - this.#reviewsScroll.offsetLeft;
+        const currentSlide = this.#scrollable.querySelector(`.review-slide:nth-child(${slideIndex})`);
+        this.#scrollable.scrollLeft = currentSlide.offsetLeft - this.#scrollable.offsetLeft;
       }
       /**
        * @returns {void}
@@ -93,7 +84,7 @@
       #play() {
         clearInterval(this.#interval);
         this.#interval = setInterval(() => {
-          this.#currentSlide = this.#currentSlide + 1 + this.rows;
+          this.#currentSlide = this.#currentSlide + 1;
           if (this.#currentSlide > this.maxSlide - 1) {
             this.#currentSlide = 2;
           }
@@ -107,6 +98,10 @@
       #stop() {
         clearInterval(this.#interval);
       }
+      /**
+       * @param {Event} e
+       * @returns {void}
+       */
       move(e) {
         const button = e.target.closest("button");
         const direction = parseInt(button.dataset.direction);
@@ -114,30 +109,6 @@
         if (newSlide < 2 || newSlide > this.maxSlide) return;
         this.#currentSlide = newSlide;
         this.#scrollToSlide(this.#currentSlide);
-      }
-      /**
-       * @param {Event} e
-       * @returns {void}
-       * @private
-       */
-      #pageChangedHandler(e) {
-        const button = e.target.closest("button");
-        const direction = parseInt(button.dataset.direction);
-        const newSlide = this.#currentSlide + direction * (this.rows + 1);
-        if (newSlide < 2 || newSlide > this.maxSlide) return;
-        this.#currentSlide = newSlide;
-        this.#scrollToSlide(this.#currentSlide);
-      }
-      /**
-       * @returns {void}
-       * @private
-       */
-      #setupControlButtons() {
-        const paginatorButtons = document.querySelectorAll(".reviews-paginator__button");
-        paginatorButtons.forEach((button) => {
-          button.removeEventListener("click", this.#pageChangedListener);
-          button.addEventListener("click", this.#pageChangedListener);
-        });
       }
     }
     const scroll = new ScrollController();
@@ -159,14 +130,14 @@
       #fields = { stars: 0, image: null };
       /**
        * @type {boolean}
-       * @private
-       */
-      #imageLoaded = false;
-      /**
-       * @type {boolean}
        * @readonly
        */
       submited = false;
+      /**
+       * @type {HTMLElement}
+       * @private
+       */
+      #fileWrapper;
       /**
        * @type {HTMLTemplateElement}
        * @private
@@ -178,29 +149,10 @@
        */
       #buttonTemplate;
       /**
-       * @type {any}
-       * @private
-       */
-      #fileChangedListener;
-      /**
-       * @type {HTMLElement}
-       * @private
-       */
-      #formFile;
-      /**
-       * @type {any}
-       * @private
-       */
-      #starListener;
-      /**
        * @type {Element[]}
        * @private
        */
-      #formStars;
-      constructor() {
-        this.#fileChangedListener = this.#fileChangedHandler.bind(this);
-        this.#starListener = this.#starHandler.bind(this);
-      }
+      #stars;
       /**
        * @returns {void}
        */
@@ -214,13 +166,11 @@
        */
       reload() {
         this.#form = document.querySelector("#review-form");
-        this.#formFile = document.querySelector(".review-form__file");
-        this.#imageTemplate = this.#formFile.querySelector("#review-form__file-template--image");
-        this.#buttonTemplate = this.#formFile.querySelector("#review-form__file-template--button");
-        this.#formStars = [...document.querySelector(".review-form__stars-selector").children];
-        this.#formStars.shift();
-        this.#setupStarsInput();
-        this.#setupFileInput();
+        this.#fileWrapper = document.querySelector(".review-form__file");
+        this.#imageTemplate = this.#fileWrapper.querySelector("#review-form__file-template--image");
+        this.#buttonTemplate = this.#fileWrapper.querySelector("#review-form__file-template--button");
+        this.#stars = [...document.querySelector(".review-form__stars-selector").children];
+        this.#stars.shift();
       }
       /**
        * @returns {Review}
@@ -235,42 +185,18 @@
       }
       /**
        * @param {Event} e
-       * @returns {any} 
-       * @private
+       * @returns {Review}
        */
-      #starHandler(e) {
-        const star = e.target.closest("span");
-        for (let i = 0; i < 5; i++) {
-          this.#formStars[i].classList.remove("active");
+      toggle(e) {
+        const control = e.target.closest("button");
+        const collapsible = control.nextElementSibling;
+        if (collapsible.dataset.open === "true") {
+          collapsible.dataset.open = "false";
+          control.textContent = "Escribe tu valoraci\xF3n";
+        } else {
+          collapsible.dataset.open = "true";
+          control.textContent = "Cerrar formulario";
         }
-        const index = this.#formStars.indexOf(star);
-        this.#fields.stars = index + 1;
-        for (let i = 0; i < this.#fields.stars; i++) {
-          this.#formStars[i].classList.add("active");
-        }
-      }
-      /**
-       * @returns {void}
-       * @private
-       */
-      #setupStarsInput() {
-        for (let i = 0; i < this.#formStars.length; i++) {
-          const star = this.#formStars[i];
-          star.removeEventListener("click", this.#starListener);
-          star.addEventListener("click", this.#starListener);
-        }
-      }
-      /**
-       * @returns {void}
-       * @private
-       */
-      #onImageDeleted() {
-        this.#form.image = null;
-        this.#imageLoaded = false;
-        const formFileInput = this.#formFile.querySelector("#review-form__file-input");
-        formFileInput.value = "";
-        this.#formFile.querySelector(".review-form__file-content").remove();
-        this.#formFile.appendChild(this.#buttonTemplate.content.cloneNode(true));
       }
       /**
        * @param {Event} event
@@ -278,30 +204,29 @@
        * @private
        */
       #onImageLoaded(event) {
-        if (this.#imageLoaded) return;
-        this.#imageLoaded = true;
         const image = event.target;
         const aspectRatio = image.width / image.height;
-        this.#fields.image = {
-          src: image.src,
-          width: image.width,
-          height: image.height,
-          aspectRatio,
-          srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
-        };
-        this.#formFile.querySelector(".review-form__file-button--upload").remove();
-        const formFileImage = this.#imageTemplate.content.cloneNode(true);
-        const container = formFileImage.querySelector(".review-form__file-content");
+        this.#fields.images = [
+          {
+            src: image.src,
+            width: image.width,
+            height: image.height,
+            aspectRatio,
+            srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
+          }
+        ];
+        const fileButton = this.#fileWrapper.querySelector(".review-form__file-button--upload");
+        fileButton.remove();
+        const fileImage = this.#imageTemplate.content.cloneNode(true);
+        const container = fileImage.querySelector(".review-form__file-content");
         container.appendChild(image);
-        container.firstElementChild.addEventListener("click", this.#onImageDeleted.bind(this));
-        this.#formFile.appendChild(formFileImage);
+        this.#fileWrapper.appendChild(fileImage);
       }
       /**
        * @param {Event} event
        * @returns {void}
-       * @private
        */
-      #fileChangedHandler(event) {
+      uploadImage(event) {
         const files = event.target.files;
         if (!files.length) return;
         const file = files[0];
@@ -320,25 +245,45 @@
       }
       /**
        * @returns {void}
-       * @private
        */
-      #setupFileInput() {
-        const formFileInput = this.#formFile.querySelector("#review-form__file-input");
-        formFileInput.removeEventListener("change", this.#fileChangedListener);
-        formFileInput.addEventListener("change", this.#fileChangedListener);
+      deleteImage() {
+        this.#form.image = null;
+        const file = this.#fileWrapper.querySelector("input");
+        file.value = "";
+        const fileImage = this.#fileWrapper.querySelector(".review-form__file-content");
+        fileImage.remove();
+        const fileButton = this.#buttonTemplate.content.cloneNode(true);
+        this.#fileWrapper.appendChild(fileButton);
+      }
+      /**
+       * @param {Event} e
+       * @returns {any} 
+       */
+      rate(e) {
+        const star = e.target.closest("span");
+        for (let i = 0; i < 5; i++) {
+          this.#stars[i].classList.remove("active");
+        }
+        const index = this.#stars.indexOf(star);
+        this.#fields.stars = index + 1;
+        for (let i = 0; i < this.#fields.stars; i++) {
+          this.#stars[i].classList.add("active");
+        }
       }
       /**
        * @returns {void}
        */
       reset() {
-        for (let i = 0; i < this.#formStars.length; i++) {
-          this.#formStars[i].classList.remove("active");
+        for (let i = 0; i < this.#stars.length; i++) {
+          this.#stars[i].classList.remove("active");
         }
         this.#fields = { stars: 0, image: null };
-        this.#imageLoaded = false;
         this.#form.reset();
-        this.#formFile.querySelector(".review-form__file-content").remove();
-        this.#formFile.appendChild(this.#buttonTemplate.content.cloneNode(true));
+        const fileImage = this.#fileWrapper.querySelector(".review-form__file-content");
+        if (!fileImage) return;
+        fileImage.remove();
+        const fileButton = this.#buttonTemplate.content.cloneNode(true);
+        this.#fileWrapper.appendChild(fileButton);
       }
     }
     const form = new FormController();
@@ -359,48 +304,42 @@
        */
       #currentSlide = 2;
       /**
-       * @type {any}
+       * @type {HTMLElement}
        * @private
        */
-      #pageChangedListener;
+      #dialog;
       /**
        * @type {HTMLElement}
        * @private
        */
       #slideshow;
       /**
-       * @type {any}
+       * @type {HTMLElement}
        * @private
        */
-      #dialogListener;
+      #mainSelector;
       /**
        * @type {HTMLElement}
        * @private
        */
-      #dialog;
+      #secondarySelector;
+      /**
+       * @type {any}
+       * @private
+       */
+      #dialogListener;
       /**
        * @type {any}
        * @private
        */
       #mainSelectorListener;
       /**
-       * @type {HTMLElement}
-       * @private
-       */
-      #mainSelector;
-      /**
        * @type {any}
        * @private
        */
       #secondarySelectorListener;
-      /**
-       * @type {HTMLElement}
-       * @private
-       */
-      #secondarySelector;
       constructor() {
         this.#dialogListener = this.#dialogHandler.bind(this);
-        this.#pageChangedListener = this.#pageChangedHandler.bind(this);
         this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
         this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
         this.#maxSlide = document.querySelector("#images-per-review").value + 1;
@@ -424,8 +363,13 @@
         this.#mainSelector = mainSelector;
         this.#secondarySelector = secondarySelector;
         this.#setupDialog();
-        this.#setupControlButtons();
         this.#setupVariants();
+      }
+      /**
+       * @returns {number}
+       */
+      get currentSlide() {
+        return this.#currentSlide - 1;
       }
       /**
        * @returns {void}
@@ -438,6 +382,7 @@
        */
       hide() {
         this.#dialog.close();
+        this.#currentSlide = 2;
       }
       /**
        * @param {number} slideIndex
@@ -451,9 +396,8 @@
       /**
        * @param {Event} e
        * @returns {void}
-       * @private
        */
-      #pageChangedHandler(e) {
+      move(e) {
         const button = e.target.closest("button");
         const direction = parseInt(button.dataset.direction);
         const newSlide = this.#currentSlide + direction * 1;
@@ -461,17 +405,6 @@
         if (newSlide < 2 || newSlide > this.#maxSlide) return;
         this.#currentSlide = newSlide;
         this.#scrollToSlide(this.#currentSlide);
-      }
-      /**
-       * @returns {void}
-       * @private
-       */
-      #setupControlButtons() {
-        const paginatorButtons = document.querySelectorAll(".dialog-button--paginator");
-        paginatorButtons.forEach((button) => {
-          button.removeEventListener("click", this.#pageChangedListener);
-          button.addEventListener("click", this.#pageChangedListener);
-        });
       }
       /**
        * @param {Event} e
@@ -532,14 +465,8 @@
        * @type {HTMLElement}
        * @private
        */
-      #infoCollapsible;
-      /**
-       * @type {any}
-       * @private
-       */
-      #formCollapsibleListener;
+      #collapsible;
       constructor() {
-        this.#formCollapsibleListener = this.#formCollapsibleHandler.bind(this);
         this.init();
       }
       /**
@@ -554,45 +481,19 @@
        * @returns {void}
        */
       reload() {
-        this.#infoCollapsible = document.querySelector("#reviews-info-collapsible");
-        this.#setupCollapsibles();
+        this.#collapsible = document.querySelector("#reviews-info-collapsible");
       }
       /**
        * @returns {void}
        */
       openCollapsible() {
-        this.#infoCollapsible.dataset.open = "true";
+        this.#collapsible.dataset.open = "true";
       }
       /**
        * @returns {void}
        */
       closeCollapsible() {
-        this.#infoCollapsible.dataset.open = "close";
-      }
-      /**
-       * @param {Event} e
-       * @returns {void}
-       * @private
-       */
-      #formCollapsibleHandler(e) {
-        const formCollapsibleControl = e.target.closest("button");
-        const formCollapsible = formCollapsibleControl.nextElementSibling;
-        if (formCollapsible.dataset.open === "true") {
-          formCollapsible.dataset.open = "false";
-          formCollapsibleControl.textContent = "Escribe tu valoraci\xF3n";
-        } else {
-          formCollapsible.dataset.open = "true";
-          formCollapsibleControl.textContent = "Cerrar formulario";
-        }
-      }
-      /**
-       * @returns {void}
-       * @private
-       */
-      #setupCollapsibles() {
-        const formCollapsibleControl = document.querySelector("#reviews-form-collapsible");
-        formCollapsibleControl.removeEventListener("click", this.#formCollapsibleListener);
-        formCollapsibleControl.addEventListener("click", this.#formCollapsibleListener);
+        this.#collapsible.dataset.open = "close";
       }
     }
     const doom = new DoomController();
@@ -810,8 +711,37 @@
     ;
     Alpine.data("scroll", () => ({
       move(e) {
-        console.log(e);
-        console.log("Hola");
+        scroll.move(e);
+      }
+    }));
+    Alpine.data("form", () => ({
+      submited: false,
+      toggle(e) {
+        form.toggle(e);
+      },
+      uploadImage(e) {
+        form.uploadImage(e);
+      },
+      deleteImage() {
+        form.deleteImage();
+      },
+      rate(e) {
+        form.rate(e);
+      },
+      submit() {
+        const review = form.data();
+        state.add(review);
+        this.reviews.unshift(review);
+        form.reset();
+        form.submited = true;
+        this.submited = true;
+      }
+    }));
+    Alpine.data("dialog", () => ({
+      slide: 1,
+      move(e) {
+        modal.move(e);
+        this.slide = modal.currentSlide;
       }
     }));
     Alpine.data("aiReviews", () => ({
@@ -862,7 +792,6 @@
       rating: {},
       expandedReview: null,
       country: state.country,
-      submited: form.submited,
       initialized: true,
       loading: true,
       success: null,
@@ -883,9 +812,9 @@
         rating.average = average.toFixed(1);
         this.rating = rating;
       },
-      toggleDialog(selected) {
-        if (selected) {
-          this.expandedReview = selected;
+      expand(review) {
+        if (review) {
+          this.expandedReview = review;
           modal.show();
         } else {
           modal.hide();
@@ -993,14 +922,6 @@
       generateStars() {
         state.rate();
         this.reviews = state.copy;
-      },
-      addReview() {
-        const review = form.data();
-        state.add(review);
-        this.reviews.unshift(review);
-        form.reset();
-        form.submited = true;
-        this.submited = true;
       },
       removeReview(index) {
         this.reviews.splice(index, 1);

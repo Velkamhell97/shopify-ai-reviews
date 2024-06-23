@@ -380,15 +380,14 @@
   /*#region Layouts */
   .reviews-layout-1, .reviews-layout-2 {
     --gap: 1rem;
-    --review-columns: 1;
-    --review-rows: 0;
+    --columns: 1;
     gap: var(--gap);
     padding: 1rem 1rem;
     scroll-padding: 1rem;
     align-items: start;
     
     > .review-slide {
-      width: calc((100% - (var(--review-columns) - 1) * var(--gap)) / var(--review-columns));
+      width: calc((100% - (var(--columns) - 1) * var(--gap)) / var(--columns));
       margin-right: 5px;
     }
 
@@ -397,7 +396,7 @@
     }
 
     @media screen and (width >= 750px) {
-      --review-columns: 2;
+      --columns: 2;
 
       & .review-slide__image {
         height: 240px;
@@ -405,7 +404,7 @@
     }
 
     @media screen and (width >= 990px) {
-      --review-columns: 3;
+      --columns: 3;
 
       & .review-slide__image {
         height: 250px;
@@ -414,9 +413,9 @@
   }
   
   .reviews-layout-3 {
-    --review-columns: 1;
-    column-count: var(--review-columns);
-    -webkit-column-count: var(--review-columns);
+    --columns: 1;
+    column-count: var(--columns);
+    -webkit-column-count: var(--columns);
     column-gap: 2rem;
   
     > .review-slide {
@@ -433,7 +432,7 @@
     }
     
     @media (width >= 750px) {
-      --review-columns: 3;
+      --columns: 3;
     }
   }
   /*#endregion */
