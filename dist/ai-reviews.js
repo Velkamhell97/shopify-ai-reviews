@@ -28,23 +28,24 @@
     }
     nextSlide(reset) {
       const newSlide = this.#currentSlide + 1;
-      console.log(newSlide);
-      const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
-      console.log(currentSlide);
-      if (!currentSlide) {
+      const length = this.#slideshow.children.length - (this.columns - 1);
+      if (newSlide > length) {
         if (reset) this.#currentSlide = 2;
-        return;
+        return null;
       }
       ;
+      const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
       this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       this.#currentSlide = newSlide;
+      return { current: newSlide, end: newSlide === length };
     }
     previousSlide() {
       const newSlide = this.#currentSlide - 1;
-      if (newSlide < 2) return;
+      if (newSlide < 2) return null;
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
       this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       this.#currentSlide = newSlide;
+      return { current: newSlide, start: newSlide === 2 };
     }
     #play() {
       clearInterval(this.#interval);
@@ -775,8 +776,23 @@
     }
     ;
     Alpine.data("scroll", () => ({
-      move(e) {
-        scroll.move(e);
+      reviews: { current: 2, start: true, end: false },
+      dialog: { current: 2, start: true, end: false },
+      nextReviewSlide() {
+        const { current, end } = this.$el.closest("custom-slideshow").nextSlide();
+        this.reviews = { ...this.reviews, current, end };
+      },
+      previousReviewSlide(e) {
+        const { current, start } = this.$el.closest("custom-slideshow").previousSlide();
+        this.reviews = { ...this.reviews, current, start };
+      },
+      nextDialogSlide() {
+        const { current, end } = this.$el.closest("custom-slideshow").nextSlide();
+        this.dialog = { ...this.dialog, current, end };
+      },
+      previousDialogSlide(e) {
+        const { current, start } = this.$el.closest("custom-slideshow").previousSlide();
+        this.dialog = { ...this.dialog, current, start };
       }
     }));
     Alpine.data("form", () => ({
@@ -799,13 +815,6 @@
         form.reset();
         form.submitted = true;
         this.submitted = true;
-      }
-    }));
-    Alpine.data("dialog", () => ({
-      slide: 1,
-      move(e) {
-        modal.move(e);
-        this.slide = modal.currentSlide;
       }
     }));
     Alpine.data("aiReviews", () => ({
