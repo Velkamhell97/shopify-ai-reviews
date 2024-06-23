@@ -10,12 +10,13 @@
       this.#slideshow = this.querySelector(".slideshow-scrollable");
     }
     connectedCallback() {
-      console.log("Custom element added to page.");
+      console.log(this.getAttribute("autoplay"));
     }
     disconnectedCallback() {
       this.#pause();
     }
     attributeChangedCallback(name, _, newValue) {
+      console.log(`change: ${name}`);
       switch (name) {
         case "autoplay":
           newValue !== null ? this.#play() : this.#pause();
