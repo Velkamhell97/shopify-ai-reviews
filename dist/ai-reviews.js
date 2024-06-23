@@ -22,9 +22,15 @@
           break;
       }
     }
+    get columns() {
+      const columns = getComputedStyle(this.#slideshow).getPropertyValue("--columns");
+      return columns;
+    }
     nextSlide(reset) {
       const newSlide = this.#currentSlide + 1;
+      console.log(newSlide);
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
+      console.log(currentSlide);
       if (!currentSlide) {
         if (reset) this.#currentSlide = 2;
         return;
