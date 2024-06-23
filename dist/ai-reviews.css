@@ -56,6 +56,11 @@
     font-size: 14px;
   }
 
+  .slideshow-container {
+    --columns: 1;
+    --gap: 0rem;
+  }
+
   .custom-slideshow {
     display: flex;
 
