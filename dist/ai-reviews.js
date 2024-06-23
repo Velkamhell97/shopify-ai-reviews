@@ -335,22 +335,32 @@
       }
     }
     const form = new FormController();
-    class DoomController {
+    class DialogController {
       /**
        * @type {boolean}
        * @private
        */
       #initialized = false;
       /**
-       * @type {HTMLElement}
+       * @type {number}
        * @private
        */
-      #infoCollapsible;
+      #maxSlide = 100;
+      /**
+       * @type {number}
+       * @private
+       */
+      #currentSlide = 2;
       /**
        * @type {any}
        * @private
        */
-      #formCollapsibleListener;
+      #pageChangedListener;
+      /**
+       * @type {HTMLElement}
+       * @private
+       */
+      #slideshow;
       /**
        * @type {any}
        * @private
@@ -382,7 +392,6 @@
        */
       #secondarySelector;
       constructor() {
-        this.#formCollapsibleListener = this.#formCollapsibleHandler.bind(this);
         this.#dialogListener = this.#dialogHandler.bind(this);
         this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
         this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
@@ -400,63 +409,57 @@
        * @returns {void}
        */
       reload() {
-        this.#infoCollapsible = document.querySelector("#reviews-info-collapsible");
         this.#dialog = document.querySelector("#reviews-dialog");
         const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
         this.#mainSelector = mainSelector;
         this.#secondarySelector = secondarySelector;
-        this.#setupCollapsibles();
         this.#setupDialog();
         this.#setupVariants();
       }
       /**
        * @returns {void}
        */
-      openCollapsible() {
-        this.#infoCollapsible.dataset.open = "true";
-      }
-      /**
-       * @returns {void}
-       */
-      closeCollapsible() {
-        this.#infoCollapsible.dataset.open = "close";
-      }
-      /**
-       * @returns {void}
-       */
-      showModal() {
+      show() {
         this.#dialog.showModal();
       }
       /**
        * @returns {void}
        */
-      closeModal() {
+      hide() {
         this.#dialog.close();
+      }
+      /**
+       * @param {number} slideIndex
+       * @returns {void}
+       * @private
+       */
+      #scrollToSlide(slideIndex) {
+        const currentSlide = this.#slideshow.querySelector(`.dialog-slide:nth-child(${slideIndex})`);
+        this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       }
       /**
        * @param {Event} e
        * @returns {void}
        * @private
        */
-      #formCollapsibleHandler(e) {
-        const formCollapsibleControl = e.target.closest("button");
-        const formCollapsible = formCollapsibleControl.nextElementSibling;
-        if (formCollapsible.dataset.open === "true") {
-          formCollapsible.dataset.open = "false";
-          formCollapsibleControl.textContent = "Escribe tu valoraci\xF3n";
-        } else {
-          formCollapsible.dataset.open = "true";
-          formCollapsibleControl.textContent = "Cerrar formulario";
-        }
+      #pageChangedHandler(e) {
+        const button = e.target.closest("button");
+        const direction = parseInt(button.dataset.direction);
+        const newSlide = this.#currentSlide + direction * 1;
+        if (newSlide < 2 || newSlide > this.#maxSlide) return;
+        this.#currentSlide = newSlide;
+        this.#scrollToSlide(this.#currentSlide);
       }
       /**
        * @returns {void}
        * @private
        */
-      #setupCollapsibles() {
-        const formCollapsibleControl = document.querySelector("#reviews-form-collapsible");
-        formCollapsibleControl.removeEventListener("click", this.#formCollapsibleListener);
-        formCollapsibleControl.addEventListener("click", this.#formCollapsibleListener);
+      #setupControlButtons() {
+        const paginatorButtons = document.querySelectorAll(".dialog-paginator__button");
+        paginatorButtons.forEach((button) => {
+          button.removeEventListener("click", this.#pageChangedListener);
+          button.addEventListener("click", this.#pageChangedListener);
+        });
       }
       /**
        * @param {Event} e
@@ -504,6 +507,80 @@
         this.#mainSelector.addEventListener("change", this.#mainSelectorListener);
         this.#secondarySelector.removeEventListener("change", this.#secondarySelectorListener);
         this.#secondarySelector.addEventListener("change", this.#secondarySelectorListener);
+      }
+    }
+    const modal = new DialogController();
+    class DoomController {
+      /**
+       * @type {boolean}
+       * @private
+       */
+      #initialized = false;
+      /**
+       * @type {HTMLElement}
+       * @private
+       */
+      #infoCollapsible;
+      /**
+       * @type {any}
+       * @private
+       */
+      #formCollapsibleListener;
+      constructor() {
+        this.#formCollapsibleListener = this.#formCollapsibleHandler.bind(this);
+        this.init();
+      }
+      /**
+       * @returns {void}
+       */
+      init() {
+        if (this.#initialized) return;
+        this.reload();
+        this.#initialized = true;
+      }
+      /**
+       * @returns {void}
+       */
+      reload() {
+        this.#infoCollapsible = document.querySelector("#reviews-info-collapsible");
+        this.#setupCollapsibles();
+      }
+      /**
+       * @returns {void}
+       */
+      openCollapsible() {
+        this.#infoCollapsible.dataset.open = "true";
+      }
+      /**
+       * @returns {void}
+       */
+      closeCollapsible() {
+        this.#infoCollapsible.dataset.open = "close";
+      }
+      /**
+       * @param {Event} e
+       * @returns {void}
+       * @private
+       */
+      #formCollapsibleHandler(e) {
+        const formCollapsibleControl = e.target.closest("button");
+        const formCollapsible = formCollapsibleControl.nextElementSibling;
+        if (formCollapsible.dataset.open === "true") {
+          formCollapsible.dataset.open = "false";
+          formCollapsibleControl.textContent = "Escribe tu valoraci\xF3n";
+        } else {
+          formCollapsible.dataset.open = "true";
+          formCollapsibleControl.textContent = "Cerrar formulario";
+        }
+      }
+      /**
+       * @returns {void}
+       * @private
+       */
+      #setupCollapsibles() {
+        const formCollapsibleControl = document.querySelector("#reviews-form-collapsible");
+        formCollapsibleControl.removeEventListener("click", this.#formCollapsibleListener);
+        formCollapsibleControl.addEventListener("click", this.#formCollapsibleListener);
       }
     }
     const doom = new DoomController();
@@ -614,8 +691,11 @@
        */
       set reviews(value) {
         const reviews = structuredClone(value);
-        for (let i = 0; i < this.#images.length; i++) {
-          reviews[i].image = this.#images[i];
+        const imagesPerReview = document.querySelector("#images-per-review").value ?? 1;
+        console.log(imagesPerReview);
+        for (let i = 0; i < this.#images.length; i += imagesPerReview) {
+          const chunk = this.#images.slice(i, i + imagesPerReview);
+          reviews[i].images = chunk;
         }
         const now = /* @__PURE__ */ new Date();
         const dayinMillis = 864e5;
@@ -707,6 +787,7 @@
       formReload = true;
       scrollReload = true;
       doom.reload();
+      modal.reload();
     }
     if (Shopify.designMode) {
       document.addEventListener("shopify:section:load", refresh);
@@ -784,9 +865,9 @@
       toggleDialog(selected) {
         if (selected) {
           this.expandedReview = selected;
-          doom.showModal();
+          modal.show();
         } else {
-          doom.closeModal();
+          modal.hide();
           this.expandedReview = null;
         }
       },

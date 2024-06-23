@@ -449,7 +449,43 @@
     }
   }
 
-  .reviews-dialog__button--close {
+  .dialog-media {
+    width: 100%;
+    position: relative;
+  }
+
+  .dialog-slideshow {
+    height: 230px;
+    width: 100%;
+    overflow: auto;
+
+    & img {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .dialog-button--paginator {
+    padding: 0.75rem;
+    border-radius: 50%;
+    position: absolute;
+    color: white;
+    cursor: pointer;
+    background-color: rgba(128, 128, 128, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    > svg {
+      display: block;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .dialog-button--close {
     position: absolute;
     right: -15px;
     top: -15px;
@@ -462,44 +498,20 @@
     }
   }
 
-  .reviews-dialog__image {
-    height: 230px;
-    width: 100%;
-    position: relative;
-
-    & img {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-  }
-
-  .dialog-paginator__button {
-    padding: 0.75rem;
-    border-radius: 50%;
-    position: absolute;
-    color: white;
-    background-color: rgba(128, 128, 128, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.7);
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
   @media screen and (width >= 750px) {
     #reviews-dialog {
       max-width: 770px;
     }
 
-    .reviews-dialog__wrapper {
+    .dialog-wrapper {
       flex-direction: row !important;
     }
 
-    .reviews-dialog__image {
+    .dialog-media {
       width: 50%;
     }
 
-    .reviews-dialog__content {
+    .dialog-content {
       padding-inline: 1rem;
     }
   }
