@@ -103,7 +103,9 @@
        * @returns {void}
        */
       move(e) {
+        console.log(e);
         const button = e.target.closest("button");
+        console.log(button);
         const direction = parseInt(button.dataset.direction);
         const newSlide = this.#currentSlide + direction * (this.rows + 1);
         if (newSlide < 2 || newSlide > this.maxSlide) return;
@@ -711,6 +713,7 @@
     ;
     Alpine.data("scroll", () => ({
       move(e) {
+        console.log(e);
         scroll.move(e);
       }
     }));
