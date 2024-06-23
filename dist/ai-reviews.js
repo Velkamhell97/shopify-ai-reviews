@@ -613,7 +613,7 @@
         }
         for (let i = 0; i < chunks.length; i++) {
           reviews2[i].images = chunks[i];
-          if (chunks.length === 1) {
+          if (chunks[i].length === 1) {
             reviews2[i].single = true;
           }
         }
