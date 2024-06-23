@@ -1,5 +1,29 @@
 (() => {
   // src/ai-reviews.js
+  var CustomCollapsible = class extends HTMLElement {
+    static observedAttributes = ["open", "id"];
+    constructor() {
+      super();
+    }
+    #collapsibleListener(e) {
+      const { id } = e.details;
+      if (id !== this.getAttribute("id")) return;
+      this.toggle();
+    }
+    connectedCallback() {
+      this.addEventListener("toggle-collapsible", this.#collapsibleListener);
+    }
+    disconnectedCallback() {
+    }
+    attributeChangedCallback(name, _, newValue) {
+      console.log(`change: ${name}`);
+    }
+    toggle() {
+      const open = this.getAttribute("open") !== null;
+      open ? this.removeAttribute("open") : this.setAttribute("open", "");
+    }
+  };
+  customElements.define("custom-collapsible", CustomCollapsible);
   var CustomSlideshow = class extends HTMLElement {
     #currentSlide = 2;
     #interval = null;
