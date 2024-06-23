@@ -393,6 +393,7 @@
       #secondarySelector;
       constructor() {
         this.#dialogListener = this.#dialogHandler.bind(this);
+        this.#pageChangedListener = this.#pageChangedHandler.bind(this);
         this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
         this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
         this.init();
@@ -402,6 +403,7 @@
        */
       init() {
         if (this.#initialized) return;
+        this.#maxSlide = document.querySelector("#images-per-review").value + 1;
         this.reload();
         this.#initialized = true;
       }
@@ -410,10 +412,12 @@
        */
       reload() {
         this.#dialog = document.querySelector("#reviews-dialog");
+        this.#slideshow = document.querySelector("#dialog-slideshow");
         const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
         this.#mainSelector = mainSelector;
         this.#secondarySelector = secondarySelector;
         this.#setupDialog();
+        this.#setupControlButtons();
         this.#setupVariants();
       }
       /**
@@ -434,7 +438,8 @@
        * @private
        */
       #scrollToSlide(slideIndex) {
-        const currentSlide = this.#slideshow.querySelector(`.dialog-slide:nth-child(${slideIndex})`);
+        const currentSlide = this.#slideshow.querySelector(`.dialog-image:nth-child(${slideIndex})`);
+        console.log(currentSlide);
         this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       }
       /**
@@ -446,6 +451,7 @@
         const button = e.target.closest("button");
         const direction = parseInt(button.dataset.direction);
         const newSlide = this.#currentSlide + direction * 1;
+        console.log(newSlide);
         if (newSlide < 2 || newSlide > this.#maxSlide) return;
         this.#currentSlide = newSlide;
         this.#scrollToSlide(this.#currentSlide);
@@ -455,7 +461,7 @@
        * @private
        */
       #setupControlButtons() {
-        const paginatorButtons = document.querySelectorAll(".dialog-paginator__button");
+        const paginatorButtons = document.querySelectorAll(".dialog-button--paginator");
         paginatorButtons.forEach((button) => {
           button.removeEventListener("click", this.#pageChangedListener);
           button.addEventListener("click", this.#pageChangedListener);

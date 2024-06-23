@@ -294,7 +294,7 @@
 
 
   /*#region Paginator | Scroll */
-  .reviews-paginator__button {
+  .reviews-button--paginator {
     padding: 0.75rem;
     border-radius: 50%;
     transition: transform 0.2s ease;
@@ -449,6 +449,10 @@
     }
   }
 
+  .dialog-wrapper {
+    align-items: start;
+  }
+
   .dialog-media {
     width: 100%;
     position: relative;
@@ -457,9 +461,11 @@
   .dialog-slideshow {
     height: 230px;
     width: 100%;
-    overflow: auto;
+    overflow: hidden;
+    border-radius: 1rem;
 
     & img {
+      flex: none;
       display: block;
       width: 100%;
       height: 100%;
