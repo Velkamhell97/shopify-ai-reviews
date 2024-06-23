@@ -693,8 +693,8 @@
         const reviews = structuredClone(value);
         const imagesPerReview = document.querySelector("#images-per-review").value ?? 1;
         const chunks = [];
-        for (let i = 0; i < this.#images.length; i += imagesPerReview) {
-          const chunk = this.#images.slice(i, i + imagesPerReview);
+        for (let i = 0; i < this.#images.length; i += 2) {
+          const chunk = this.#images.slice(i, i + 2);
           chunks.push(chunk);
         }
         for (let i = 0; i < chunks.length; i++) {
