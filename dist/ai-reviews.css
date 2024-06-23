@@ -367,12 +367,24 @@
 
   .review-slide__image {
     max-width: 100%;
+    position: relative;
 
     > :is(img,svg) {
       display: block;
       width: 100%;
       height: 100%;
     }
+  }
+  
+  .review-slide__image-caption {
+    padding: 1rem;
+    border-bottom-left-radius: 0.5rem;
+    color: white;
+    background-color: rgba(128, 128, 128, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    position: absolute;
+    top: 0;
+    right: 0;
   }
   /*#endregion */
 
@@ -454,7 +466,6 @@
 
   .dialog-media {
     width: 100%;
-    position: relative;
   }
 
   .dialog-slideshow {
@@ -536,6 +547,10 @@
 
   .absolute {
     position: absolute;
+  }
+
+  .expanded {
+    inset: 0;
   }
 
   .flex {
