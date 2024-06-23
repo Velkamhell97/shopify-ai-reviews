@@ -503,16 +503,6 @@
        * @type {Review[]}
        * @private
        */
-      #reviews = [];
-      /**
-       * @type {ReviewImage[]}
-       * @private
-       */
-      #images = [];
-      /**
-       * @type {Review[]}
-       * @private
-       */
       #defaultReviews = [
         { author: "Mar\xEDa Gonz\xE1lez", text: "Desde que compr\xE9 este producto, he ahorrado tanto tiempo como dinero. La entrega lleg\xF3 rapid\xEDsimo y en perfectas condiciones. Es incre\xEDble c\xF3mo facilita mi d\xEDa a d\xEDa. \xA1Definitivamente vale la pena probarlo, no me arrepiento de la compra!" },
         { author: "Carlos Ram\xEDrez", text: "Llevaba meses buscando algo as\xED y finalmente lo encontr\xE9 aqu\xED. La atenci\xF3n al cliente fue muy buena, despejaron todas mis dudas con rapidez y profesionalismo. Muy satisfecho con la compra, es justo lo que necesitaba para resolver mi problema" },
@@ -535,6 +525,20 @@
         { author: "Elena Vargas", text: "Desde que lo tengo, he notado una mejora significativa en mis actividades diarias. La atenci\xF3n al cliente fue muy cordial y siempre estuvieron disponibles para ayudarme. Definitivamente lo recomendar\xE9, realmente ha marcado una diferencia en mi rutina." },
         { author: "Andr\xE9s Mendoza", text: "Este producto me ha facilitado mucho la vida. Lleg\xF3 antes de lo previsto y en perfectas condiciones. Estoy muy satisfecho con la compra y lo recomendar\xE9 sin dudas a quienes buscan soluciones pr\xE1cticas y de calidad." }
       ];
+      /**
+       * @type {ReviewImage[]}
+       * @private
+       */
+      #images = [];
+      /**
+       * @type {Review[]}
+       * @private
+       */
+      #reviews = [];
+      /**
+       * @type {Review}
+       */
+      lastExpanded;
       /**
        * @type {any}
        */
@@ -764,7 +768,7 @@
       },
       reviews: [],
       rating: {},
-      expandedReview: null,
+      expandedReview: state.lastExpanded,
       country: state.country,
       initialized: true,
       loading: true,
@@ -788,6 +792,7 @@
       },
       expand(review) {
         if (review) {
+          this.lastExpanded = review;
           this.expandedReview = review;
           modal.show();
         } else {
