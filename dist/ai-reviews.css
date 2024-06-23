@@ -462,6 +462,7 @@
     height: 230px;
     width: 100%;
     overflow: hidden;
+    scroll-behavior: smooth;
     border-radius: 1rem;
 
     & img {
