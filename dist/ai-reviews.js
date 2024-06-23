@@ -7,20 +7,20 @@
     static observedAttributes = ["autoplay"];
     constructor() {
       super();
-      this.#slideshow = this.querySelector(".slideshow-scrollable");
     }
     connectedCallback() {
-      console.log(this.getAttribute("autoplay"));
+      this.#slideshow = this.querySelector(".slideshow-scrollable");
+      if (this.getAttribute("autoplay") !== null) {
+        this.#play();
+      }
     }
     disconnectedCallback() {
       this.#pause();
     }
     attributeChangedCallback(name, _, newValue) {
       console.log(`change: ${name}`);
-      switch (name) {
-        case "autoplay":
-          newValue !== null ? this.#play() : this.#pause();
-          break;
+      if (name === "autoplay") {
+        newValue === null ? this.#pause() : this.#play();
       }
     }
     get columns() {

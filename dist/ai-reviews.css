@@ -20,6 +20,20 @@
     }
   }
 
+  custom-collapsible[open] > .collapsible-wrapper {
+    grid-template-rows: 1fr;
+  }
+
+  .collapsible-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms;
+
+    > .collapsible-content {
+      overflow: hidden;
+    }
+  }
+
   .reviews-collapsible {
     display: grid;
     grid-template-rows: 0fr;
