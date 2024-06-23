@@ -203,10 +203,11 @@
        * @returns {void}
        * @private
        */
-      #onImageLoaded(event) {
+      #showImage(image) {
         console.log("load");
-        const image = event.target;
         const aspectRatio = image.width / image.height;
+        console.log(this.#fields);
+        return;
         this.#fields.images = [
           {
             src: image.src,
@@ -239,7 +240,10 @@
         const reader = new FileReader();
         reader.addEventListener("load", (e) => {
           const image = new Image();
-          image.onload = this.#onImageLoaded.bind(this);
+          image.onload = () => {
+            image.onload = null;
+            this.#showImage(image);
+          };
           image.src = reader.result;
           image.alt = "Uploaded image";
         }, false);
