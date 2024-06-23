@@ -735,7 +735,7 @@
         this.$dispatch("form-submitted", review);
         form.reset();
         form.submitted = true;
-        this.submited = true;
+        this.submitted = true;
       }
     }));
     Alpine.data("dialog", () => ({
