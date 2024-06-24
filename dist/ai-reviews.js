@@ -212,8 +212,7 @@
        * @param {number} index
        */
       deleteImage(index) {
-        this.#images.splice(index, 1);
-        this.#fields.single = this.#images.length === 1;
+        console.log(this.#images.length);
       }
       /**
        * @param {number} index
@@ -575,9 +574,10 @@
         this.images = images;
       },
       deleteImage(index) {
-        form.deleteImage(index);
+        console.log("entre");
         this.images.splice(index, 1);
         this.single = this.images.length === 1;
+        form.deleteImage(index);
       },
       rate() {
         console.log("entre");
