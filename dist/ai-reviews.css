@@ -416,7 +416,7 @@
     -webkit-column-count: var(--columns);
     column-gap: 2rem;
   
-    > .review-slide {
+    & .review-slide {
       margin-bottom: 1.5rem;
       display: inline-flex !important;
     }
