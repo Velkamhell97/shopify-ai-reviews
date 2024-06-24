@@ -62,13 +62,13 @@
       const length = this.#slideshow.children.length - (this.columns - 1);
       if (newSlide > length) {
         if (reset) this.#currentSlide = 2;
-        return { current: length - 1, end: null };
+        return { current: length - 1, start: false, end: null };
       }
       ;
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
       this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       this.#currentSlide = newSlide;
-      return { current: newSlide - 1, end: newSlide === length };
+      return { current: newSlide - 1, start: false, end: newSlide === length };
     }
     /**
      * @returns {Slide}
@@ -76,13 +76,13 @@
     previousSlide() {
       const newSlide = this.#currentSlide - 1;
       if (newSlide < 2) {
-        return { current: 1, start: null };
+        return { current: 1, start: null, end: false };
       }
       ;
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
       this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       this.#currentSlide = newSlide;
-      return { current: newSlide - 1, start: newSlide === 2 };
+      return { current: newSlide - 1, start: newSlide === 2, end: false };
     }
     #play() {
       clearInterval(this.#interval);
@@ -535,20 +535,16 @@
       reviews: { current: 1, start: true, end: false },
       dialog: { current: 1, start: true, end: false },
       nextReviewSlide() {
-        const { current, end } = this.$el.closest("custom-slideshow").nextSlide();
-        this.reviews = { ...this.reviews, current, end };
+        this.reviews = this.$el.closest("custom-slideshow").nextSlide();
       },
       previousReviewSlide(e) {
-        const { current, start } = this.$el.closest("custom-slideshow").previousSlide();
-        this.reviews = { ...this.reviews, current, start };
+        this.reviews = this.$el.closest("custom-slideshow").previousSlide();
       },
       nextDialogSlide() {
-        const { current, end } = this.$el.closest("custom-slideshow").nextSlide();
-        this.dialog = { ...this.dialog, current, end };
+        this.dialog = this.$el.closest("custom-slideshow").nextSlide();
       },
       previousDialogSlide(e) {
-        const { current, start } = this.$el.closest("custom-slideshow").previousSlide();
-        this.dialog = { ...this.dialog, current, start };
+        this.dialog = this.$el.closest("custom-slideshow").previousSlide();
       }
     }));
     Alpine.data("form", () => ({
