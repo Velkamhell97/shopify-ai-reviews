@@ -425,10 +425,10 @@
         for (let i = 0; i < 5; i++) {
           const v = starsAcc[i];
           const p = v / reviews.length;
-          this.rating.individuals[i] = { v, p };
+          this.#rating.individuals[i] = { v, p };
         }
         const average = sum / reviews.length;
-        this.rating.average = average.toFixed(1);
+        this.#rating.average = average.toFixed(1);
       }
       date() {
         const reviews = this.#reviews;
