@@ -254,6 +254,7 @@
     border-radius: 1rem;
 
     & img {
+      width: 100%;
       display: block;
       height: auto;
     }
