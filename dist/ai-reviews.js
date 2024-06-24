@@ -171,67 +171,53 @@
         return fields;
       }
       /**
-       * @param {HTMLImageElement} image
+       * @param {any} file
        * @private
        */
-      #showImage(image) {
-        const aspectRatio = image.width / image.height;
-        const loadedImage = {
-          src: image.src,
-          width: image.width,
-          height: image.height,
-          aspectRatio,
-          srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
-        };
-        this.#fields.images = [...this.#fields.images, loadedImage];
-        if (this.#fields.images.length > 1) {
-          return;
-        }
-        const fileButton = this.#fileWrapper.querySelector(".review-form__file-button--upload");
-        fileButton.remove();
-        const fileImage = this.#imageTemplate.content.cloneNode(true);
-        const container = fileImage.querySelector(".review-form__file-content");
-        container.appendChild(image);
-        this.#fileWrapper.appendChild(fileImage);
+      #loadImage(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            reader.onload = null;
+            const image = new Image();
+            image.onload = () => {
+              image.onload = null;
+              const loadedImage = {
+                src: image.src,
+                width: image.width,
+                height: image.height,
+                aspectRatio: image.width / image.height,
+                srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
+              };
+              resolve(loadedImage);
+            };
+            image.onerror = reject;
+            image.src = reader.result;
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
       }
       /**
        * @param {Event} event
+       * @returns {Promise<ReviewImage[]>}
        */
-      uploadImage(event) {
+      uploadImages(event) {
         const files = event.target.files;
         if (!files.length) return;
         if (files.length > this.#maxFiles) {
           alert(`Solo pueden subirse ${this.#maxFiles} archivo(s)`);
           return;
         }
+        const promises = [];
         for (let i = 0; i < files.length; i++) {
           if (files[i].size > 2097152) {
             alert("Uno de los archivos es muy grande, maximo 2MB");
             return;
           }
+          promises.push(this.#loadImage(files[i]));
         }
-        if (files.length === 1) {
-          this.#fields.single = true;
-        }
-        for (let i = 0; i < files.length; i++) {
-          const reader = new FileReader();
-          reader.addEventListener("load", (e) => {
-            const image = new Image();
-            image.onload = () => {
-              image.onload = null;
-              this.#showImage(image);
-              if (i === 1) {
-                const caption = this.#fileWrapper.querySelector(".images-length-caption");
-                if (!caption) return;
-                caption.textContent = `${files.length} Imagenes`;
-                caption.style.display = "block";
-              }
-            };
-            image.src = reader.result;
-            image.alt = "Uploaded image";
-          }, false);
-          reader.readAsDataURL(files[i]);
-        }
+        return Promise.all(promises);
       }
       deleteImage() {
         this.#fields.images = [];
@@ -599,9 +585,13 @@
       }
     }));
     Alpine.data("form", () => ({
+      images: [],
+      single: true,
       submitted: false,
-      uploadImage(e) {
-        form.uploadImage(e);
+      async uploadImages(e) {
+        const images = await form.uploadImages(e);
+        this.single = images.length === 1;
+        this.images = images;
       },
       deleteImage() {
         form.deleteImage();
