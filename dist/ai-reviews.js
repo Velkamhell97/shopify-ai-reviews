@@ -204,9 +204,8 @@
           }
           promises.push(this.#loadImage(files[i]));
         }
-        const images = await Promise.all(promises);
-        this.#images = images;
-        return images;
+        this.#images = await Promise.all(promises);
+        return [...this.#images];
       }
       /**
        * @param {number} index
