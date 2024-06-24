@@ -423,7 +423,7 @@
           sum = sum + stars;
         }
         for (let i = 0; i < 5; i++) {
-          const v = starsAcc.individuals[i];
+          const v = starsAcc[i];
           const p = v / reviews.length;
           this.rating.individuals[i] = { v, p };
         }
