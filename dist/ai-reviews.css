@@ -78,8 +78,6 @@
     cursor: pointer;
     background-color: rgba(128, 128, 128, 0.5);
     border: 2px solid rgba(255, 255, 255, 0.7);
-    left: var(--paginator-left, 0px);
-    right: var(--paginator-right, 0px);
     top: 50%;
     transform: translateY(-50%);
     z-index: 1;
