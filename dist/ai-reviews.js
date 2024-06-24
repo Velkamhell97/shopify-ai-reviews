@@ -581,7 +581,6 @@
         this.images = images;
       },
       deleteImage(index) {
-        form.deleteImage(index);
         console.log(this.images.length);
         this.images.splice(index, 1);
         console.log(this.images.length);
