@@ -538,8 +538,8 @@
   .dialog-slideshow {
     --columns:1;
     --gap: 0rem;
+    --slide-padding: 0px;
     height: 230px;
-    border-radius: 1rem;
 
     & img {
       display: block;

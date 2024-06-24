@@ -62,24 +62,27 @@
       const length = this.#slideshow.children.length - (this.columns - 1);
       if (newSlide > length) {
         if (reset) this.#currentSlide = 2;
-        return null;
+        return { current: length - 1, end: null };
       }
       ;
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
       this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       this.#currentSlide = newSlide;
-      return { current: newSlide, end: newSlide === length };
+      return { current: newSlide - 1, end: newSlide === length };
     }
     /**
      * @returns {Slide}
      */
     previousSlide() {
       const newSlide = this.#currentSlide - 1;
-      if (newSlide < 2) return null;
+      if (newSlide < 2) {
+        return { current: 1, start: null };
+      }
+      ;
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
       this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       this.#currentSlide = newSlide;
-      return { current: newSlide, start: newSlide === 2 };
+      return { current: newSlide - 1, start: newSlide === 2 };
     }
     #play() {
       clearInterval(this.#interval);
@@ -127,11 +130,6 @@
        * @readonly
        */
       submitted = false;
-      /**
-       * @type {Element[]}
-       * @private
-       */
-      #stars;
       constructor() {
         this.#maxFiles = parseInt(document.querySelector("#images-per-review").value);
       }
@@ -142,8 +140,6 @@
       }
       reload() {
         this.#form = document.querySelector("#review-form");
-        this.#stars = [...document.querySelector(".review-form__stars-selector").children];
-        this.#stars.shift();
       }
       /**
        * @returns {Review}
@@ -154,8 +150,8 @@
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
         const date = datetime.format(/* @__PURE__ */ new Date());
-        const fields = { author, text, ...this.#fields, images: this.#images, date };
-        return fields;
+        const review = { author, text, ...this.#fields, images: this.#images, date };
+        return review;
       }
       /**
        * @param {number} value
@@ -165,6 +161,7 @@
       }
       /**
        * @param {any} file
+       * @returns {Promise<ReviewImage>}
        * @private
        */
       #loadImage(file) {
@@ -226,7 +223,8 @@
       }
       submit() {
         const review = this.#data();
-        this.#fields = { stars: 0, images: [], single: false };
+        this.#fields = { stars: 0, single: false };
+        this.#images = [];
         this.#form.reset();
         this.submitted = true;
         return review;
@@ -534,8 +532,8 @@
     }
     ;
     Alpine.data("scroll", () => ({
-      reviews: { current: 2, start: true, end: false },
-      dialog: { current: 2, start: true, end: false },
+      reviews: { current: 1, start: true, end: false },
+      dialog: { current: 1, start: true, end: false },
       nextReviewSlide() {
         const { current, end } = this.$el.closest("custom-slideshow").nextSlide();
         this.reviews = { ...this.reviews, current, end };
@@ -559,9 +557,13 @@
       submitted: false,
       lastStar: null,
       async uploadImages(e) {
-        const images = await form.uploadImages(e);
-        this.single = images.length === 1;
-        this.images = images;
+        try {
+          const images = await form.uploadImages(e);
+          this.single = images.length === 1;
+          this.images = images;
+        } catch (error) {
+          alert(error);
+        }
       },
       deleteImage(index) {
         this.images.splice(index, 1);
