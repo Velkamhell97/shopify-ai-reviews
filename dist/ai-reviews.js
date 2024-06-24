@@ -16,6 +16,7 @@
       this.addEventListener("toggle-collapsible", this.#collapsibleListener);
     }
     disconnectedCallback() {
+      this.removeEventListener("toggle-collapsible", this.#collapsibleListener);
     }
     toggle() {
       const open = this.getAttribute("open") !== null;
@@ -41,7 +42,6 @@
       this.#pause();
     }
     attributeChangedCallback(name, _, newValue) {
-      console.log(`change: ${name}`);
       if (name === "autoplay") {
         newValue === null ? this.#pause() : this.#play();
       }
@@ -86,7 +86,6 @@
     }
     #play() {
       clearInterval(this.#interval);
-      return;
       this.#interval = setInterval(this.nextSlide.bind(this, true), 3e3);
     }
     #pause() {
@@ -100,11 +99,6 @@
     }
     const database = firestore;
     class FormController {
-      /**
-       * @type {boolean}
-       * @private
-       */
-      #initialized = false;
       /**
        * @type {HTMLFormElement}
        * @private
@@ -132,11 +126,7 @@
       submitted = false;
       constructor() {
         this.#maxFiles = parseInt(document.querySelector("#images-per-review").value);
-      }
-      init() {
-        if (this.#initialized) return;
         this.reload();
-        this.#initialized = true;
       }
       reload() {
         this.#form = document.querySelector("#review-form");
@@ -233,11 +223,6 @@
     const form = new FormController();
     class DialogController {
       /**
-       * @type {boolean}
-       * @private
-       */
-      #initialized = false;
-      /**
        * @type {HTMLElement}
        * @private
        */
@@ -265,18 +250,14 @@
       constructor() {
         this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
         this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
-        this.init();
-      }
-      init() {
-        if (this.#initialized) return;
         this.reload();
-        this.#initialized = true;
       }
       reload() {
         this.#dialog = document.querySelector("#reviews-dialog");
         const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
         this.#mainSelector = mainSelector;
         this.#secondarySelector = secondarySelector;
+        this.#setupVariants();
       }
       show() {
         this.#dialog.showModal();
@@ -340,9 +321,10 @@
        */
       country;
       /**
-       * @type {string}
+       * @type {Rating}
+       * @private
        */
-      average;
+      #rating = { average: "0.0", individuals: [{ v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }] };
       /**
        * @type {Review[]}
        * @private
@@ -375,6 +357,11 @@
        */
       #images = [];
       /**
+       * @type {number}
+       * @private
+       */
+      #imagesPerReview;
+      /**
        * @type {Review[]}
        * @private
        */
@@ -383,10 +370,6 @@
        * @type {Review}
        */
       lastExpanded;
-      /**
-       * @type {any}
-       */
-      error;
       /**
        * @param {Database} database
        */
@@ -400,6 +383,7 @@
           image.src = `${image.src}&width=900`;
           delete image.preview_image;
         }
+        this.#imagesPerReview = parseInt(document.querySelector("#images-per-review").value);
         this.#images = images;
       }
       /**
@@ -420,56 +404,54 @@
       remove(index) {
         this.#reviews.splice(index, 1);
       }
-      /**
-       * @param {Review[]} value
-       */
-      set reviews(value) {
-        const reviews2 = structuredClone(value);
-        const imagesPerReview = parseInt(document.querySelector("#images-per-review").value);
-        const chunks = [];
-        for (let i = 0; i < this.#images.length; i += imagesPerReview) {
-          const chunk = this.#images.slice(i, i + imagesPerReview);
-          chunks.push(chunk);
-        }
-        for (let i = 0; i < chunks.length; i++) {
-          reviews2[i].images = chunks[i];
-          if (chunks[i].length === 1) {
-            reviews2[i].single = true;
-          }
-        }
+      rate() {
+        const reviews2 = this.#reviews;
+        const weight = 0.05;
+        let sum = 0;
+        const starsAcc = [0, 0, 0, 0, 0];
         const now = /* @__PURE__ */ new Date();
         const dayinMillis = 864e5;
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
-        const weight = 0.05;
         for (let i = 0; i < reviews2.length; i++) {
           const randomTime = Math.floor(Math.random() * 11) * dayinMillis;
           const date = new Date(now.getTime() - randomTime);
-          const stars = Math.random() < weight ? 4 : 5;
           reviews2[i].date = datetime.format(date);
+          const stars = Math.random() < weight ? 4 : 5;
           reviews2[i].stars = stars;
+          starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
+          sum = sum + stars;
         }
-        this.average = "0.0";
-        this.#reviews = reviews2;
+        for (let i = 0; i < 5; i++) {
+          const v = starsAcc.individuals[i];
+          const p = v / reviews2.length;
+          this.rating.individuals[i] = { v, p };
+        }
+        const average = sum / reviews2.length;
+        this.rating.average = average.toFixed(1);
+      }
+      date() {
+        const reviews2 = this.#reviews;
+        const now = /* @__PURE__ */ new Date();
+        const dayinMillis = 864e5;
+        const options = { year: "numeric", month: "long", day: "numeric" };
+        const datetime = new Intl.DateTimeFormat("es", options);
+        for (let i = 0; i < reviews2.length; i++) {
+          const randomTime = Math.floor(Math.random() * 11) * dayinMillis;
+          const date = new Date(now.getTime() - randomTime);
+          reviews2[i].date = datetime.format(date);
+        }
       }
       /**
-       * @param {string[]} value
+       * @returns {Rating}
        */
-      set names(value) {
-        for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
-          this.#reviews[i].author = value[i];
-        }
+      get rating() {
+        return structuredClone(this.#rating);
       }
       /**
        * @returns {Review[]}
        */
       get reviews() {
-        return this.#reviews;
-      }
-      /**
-       * @returns {Review[]}
-       */
-      get copy() {
         return structuredClone(this.#reviews);
       }
       /**
@@ -483,6 +465,32 @@
           raw.push({ author, text });
         }
         return raw;
+      }
+      /**
+       * @param {Review[]} value
+       */
+      set reviews(value) {
+        this.#reviews = structuredClone(value);
+        const chunks = [];
+        for (let i = 0; i < this.#images.length; i += this.#imagesPerReview) {
+          const chunk = this.#images.slice(i, i + this.#imagesPerReview);
+          chunks.push(chunk);
+        }
+        for (let i = 0; i < chunks.length; i++) {
+          reviews[i].images = chunks[i];
+          if (chunks[i].length === 1) {
+            reviews[i].single = true;
+          }
+        }
+        this.rate();
+      }
+      /**
+       * @param {string[]} value
+       */
+      set names(value) {
+        for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
+          this.#reviews[i].author = value[i];
+        }
       }
       /**
        * @returns {Promise<void>}
@@ -508,23 +516,10 @@
           this.#fetched = true;
         }
       }
-      rate() {
-        const weight = 0.05;
-        let sum = 0;
-        for (let i = 0; i < this.#reviews.length; i++) {
-          const stars = Math.random() < weight ? 4 : 5;
-          this.#reviews[i].stars = stars;
-          sum = sum + stars;
-        }
-        this.average = (sum / reviews.length).toFixed(1);
-      }
     }
     const state = new State(database);
-    let formReload = false;
-    let scrollReload = false;
     function refresh() {
-      formReload = true;
-      scrollReload = true;
+      form.reload();
       modal.reload();
     }
     if (Shopify.designMode) {
@@ -581,28 +576,8 @@
     }));
     Alpine.data("aiReviews", () => ({
       async init() {
-        this.$nextTick(() => {
-          form.init();
-          if (formReload) {
-            formReload = false;
-            form.reload();
-          }
-        });
-        this.$watch("initialized", () => {
-          if (!this.initialized) return;
-          console.log(state.lastExpanded);
-          if (scrollReload) {
-            scrollReload = false;
-            scroll.reload(true);
-          }
-        });
-        this.$watch("reviews", () => {
-          const reviews2 = this.reviews;
-          if (!reviews2.length) return;
-          if (state.average !== this.rating.average) {
-            this.rate(reviews2);
-          }
-          scroll.maxSlide = reviews2.length;
+        this.$watch("reviews", (value) => {
+          if (!value?.length) return;
         });
         this.$watch("success", (value) => {
           if (value) this.$dispatch("toggle-collapsible", { id: "1" });
@@ -614,6 +589,7 @@
           await state.init();
           this.country = state.country;
           this.reviews = state.copy;
+          this.rating = state.rating;
         } catch (error) {
           console.error(error);
           this.error = error;
@@ -623,29 +599,13 @@
         }
       },
       reviews: [],
-      rating: {},
+      rating: state.rating,
       expandedReview: state.lastExpanded,
       country: state.country,
       initialized: true,
       loading: true,
       success: null,
       error: null,
-      rate(reviews2) {
-        const rating = { average: "5.0", individuals: [0, 0, 0, 0, 0] };
-        let sum = 0;
-        for (let i = 0; i < reviews2.length; i++) {
-          const stars = reviews2[i].stars;
-          sum = sum + stars;
-          rating.individuals[stars - 1] = rating.individuals[stars - 1] + 1;
-        }
-        for (let i = 0; i < 5; i++) {
-          const value = rating.individuals[i];
-          rating.individuals[i] = { value, per: value / reviews2.length * 100 };
-        }
-        const average = sum / reviews2.length;
-        rating.average = average.toFixed(1);
-        this.rating = rating;
-      },
       expand(review) {
         if (review) {
           state.lastExpanded = review;
@@ -719,7 +679,7 @@
             throw new Error(error?.message ?? error);
           }
           state.reviews = json.reviews;
-          this.reviews = state.copy;
+          this.reviews = state.reviews;
           this.success = { message: "Rese\xF1as generadas exitosamente." };
         } catch (error) {
           this.error = error;
@@ -746,7 +706,7 @@
             throw new Error(error?.message ?? error);
           }
           state.names = json.names;
-          this.reviews = state.copy;
+          this.reviews = state.reviews;
           this.success = { message: "Nombres generadas exitosamente." };
         } catch (error) {
           this.error = error;
@@ -756,7 +716,8 @@
       },
       generateStars() {
         state.rate();
-        this.reviews = state.copy;
+        this.reviews = state.reviews;
+        this.rating = state.rating;
       },
       addReview(review) {
         state.add(review);
