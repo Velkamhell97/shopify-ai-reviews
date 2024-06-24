@@ -582,9 +582,9 @@
       },
       deleteImage(index) {
         form.deleteImage(index);
-        console.log(`deleted: ${index}`);
+        console.log(this.images.length);
         this.images.splice(index, 1);
-        this.single = this.images.length === 1;
+        console.log(this.images.length);
       },
       rate() {
         console.log("entre");
