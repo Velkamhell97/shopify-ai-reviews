@@ -212,14 +212,8 @@
        * @param {number} index
        */
       deleteImage(index) {
-        console.log(this.#images.length);
         this.#images.splice(index, 1);
         this.#fields.single = this.#images.length === 1;
-        if (!this.#images.length) {
-          console.log("entre");
-          const file = this.#form.querySelector("input[type='file']");
-          file.value = "";
-        }
       }
       /**
        * @param {number} index
@@ -581,9 +575,9 @@
         this.images = images;
       },
       deleteImage(index) {
-        console.log(this.images.length);
+        form.deleteImage(index);
         this.images.splice(index, 1);
-        console.log(this.images.length);
+        this.single = this.images.length === 1;
       },
       rate() {
         console.log("entre");
