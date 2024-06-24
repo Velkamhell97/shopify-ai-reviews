@@ -204,9 +204,9 @@
           }
           promises.push(this.#loadImage(files[i]));
         }
-        const images2 = await Promise.all(promises);
-        this.#images = images2;
-        return images2;
+        const images = await Promise.all(promises);
+        this.#images = images;
+        return images;
       }
       /**
        * @param {number} index
@@ -214,10 +214,6 @@
       deleteImage(index) {
         this.#images.splice(index, 1);
         this.#fields.single = this.#images.length === 1;
-        if (!this.#images.length) {
-          const file = this.#form.querySelector("input[type='file']");
-          file.value = "";
-        }
       }
       /**
        * @param {number} index
@@ -410,15 +406,15 @@
        */
       constructor(database2) {
         this.#database = database2;
-        const images2 = JSON.parse(document.querySelector("#reviews-media").textContent);
-        if (!images2) return;
-        for (let i = 0; i < images2.length; i++) {
-          const image = images2[i];
+        const images = JSON.parse(document.querySelector("#reviews-media").textContent);
+        if (!images) return;
+        for (let i = 0; i < images.length; i++) {
+          const image = images[i];
           image.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
           image.src = `${image.src}&width=900`;
           delete image.preview_image;
         }
-        this.#images = images2;
+        this.#images = images;
       }
       /**
        * @returns {Promise<void>}
@@ -574,14 +570,13 @@
       single: true,
       submitted: false,
       async uploadImages(e) {
-        const images2 = await form.uploadImages(e);
-        this.single = images2.length === 1;
-        this.images = images2;
+        const images = await form.uploadImages(e);
+        this.single = images.length === 1;
+        this.images = images;
       },
       deleteImage(index) {
         form.deleteImage(index);
-        this.images.splice(index, 1);
-        this.single = images.length === 1;
+        console.log(`deleted: ${index}`);
       },
       rate() {
         console.log("entre");
