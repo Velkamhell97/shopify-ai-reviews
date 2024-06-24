@@ -176,7 +176,6 @@
                 aspectRatio: image.width / image.height,
                 srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
               };
-              this.#images.push(loadedImage);
               resolve(loadedImage);
             };
             image.onerror = reject;
@@ -190,7 +189,7 @@
        * @param {Event} event
        * @returns {Promise<ReviewImage[]>}
        */
-      uploadImages(event) {
+      async uploadImages(event) {
         const files = event.target.files;
         if (!files.length) return;
         if (files.length > this.#maxFiles) {
@@ -205,7 +204,9 @@
           }
           promises.push(this.#loadImage(files[i]));
         }
-        return Promise.all(promises);
+        const images2 = await Promise.all(promises);
+        this.#images = images2;
+        return images2;
       }
       /**
        * @param {number} index
