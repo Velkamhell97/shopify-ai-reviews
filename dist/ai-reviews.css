@@ -377,6 +377,11 @@
     border-radius: 50%;
     transition: transform 0.2s ease;
 
+    &:disabled {
+      opacity: 0.65;
+      pointer-events:none;
+    }
+
     &:not(:disabled):hover {
       transform: scale(1.15);
     }
