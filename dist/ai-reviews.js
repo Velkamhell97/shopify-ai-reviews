@@ -212,8 +212,13 @@
        * @param {number} index
        */
       deleteImage(index) {
+        console.log(this.#images.length);
         this.#images.splice(index, 1);
         this.#fields.single = this.#images.length === 1;
+        if (!this.#images.length) {
+          const file = this.#form.querySelector("input[type='file']");
+          file.value = "";
+        }
       }
       /**
        * @param {number} index
