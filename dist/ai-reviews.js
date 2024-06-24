@@ -588,7 +588,7 @@
         try {
           await state.init();
           this.country = state.country;
-          this.reviews = state.copy;
+          this.reviews = state.reviews;
           this.rating = state.rating;
         } catch (error) {
           console.error(error);
