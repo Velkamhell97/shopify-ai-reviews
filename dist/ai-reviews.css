@@ -297,8 +297,8 @@
   .review-form__file-button--delete {
     position: absolute;
     padding: 7.5px;
-    top: 2.5px;
-    right: 2.5px;
+    top: 5px;
+    right: 5px;
     border-radius: 50%;
     transition: transform 0.2s ease;
 

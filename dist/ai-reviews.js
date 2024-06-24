@@ -216,6 +216,7 @@
         this.#images.splice(index, 1);
         this.#fields.single = this.#images.length === 1;
         if (!this.#images.length) {
+          console.log("entre");
           const file = this.#form.querySelector("input[type='file']");
           file.value = "";
         }
@@ -582,6 +583,8 @@
       deleteImage(index) {
         form.deleteImage(index);
         console.log(`deleted: ${index}`);
+        this.images.splice(index, 1);
+        this.single = this.images.length === 1;
       },
       rate() {
         console.log("entre");
