@@ -113,30 +113,20 @@
        */
       #maxFiles;
       /**
+       * @type {ReviewImage[]}
+       * @private
+       */
+      #images;
+      /**
        * @type {Review}
        * @private
        */
-      #fields = { stars: 0, images: [] };
+      #fields = { stars: 0, single: true };
       /**
        * @type {boolean}
        * @readonly
        */
       submitted = false;
-      /**
-       * @type {HTMLElement}
-       * @private
-       */
-      #fileWrapper;
-      /**
-       * @type {HTMLTemplateElement}
-       * @private
-       */
-      #imageTemplate;
-      /**
-       * @type {HTMLTemplateElement}
-       * @private
-       */
-      #buttonTemplate;
       /**
        * @type {Element[]}
        * @private
@@ -152,9 +142,6 @@
       }
       reload() {
         this.#form = document.querySelector("#review-form");
-        this.#fileWrapper = document.querySelector(".review-form__file");
-        this.#imageTemplate = this.#fileWrapper.querySelector("#review-form__file-template--image");
-        this.#buttonTemplate = this.#fileWrapper.querySelector("#review-form__file-template--button");
         this.#stars = [...document.querySelector(".review-form__stars-selector").children];
         this.#stars.shift();
       }
@@ -167,7 +154,7 @@
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
         const date = datetime.format(/* @__PURE__ */ new Date());
-        const fields = { author, text, ...this.#fields, date };
+        const fields = { author, text, ...this.#fields, images: this.#images, date };
         return fields;
       }
       /**
@@ -189,6 +176,7 @@
                 aspectRatio: image.width / image.height,
                 srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
               };
+              this.#images.push(loadedImage);
               resolve(loadedImage);
             };
             image.onerror = reject;
@@ -219,15 +207,16 @@
         }
         return Promise.all(promises);
       }
-      deleteImage() {
-        this.#fields.images = [];
-        this.#fields.single = false;
-        const file = this.#fileWrapper.querySelector("input");
-        file.value = "";
-        const fileImage = this.#fileWrapper.querySelector(".review-form__file-content");
-        fileImage.remove();
-        const fileButton = this.#buttonTemplate.content.cloneNode(true);
-        this.#fileWrapper.appendChild(fileButton);
+      /**
+       * @param {number} index
+       */
+      deleteImage(index) {
+        this.#images.splice(index, 1);
+        this.#fields.single = this.#images.length === 1;
+        if (!this.#images.length) {
+          const file = this.#form.querySelector("input[type='file']");
+          file.value = "";
+        }
       }
       /**
        * @param {number} index
@@ -250,11 +239,6 @@
         }
         this.#fields = { stars: 0, images: [], single: false };
         this.#form.reset();
-        const fileImage = this.#fileWrapper.querySelector(".review-form__file-content");
-        if (!fileImage) return;
-        fileImage.remove();
-        const fileButton = this.#buttonTemplate.content.cloneNode(true);
-        this.#fileWrapper.appendChild(fileButton);
       }
       submit() {
         const review = this.#data();
@@ -425,15 +409,15 @@
        */
       constructor(database2) {
         this.#database = database2;
-        const images = JSON.parse(document.querySelector("#reviews-media").textContent);
-        if (!images) return;
-        for (let i = 0; i < images.length; i++) {
-          const image = images[i];
+        const images2 = JSON.parse(document.querySelector("#reviews-media").textContent);
+        if (!images2) return;
+        for (let i = 0; i < images2.length; i++) {
+          const image = images2[i];
           image.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
           image.src = `${image.src}&width=900`;
           delete image.preview_image;
         }
-        this.#images = images;
+        this.#images = images2;
       }
       /**
        * @returns {Promise<void>}
@@ -589,12 +573,14 @@
       single: true,
       submitted: false,
       async uploadImages(e) {
-        const images = await form.uploadImages(e);
-        this.single = images.length === 1;
-        this.images = images;
+        const images2 = await form.uploadImages(e);
+        this.single = images2.length === 1;
+        this.images = images2;
       },
-      deleteImage() {
-        form.deleteImage();
+      deleteImage(index) {
+        form.deleteImage(index);
+        this.images.splice(index, 1);
+        this.single = images.length === 1;
       },
       rate() {
         console.log("entre");
