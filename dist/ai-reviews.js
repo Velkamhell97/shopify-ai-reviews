@@ -158,6 +158,12 @@
         return fields;
       }
       /**
+       * @param {number} value
+       */
+      set stars(value) {
+        this.#fields.stars = value;
+      }
+      /**
        * @param {any} file
        * @private
        */
@@ -215,35 +221,13 @@
         this.#fields.single = this.#images.length === 1;
         if (!this.#images.length) {
           const file = this.#form.querySelector("input[type='file']");
-          console.log(file);
           file.value = "";
         }
       }
-      /**
-       * @param {number} index
-       */
-      rate(index) {
-        for (let i = 0; i < 5; i++) {
-          this.#stars[i].classList.remove("active");
-        }
-        this.#fields.stars = index + 1;
-        for (let i = 0; i < index; i++) {
-          this.#stars[i].classList.add("active");
-        }
-      }
-      /**
-       * @private
-       */
-      #reset() {
-        for (let i = 0; i < 5; i++) {
-          this.#stars[i].classList.remove("active");
-        }
-        this.#fields = { stars: 0, images: [], single: false };
-        this.#form.reset();
-      }
       submit() {
         const review = this.#data();
-        this.#reset();
+        this.#fields = { stars: 0, images: [], single: false };
+        this.#form.reset();
         this.submitted = true;
         return review;
       }
@@ -573,6 +557,7 @@
       images: [],
       single: true,
       submitted: false,
+      lastStar: null,
       async uploadImages(e) {
         const images = await form.uploadImages(e);
         this.single = images.length === 1;
@@ -583,13 +568,16 @@
         this.single = this.images.length === 1;
         form.deleteImage(index);
       },
-      rate() {
-        console.log("entre");
+      rate(index) {
+        form.stars = index + 1;
+        this.lastStar?.classList?.remove("active");
         this.$el.classList.add("active");
+        this.lastStar = this.$el;
       },
       submit() {
         const review = form.submit();
         this.$dispatch("form-submitted", review);
+        this.lastStar?.classList?.remove("active");
         this.submitted = true;
       }
     }));
