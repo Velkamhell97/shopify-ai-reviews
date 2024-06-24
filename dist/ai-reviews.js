@@ -405,7 +405,7 @@
         this.#reviews.splice(index, 1);
       }
       rate() {
-        const reviews2 = this.#reviews;
+        const reviews = this.#reviews;
         const weight = 0.05;
         let sum = 0;
         const starsAcc = [0, 0, 0, 0, 0];
@@ -413,33 +413,33 @@
         const dayinMillis = 864e5;
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
-        for (let i = 0; i < reviews2.length; i++) {
+        for (let i = 0; i < reviews.length; i++) {
           const randomTime = Math.floor(Math.random() * 11) * dayinMillis;
           const date = new Date(now.getTime() - randomTime);
-          reviews2[i].date = datetime.format(date);
+          reviews[i].date = datetime.format(date);
           const stars = Math.random() < weight ? 4 : 5;
-          reviews2[i].stars = stars;
+          reviews[i].stars = stars;
           starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
           sum = sum + stars;
         }
         for (let i = 0; i < 5; i++) {
           const v = starsAcc.individuals[i];
-          const p = v / reviews2.length;
+          const p = v / reviews.length;
           this.rating.individuals[i] = { v, p };
         }
-        const average = sum / reviews2.length;
+        const average = sum / reviews.length;
         this.rating.average = average.toFixed(1);
       }
       date() {
-        const reviews2 = this.#reviews;
+        const reviews = this.#reviews;
         const now = /* @__PURE__ */ new Date();
         const dayinMillis = 864e5;
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
-        for (let i = 0; i < reviews2.length; i++) {
+        for (let i = 0; i < reviews.length; i++) {
           const randomTime = Math.floor(Math.random() * 11) * dayinMillis;
           const date = new Date(now.getTime() - randomTime);
-          reviews2[i].date = datetime.format(date);
+          reviews[i].date = datetime.format(date);
         }
       }
       /**
@@ -458,10 +458,10 @@
        * @returns {Review[]}
        */
       get raw() {
-        const reviews2 = structuredClone(this.#reviews);
+        const reviews = structuredClone(this.#reviews);
         const raw = [];
-        for (let i = 0; i < reviews2.length; i++) {
-          const { author, text } = reviews2[i];
+        for (let i = 0; i < reviews.length; i++) {
+          const { author, text } = reviews[i];
           raw.push({ author, text });
         }
         return raw;
@@ -477,9 +477,9 @@
           chunks.push(chunk);
         }
         for (let i = 0; i < chunks.length; i++) {
-          reviews[i].images = chunks[i];
+          this.#reviews[i].images = chunks[i];
           if (chunks[i].length === 1) {
-            reviews[i].single = true;
+            this.#reviews[i].single = true;
           }
         }
         this.rate();
@@ -505,14 +505,14 @@
             this.error = response.error;
             throw new Error(this.error);
           }
-          let reviews2 = response.reviews;
+          let reviews = response.reviews;
           if (!response.exists) {
-            reviews2 = this.#defaultReviews;
+            reviews = this.#defaultReviews;
           }
           this.active = response.active;
           this.exists = response.exists;
           this.country = response.country;
-          this.reviews = reviews2;
+          this.reviews = reviews;
           this.#fetched = true;
         }
       }
