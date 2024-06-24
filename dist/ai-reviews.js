@@ -424,7 +424,7 @@
         }
         for (let i = 0; i < 5; i++) {
           const v = starsAcc[i];
-          const p = v / reviews.length * 100;
+          const p = Math.round(v / reviews.length * 100);
           this.#rating.individuals[i] = { v, p };
         }
         const average = sum / reviews.length;
