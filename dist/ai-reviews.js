@@ -14,6 +14,7 @@
      * @param {Event} e
      */
     #collapsibleListener(e) {
+      console.log("error");
       const { id } = e.detail;
       if (id !== this.getAttribute("id")) return;
       this.toggle();
@@ -682,6 +683,7 @@
           );
           const json = await response.json();
           if (!json.ok) {
+            console.log("errooooo");
             const error = json.error;
             throw new Error(error?.message ?? error);
           }
@@ -689,6 +691,7 @@
           this.reviews = state.reviews;
           this.success = { message: "Rese\xF1as generadas exitosamente." };
         } catch (error) {
+          console.log("error");
           this.error = error;
         } finally {
           this.loading = false;
