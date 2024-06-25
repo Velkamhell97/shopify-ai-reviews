@@ -18,6 +18,7 @@
       if (id !== this.getAttribute("id")) return;
       console.log(`collapsible error, open: ${open}`);
       if (open) {
+        console.log("entree");
         this.setAttribute("open", "");
       } else {
         this.removeAttribute("open");
@@ -722,12 +723,15 @@
           const json = await response.json();
           if (!json.ok) {
             const error = json.error;
+            console.log(error);
             throw new Error(error?.message ?? error);
           }
           state.names = json.names;
           this.reviews = state.reviews;
           this.success = { message: "Nombres generadas exitosamente." };
         } catch (error) {
+          console.log("catch");
+          console.log(error);
           this.error = error;
         } finally {
           this.loading = false;
