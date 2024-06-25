@@ -14,7 +14,7 @@
      * @param {Event} e
      */
     #collapsibleListener(e) {
-      console.log("error");
+      console.log("collapsible error");
       const { id } = e.detail;
       if (id !== this.getAttribute("id")) return;
       this.toggle();
@@ -591,6 +591,7 @@
           if (value) this.$dispatch("toggle-collapsible", { id: "1" });
         });
         this.$watch("error", (value) => {
+          console.log("error watch");
           if (value) this.$dispatch("toggle-collapsible", { id: "1" });
         });
         try {
