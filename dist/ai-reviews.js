@@ -14,9 +14,9 @@
      * @param {Event} e
      */
     #collapsibleListener(e) {
-      console.log("collapsible error");
       const { id, open } = e.detail;
       if (id !== this.getAttribute("id")) return;
+      console.log(`collapsible error, open: ${open}`);
       if (open) {
         this.setAttribute("open", "");
       } else {
