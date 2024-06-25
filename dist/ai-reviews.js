@@ -674,7 +674,7 @@
         if (this.loading) return;
         try {
           const form2 = Object.fromEntries(new FormData(this.$el));
-          if (!form2.prompt) {
+          if (!form2.description) {
             throw new Error("Debes incluir una descripcion del producto");
           }
           ;
