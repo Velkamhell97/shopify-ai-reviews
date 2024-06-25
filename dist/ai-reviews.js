@@ -1,28 +1,28 @@
 (() => {
   // src/ai-reviews.js
   var CustomCollapsible = class extends HTMLElement {
+    /**
+     * @type {any}
+     * @private
+     */
+    #collapsableListenerRef;
     constructor() {
       super();
-      this.collapsableListenerBind = this.#collapsibleListener.bind(this);
+      this.#collapsableListenerRef = this.#collapsibleListener.bind(this);
     }
     /**
      * @param {Event} e
      */
     #collapsibleListener(e) {
-      console.log(e);
       const { id } = e.detail;
       if (id !== this.getAttribute("id")) return;
       this.toggle();
     }
     connectedCallback() {
-      window.addEventListener("toggle-collapsible", this.collapsableListenerBind);
+      window.addEventListener("toggle-collapsible", this.#collapsableListenerRef);
     }
     disconnectedCallback() {
-      window.removeEventListener("toggle-collapsible", this.collapsableListenerBind);
-    }
-    test() {
-      const customEvent = new CustomEvent("my-custom-event", { detail: { id: "1" } });
-      this.dispatchEvent(customEvent);
+      window.removeEventListener("toggle-collapsible", this.#collapsableListenerRef);
     }
     toggle() {
       const open = this.getAttribute("open") !== null;
@@ -590,7 +590,6 @@
           if (value) this.$dispatch("toggle-collapsible", { id: "1" });
         });
         this.$watch("error", (value) => {
-          console.log(`error: ${value}`);
           if (value) this.$dispatch("toggle-collapsible", { id: "1" });
         });
         try {
@@ -669,7 +668,6 @@
         try {
           const form2 = Object.fromEntries(new FormData(this.$el));
           if (!form2.prompt) {
-            console.log("Entre");
             throw new Error("Debes incluir una descripcion del producto");
           }
           ;
@@ -691,7 +689,6 @@
           this.reviews = state.reviews;
           this.success = { message: "Rese\xF1as generadas exitosamente." };
         } catch (error) {
-          console.log("Error");
           this.error = error;
         } finally {
           this.loading = false;
