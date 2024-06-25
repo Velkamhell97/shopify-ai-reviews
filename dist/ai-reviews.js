@@ -16,6 +16,7 @@
     #collapsibleListener(e) {
       const { id, open } = e.detail;
       if (id !== this.getAttribute("id")) return;
+      console.log(`collapsible error, open: ${open}`);
       if (open) {
         this.setAttribute("open", "");
       } else {
@@ -593,9 +594,11 @@
     Alpine.data("aiReviews", () => ({
       async init() {
         this.$watch("success", (value) => {
+          console.log("sucess");
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
         this.$watch("error", (value) => {
+          console.log("error");
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
         try {
@@ -631,6 +634,7 @@
       },
       reset() {
         this.loading = true;
+        console.log("reset");
         this.$dispatch("toggle-collapsible", { id: "1", open: false });
         setTimeout(() => {
           this.success = null;
