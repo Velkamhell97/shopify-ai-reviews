@@ -690,6 +690,7 @@
           }
           state.reviews = json.reviews;
           this.reviews = state.reviews;
+          this.rating = state.rating;
           this.success = { message: "Rese\xF1as generadas exitosamente." };
         } catch (error) {
           this.error = error;
