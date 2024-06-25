@@ -9,7 +9,7 @@
      */
     #collapsibleListener(e) {
       console.log(e);
-      const { id } = e.details;
+      const { id } = e.detail;
       if (id !== this.getAttribute("id")) return;
       this.toggle();
     }
