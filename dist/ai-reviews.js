@@ -8,7 +8,7 @@
      * @param {Event} e
      */
     #collapsibleListener(e) {
-      console.log(`event: ${e}`);
+      console.log(e);
       const { id } = e.details;
       if (id !== this.getAttribute("id")) return;
       this.toggle();
