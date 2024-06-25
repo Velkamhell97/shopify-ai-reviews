@@ -15,9 +15,13 @@
      */
     #collapsibleListener(e) {
       console.log("collapsible error");
-      const { id } = e.detail;
+      const { id, open } = e.detail;
       if (id !== this.getAttribute("id")) return;
-      this.toggle();
+      if (open) {
+        this.setAttribute("open", "");
+      } else {
+        this.removeAttribute("open");
+      }
     }
     connectedCallback() {
       if (this.getAttribute("id") !== null) {
@@ -591,11 +595,11 @@
         });
         this.$watch("success", (value) => {
           console.log("success watch");
-          if (value) this.$dispatch("toggle-collapsible", { id: "1" });
+          if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
         this.$watch("error", (value) => {
           console.log("error watch");
-          if (value) this.$dispatch("toggle-collapsible", { id: "1" });
+          if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
         try {
           await state.init();
@@ -631,7 +635,7 @@
       reset() {
         this.loading = true;
         console.log("reset");
-        this.$dispatch("toggle-collapsible", { id: "1" });
+        this.$dispatch("toggle-collapsible", { id: "1", open: false });
         setTimeout(() => {
           this.success = null;
           this.error = null;
