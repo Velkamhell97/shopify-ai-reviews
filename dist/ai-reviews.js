@@ -16,7 +16,6 @@
     #collapsibleListener(e) {
       const { id, open } = e.detail;
       if (id !== this.getAttribute("id")) return;
-      console.log(`collapsible error, open: ${open}`);
       if (open) {
         this.setAttribute("open", "");
       } else {
@@ -594,11 +593,9 @@
           if (!value?.length) return;
         });
         this.$watch("success", (value) => {
-          console.log("success watch");
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
         this.$watch("error", (value) => {
-          console.log("error watch");
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
         try {
@@ -634,7 +631,6 @@
       },
       reset() {
         this.loading = true;
-        console.log("reset");
         this.$dispatch("toggle-collapsible", { id: "1", open: false });
         setTimeout(() => {
           this.success = null;
@@ -692,7 +688,6 @@
           );
           const json = await response.json();
           if (!json.ok) {
-            console.log("errooooo");
             const error = json.error;
             throw new Error(error?.message ?? error);
           }
@@ -700,7 +695,6 @@
           this.reviews = state.reviews;
           this.success = { message: "Rese\xF1as generadas exitosamente." };
         } catch (error) {
-          console.log("error");
           this.error = error;
         } finally {
           this.loading = false;
