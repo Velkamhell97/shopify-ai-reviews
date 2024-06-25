@@ -514,7 +514,6 @@
           const productId = document.querySelector("#product-id").value;
           const response = await this.#database.reviews(storeId, productId);
           if (hasError(response)) {
-            this.error = response.error;
             throw new Error(this.error);
           }
           let reviews = response.reviews;
@@ -544,13 +543,13 @@
       nextReviewSlide() {
         this.reviews = this.$el.closest("custom-slideshow").nextSlide();
       },
-      previousReviewSlide(e) {
+      previousReviewSlide() {
         this.reviews = this.$el.closest("custom-slideshow").previousSlide();
       },
       nextDialogSlide() {
         this.dialog = this.$el.closest("custom-slideshow").nextSlide();
       },
-      previousDialogSlide(e) {
+      previousDialogSlide() {
         this.dialog = this.$el.closest("custom-slideshow").previousSlide();
       }
     }));
@@ -589,9 +588,6 @@
     }));
     Alpine.data("aiReviews", () => ({
       async init() {
-        this.$watch("reviews", (value) => {
-          if (!value?.length) return;
-        });
         this.$watch("success", (value) => {
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
@@ -660,7 +656,8 @@
           );
           const json = await response.json();
           if (!json.ok) {
-            throw new Error(json.error);
+            const error = json.error;
+            throw new Error(error?.message ?? error);
           }
           this.success = { message: "Rese\xF1as guardadas exitosamente." };
         } catch (error) {
