@@ -7,16 +7,21 @@
     /**
      * @param {Event} e
      */
-    #collapsibleListener(e2) {
-      const { id } = e2.details;
+    #collapsibleListener(e) {
+      console.log(`event: ${e}`);
+      const { id } = e.details;
       if (id !== this.getAttribute("id")) return;
       this.toggle();
     }
     connectedCallback() {
-      this.addEventListener("toggle-collapsible", this.#collapsibleListener);
+      window.addEventListener("toggle-collapsible", this.#collapsibleListener);
     }
     disconnectedCallback() {
-      this.removeEventListener("toggle-collapsible", this.#collapsibleListener);
+      window.removeEventListener("toggle-collapsible", this.#collapsibleListener);
+    }
+    test() {
+      const customEvent = new CustomEvent("my-custom-event", { detail: { id: "1" } });
+      this.dispatchEvent(customEvent);
     }
     toggle() {
       const open = this.getAttribute("open") !== null;
@@ -269,21 +274,21 @@
        * @param {Event} e
        * @private
        */
-      #mainSelectorHandler(e2) {
+      #mainSelectorHandler(e) {
         const mainInputs = this.#mainSelector.querySelectorAll("input");
         const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
-        const index = [...mainInputs].indexOf(e2.target);
+        const index = [...mainInputs].indexOf(e.target);
         secondaryInputs[index].checked = true;
       }
       /**
        * @param {Event} e
        * @private
        */
-      #secondarySelectorHandler(e2) {
-        e2.stopImmediatePropagation();
+      #secondarySelectorHandler(e) {
+        e.stopImmediatePropagation();
         const mainInputs = this.#mainSelector.querySelectorAll("input");
         const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
-        const index = [...secondaryInputs].indexOf(e2.target);
+        const index = [...secondaryInputs].indexOf(e.target);
         mainInputs[index].click();
       }
       /**
@@ -532,13 +537,13 @@
       nextReviewSlide() {
         this.reviews = this.$el.closest("custom-slideshow").nextSlide();
       },
-      previousReviewSlide(e2) {
+      previousReviewSlide(e) {
         this.reviews = this.$el.closest("custom-slideshow").previousSlide();
       },
       nextDialogSlide() {
         this.dialog = this.$el.closest("custom-slideshow").nextSlide();
       },
-      previousDialogSlide(e2) {
+      previousDialogSlide(e) {
         this.dialog = this.$el.closest("custom-slideshow").previousSlide();
       }
     }));
@@ -547,9 +552,9 @@
       single: true,
       submitted: false,
       lastStar: null,
-      async uploadImages(e2) {
+      async uploadImages(e) {
         try {
-          const images = await form.uploadImages(e2);
+          const images = await form.uploadImages(e);
           this.single = images.length === 1;
           this.images = images;
         } catch (error) {
@@ -584,7 +589,7 @@
           if (value) this.$dispatch("toggle-collapsible", { id: "1" });
         });
         this.$watch("error", (value) => {
-          console.log(`error: ${e}`);
+          console.log(`error: ${value}`);
           if (value) this.$dispatch("toggle-collapsible", { id: "1" });
         });
         try {
@@ -663,6 +668,7 @@
         try {
           const form2 = Object.fromEntries(new FormData(this.$el));
           if (!form2.prompt) {
+            console.log("Entre");
             throw new Error("Debes incluir una descripcion del producto");
           }
           ;
@@ -684,6 +690,7 @@
           this.reviews = state.reviews;
           this.success = { message: "Rese\xF1as generadas exitosamente." };
         } catch (error) {
+          console.log("Error");
           this.error = error;
         } finally {
           this.loading = false;
