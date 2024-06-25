@@ -491,7 +491,7 @@
       set reviews(value) {
         this.#reviews = [];
         for (let i = 0; i < value.length; i++) {
-          this.#reviews[i].description = value[i];
+          this.#reviews.push({ description: value[i] });
         }
         this.group();
         this.rate();
