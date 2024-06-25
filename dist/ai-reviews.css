@@ -441,14 +441,17 @@
     cursor: pointer;
     gap: 0.75rem;
     box-shadow: 3px 4px 8px rgba(0, 0, 0, .2);
-
     transition: box-shadow 0.2s ease;
 
     &:hover {
       box-shadow: 3px 4px 15px rgba(0, 0, 0, .4);
     }
+  }
 
-    &:hover ~ button {
+  .review-closable {
+    position: relative;
+
+    &:hover > button {
       display: inline-flex;
     }
   }
@@ -516,7 +519,7 @@
     }
 
     .dialog-media {
-      width: 50%;
+      width: 45%;
     }
 
     .dialog-content {

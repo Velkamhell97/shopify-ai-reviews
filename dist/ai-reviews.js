@@ -7,8 +7,8 @@
     /**
      * @param {Event} e
      */
-    #collapsibleListener(e) {
-      const { id } = e.details;
+    #collapsibleListener(e2) {
+      const { id } = e2.details;
       if (id !== this.getAttribute("id")) return;
       this.toggle();
     }
@@ -269,21 +269,21 @@
        * @param {Event} e
        * @private
        */
-      #mainSelectorHandler(e) {
+      #mainSelectorHandler(e2) {
         const mainInputs = this.#mainSelector.querySelectorAll("input");
         const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
-        const index = [...mainInputs].indexOf(e.target);
+        const index = [...mainInputs].indexOf(e2.target);
         secondaryInputs[index].checked = true;
       }
       /**
        * @param {Event} e
        * @private
        */
-      #secondarySelectorHandler(e) {
-        e.stopImmediatePropagation();
+      #secondarySelectorHandler(e2) {
+        e2.stopImmediatePropagation();
         const mainInputs = this.#mainSelector.querySelectorAll("input");
         const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
-        const index = [...secondaryInputs].indexOf(e.target);
+        const index = [...secondaryInputs].indexOf(e2.target);
         mainInputs[index].click();
       }
       /**
@@ -532,13 +532,13 @@
       nextReviewSlide() {
         this.reviews = this.$el.closest("custom-slideshow").nextSlide();
       },
-      previousReviewSlide(e) {
+      previousReviewSlide(e2) {
         this.reviews = this.$el.closest("custom-slideshow").previousSlide();
       },
       nextDialogSlide() {
         this.dialog = this.$el.closest("custom-slideshow").nextSlide();
       },
-      previousDialogSlide(e) {
+      previousDialogSlide(e2) {
         this.dialog = this.$el.closest("custom-slideshow").previousSlide();
       }
     }));
@@ -547,9 +547,9 @@
       single: true,
       submitted: false,
       lastStar: null,
-      async uploadImages(e) {
+      async uploadImages(e2) {
         try {
-          const images = await form.uploadImages(e);
+          const images = await form.uploadImages(e2);
           this.single = images.length === 1;
           this.images = images;
         } catch (error) {
@@ -571,6 +571,7 @@
         const review = form.submit();
         this.$dispatch("form-submitted", review);
         this.lastStar?.classList?.remove("active");
+        this.images = [];
         this.submitted = true;
       }
     }));
@@ -583,6 +584,7 @@
           if (value) this.$dispatch("toggle-collapsible", { id: "1" });
         });
         this.$watch("error", (value) => {
+          console.log(`error: ${e}`);
           if (value) this.$dispatch("toggle-collapsible", { id: "1" });
         });
         try {
