@@ -20,7 +20,9 @@
       this.toggle();
     }
     connectedCallback() {
-      window.addEventListener("toggle-collapsible", this.#collapsableListenerRef);
+      if (this.getAttribute("id") !== null) {
+        window.addEventListener("toggle-collapsible", this.#collapsableListenerRef);
+      }
     }
     disconnectedCallback() {
       window.removeEventListener("toggle-collapsible", this.#collapsableListenerRef);
