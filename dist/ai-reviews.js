@@ -588,6 +588,7 @@
           if (!value?.length) return;
         });
         this.$watch("success", (value) => {
+          console.log("success watch");
           if (value) this.$dispatch("toggle-collapsible", { id: "1" });
         });
         this.$watch("error", (value) => {
@@ -627,6 +628,7 @@
       },
       reset() {
         this.loading = true;
+        console.log("reset");
         this.$dispatch("toggle-collapsible", { id: "1" });
         setTimeout(() => {
           this.success = null;
