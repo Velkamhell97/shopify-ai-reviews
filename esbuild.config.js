@@ -1,6 +1,6 @@
 require('esbuild').build({
-  entryPoints: ['src/ai-reviews.js'],
-  outfile: "dist/ai-reviews.min.js",
+  entryPoints: ['src/ai-reviews.css'],
+  outfile: "dist/ai-reviews.min.css",
   // outdir: "dist",
   bundle: true,
   minify: true,
