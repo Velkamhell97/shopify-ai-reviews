@@ -3,6 +3,7 @@
   var CustomCollapsible = class extends HTMLElement {
     constructor() {
       super();
+      this.collapsableListenerBind = this.#collapsibleListener.bind(this);
     }
     /**
      * @param {Event} e
@@ -14,10 +15,10 @@
       this.toggle();
     }
     connectedCallback() {
-      window.addEventListener("toggle-collapsible", this.#collapsibleListener);
+      window.addEventListener("toggle-collapsible", this.collapsableListenerBind);
     }
     disconnectedCallback() {
-      window.removeEventListener("toggle-collapsible", this.#collapsibleListener);
+      window.removeEventListener("toggle-collapsible", this.collapsableListenerBind);
     }
     test() {
       const customEvent = new CustomEvent("my-custom-event", { detail: { id: "1" } });
