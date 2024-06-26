@@ -302,10 +302,14 @@
        * @private
        */
       #setupVariants() {
-        this.#mainSelector.removeEventListener("change", this.#mainSelectorListener);
-        this.#mainSelector.addEventListener("change", this.#mainSelectorListener);
-        this.#secondarySelector.removeEventListener("change", this.#secondarySelectorListener);
-        this.#secondarySelector.addEventListener("change", this.#secondarySelectorListener);
+        if (this.#mainSelector) {
+          this.#mainSelector.removeEventListener("change", this.#mainSelectorListener);
+          this.#mainSelector.addEventListener("change", this.#mainSelectorListener);
+        }
+        if (this.#secondarySelector) {
+          this.#secondarySelector.removeEventListener("change", this.#secondarySelectorListener);
+          this.#secondarySelector.addEventListener("change", this.#secondarySelectorListener);
+        }
       }
     }
     const modal = new DialogController();
@@ -489,10 +493,18 @@
        * @param {string[]} value
        */
       set reviews(value) {
-        this.#reviews = [];
-        for (let i = 0; i < value.length; i++) {
-          this.#reviews.push({ description: value[i] });
+        const reviews = [];
+        const diff = value.length - this.#reviews.length;
+        for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
+          const author = this.#reviews[i].author;
+          reviews.push({ author, description: value[i] });
         }
+        if (diff > 0) {
+          for (let i = value.length - diff; i < value.length; i++) {
+            reviews.push({ description: value[i] });
+          }
+        }
+        this.#reviews = reviews;
         this.group();
         this.rate();
         this.date();

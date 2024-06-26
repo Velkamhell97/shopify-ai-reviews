@@ -385,6 +385,7 @@
     
     & .review-slide__image {
       height: 230px;
+      overflow: hidden;
     }
 
     @media screen and (width >= 750px) {
@@ -472,7 +473,9 @@
   /*#region Dialog */
   #reviews-dialog {
     width: 90%;
-    overflow: visible;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     
     &::backdrop {
       background-color: rgba(0,0,0,0.5);
@@ -495,17 +498,18 @@
   }
 
   .dialog-button--close {
-    position: absolute;
-    right: -15px;
-    top: -15px;
-    border-radius: 50%;
-    padding: 7.5px;
+    align-self: end;
+    margin-bottom: 6px;
     transition: transform 0.2s ease;
   }
 
   @media screen and (width >= 750px) {
     #reviews-dialog {
       max-width: 770px;
+    }
+
+    .dialog-slideshow {
+      height: 250px;
     }
 
     .dialog-wrapper {
@@ -518,6 +522,12 @@
 
     .dialog-content {
       padding-inline: 1rem;
+    }
+  }
+
+  @media screen and (width >= 990px) {
+    #reviews-dialog {
+      max-width: 970px;
     }
   }
   /*#endregion */
