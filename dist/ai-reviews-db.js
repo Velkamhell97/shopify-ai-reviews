@@ -3767,9 +3767,9 @@
       return { active: true, exists: product.exists(), country, reviews: reviews2 };
     } catch (error) {
       if (error.code == "permission-denied") {
-        return { error: "La tienda no est\xE1 activa, verifica el pago. Si crees que es un error, escribe a soporte@velkamhell-aireviews.com" };
+        return { ok: false, message: "La tienda no est\xE1 activa, verifica el pago. Si crees que es un error, escribe a soporte@velkamhell-aireviews.com" };
       } else {
-        return { error: error.message ?? error.toString() };
+        return { ok: false, message: error.message ?? error.toString() };
       }
     }
   }
