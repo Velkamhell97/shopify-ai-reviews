@@ -665,7 +665,7 @@
           );
           const json = await response.json();
           if (!json.ok) {
-            throw new Error(json.message ?? "Error inesperado");
+            throw json;
           }
           this.success = { message: "Rese\xF1as guardadas exitosamente." };
         } catch (error) {
@@ -693,7 +693,7 @@
           );
           const json = await response.json();
           if (!json.ok) {
-            throw new Error(json.message ?? "Error inesperado");
+            throw json;
           }
           state.reviews = json.reviews;
           this.reviews = state.reviews;
@@ -720,7 +720,7 @@
           );
           const json = await response.json();
           if (!json.ok) {
-            throw new Error(json?.message ?? "Error inesperado");
+            throw json;
           }
           state.names = json.names;
           this.reviews = state.reviews;
