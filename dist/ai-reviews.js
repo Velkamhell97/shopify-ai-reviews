@@ -59,8 +59,13 @@
       }
     }
     get columns() {
+      if (!this.#slideshow) {
+        console.error("CustomSlideShow -> columns getter -> this.#slideshow is undefinied");
+        return 1;
+      }
+      ;
       const columns = getComputedStyle(this.#slideshow).getPropertyValue("--columns");
-      return columns;
+      return parseInt(columns);
     }
     /**
      * @typedef {{current: number, start?: boolean, end?: boolean}} Slide
@@ -70,6 +75,11 @@
      * @returns {Slide}
      */
     nextSlide(reset) {
+      if (!this.#slideshow) {
+        console.error("CustomSlideShow -> nextSlide() -> this.#slideshow is undefinied");
+        return { current: 1, start: true, end: false };
+      }
+      ;
       const newSlide = this.#currentSlide + 1;
       const length = this.#slideshow.children.length - (this.columns - 1);
       if (newSlide > length) {
@@ -86,6 +96,11 @@
      * @returns {Slide}
      */
     previousSlide() {
+      if (!this.#slideshow) {
+        console.error("CustomSlideShow -> previousSlide() -> this.#slideshow is undefinied");
+        return { current: 1, start: false, end: fale };
+      }
+      ;
       const newSlide = this.#currentSlide - 1;
       if (newSlide < 2) {
         return { current: 1, start: null, end: false };
@@ -137,21 +152,24 @@
        */
       submitted = false;
       constructor() {
-        this.#maxFiles = parseInt(document.querySelector("#images-per-review").value);
+        this.#maxFiles = parseInt(document.querySelector("#images-per-review")?.value ?? 1);
         this.reload();
       }
       reload() {
         this.#form = document.querySelector("#review-form");
       }
       /**
-       * @returns {Review}
+       * @returns {Review?}
        * @private
        */
       #data() {
-        const { author, description } = Object.fromEntries(new FormData(this.#form));
+        if (!this.#form) {
+          return null;
+        }
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
         const date = datetime.format(/* @__PURE__ */ new Date());
+        const { author, description } = Object.fromEntries(new FormData(this.#form));
         const review = { author, description, ...this.#fields, images: this.#images, date };
         return review;
       }
@@ -219,15 +237,18 @@
         this.#images.splice(index, 1);
         this.#fields.single = this.#images.length === 1;
         if (!this.#images.length) {
-          const file = this.#form.querySelector("input[type='file']");
-          file.value = "";
+          const file = this.#form?.querySelector("input[type='file']");
+          if (file) file.value = "";
         }
       }
+      /**
+       * @returns {Review?}
+       */
       submit() {
         const review = this.#data();
         this.#fields = { stars: 0, single: false };
         this.#images = [];
-        this.#form.reset();
+        this.#form?.reset();
         this.submitted = true;
         return review;
       }
@@ -272,10 +293,10 @@
         this.#setupVariants();
       }
       show() {
-        this.#dialog.showModal();
+        this.#dialog?.showModal();
       }
       hide() {
-        this.#dialog.close();
+        this.#dialog?.close();
       }
       /**
        * @param {Event} e
@@ -302,14 +323,14 @@
        * @private
        */
       #setupVariants() {
-        if (this.#mainSelector) {
-          this.#mainSelector.removeEventListener("change", this.#mainSelectorListener);
-          this.#mainSelector.addEventListener("change", this.#mainSelectorListener);
+        if (this.#mainSelector || !this.#secondarySelector) {
+          console.info("DialogController -> setupVariants() -> Any variant picker found");
+          return;
         }
-        if (this.#secondarySelector) {
-          this.#secondarySelector.removeEventListener("change", this.#secondarySelectorListener);
-          this.#secondarySelector.addEventListener("change", this.#secondarySelectorListener);
-        }
+        this.#mainSelector.removeEventListener("change", this.#mainSelectorListener);
+        this.#mainSelector.addEventListener("change", this.#mainSelectorListener);
+        this.#secondarySelector.removeEventListener("change", this.#secondarySelectorListener);
+        this.#secondarySelector.addEventListener("change", this.#secondarySelectorListener);
       }
     }
     const modal = new DialogController();
@@ -596,9 +617,14 @@
       },
       submit() {
         const review = form.submit();
-        this.$dispatch("form-submitted", review);
         this.lastStar?.classList?.remove("active");
         this.images = [];
+        if (!review) {
+          console.error("FormController -> submit() -> this.#form is undefined");
+          alert("Ocurri\xF3 un error al momento de subir la rese\xF1a. Por favor, recargue la p\xE1gina.");
+          return;
+        }
+        this.$dispatch("form-submitted", review);
         this.submitted = true;
       }
     }));
@@ -616,8 +642,6 @@
           this.reviews = state.reviews;
           this.rating = state.rating;
         } catch (error) {
-          console.log("entre");
-          console.error(error);
           this.error = error;
         } finally {
           this.loading = false;
@@ -653,16 +677,16 @@
       async saveReviews() {
         if (this.loading) return;
         this.reset();
-        const form2 = Object.fromEntries(new FormData(this.$el));
-        const body = {
-          storeId: form2.storeId,
-          product: {
-            id: form2.productId,
-            name: form2.productName,
-            reviews: state.raw
-          }
-        };
         try {
+          const form2 = Object.fromEntries(new FormData(this.$el));
+          const body = {
+            storeId: form2.storeId,
+            product: {
+              id: form2.productId,
+              name: form2.productName,
+              reviews: state.raw
+            }
+          };
           const response = await fetch(
             "https://api.velkamhell-aireviews.com/reviews",
             {
@@ -688,7 +712,7 @@
         try {
           const form2 = Object.fromEntries(new FormData(this.$el));
           if (!form2.description) {
-            throw new Error("Debes incluir una descripcion del producto");
+            throw new Error("Debes incluir una descripci\xF3n del producto");
           }
           ;
           this.reset();
@@ -707,7 +731,7 @@
           state.reviews = json.reviews;
           this.reviews = state.reviews;
           this.rating = state.rating;
-          this.success = { message: "Rese\xF1as generadas exitosamente." };
+          this.success = { message: "\xA1Rese\xF1as generadas exitosamente! Si generaste m\xE1s rese\xF1as de las que ten\xEDas, recuerda generar los nombres presionando en el bot\xF3n Nombres." };
         } catch (error) {
           console.error(error);
           this.error = error;
@@ -718,8 +742,8 @@
       async generateNames() {
         if (this.loading) return;
         this.reset();
-        const form2 = Object.fromEntries(new FormData(this.$el));
         try {
+          const form2 = Object.fromEntries(new FormData(this.$el));
           const response = await fetch(
             `https://api.velkamhell-aireviews.com/utils/names`,
             {
@@ -734,7 +758,7 @@
           }
           state.names = json.names;
           this.reviews = state.reviews;
-          this.success = { message: "Nombres generadas exitosamente." };
+          this.success = { message: "\xA1Nombres generadas exitosamente!" };
         } catch (error) {
           console.error(error);
           this.error = error;
