@@ -474,6 +474,7 @@
   #reviews-dialog {
     width: 90%;
     overflow-y: auto;
+    text-align: end;
     
     &::backdrop {
       background-color: rgba(0,0,0,0.5);
@@ -496,9 +497,6 @@
   }
 
   .dialog-button--close {
-    filter: grayscale();
-    padding: 0;
-    align-self: end;
     margin-bottom: 6px;
     transition: transform 0.2s ease;
   }
