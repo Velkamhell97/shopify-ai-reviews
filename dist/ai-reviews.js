@@ -77,7 +77,7 @@
     nextSlide(reset) {
       if (!this.#slideshow) {
         console.error("CustomSlideShow -> nextSlide() -> this.#slideshow is undefinied");
-        return { current: 1, start: true, end: false };
+        return { current: 1, start: false, end: false };
       }
       ;
       const newSlide = this.#currentSlide + 1;
@@ -98,7 +98,7 @@
     previousSlide() {
       if (!this.#slideshow) {
         console.error("CustomSlideShow -> previousSlide() -> this.#slideshow is undefinied");
-        return { current: 1, start: false, end: fale };
+        return { current: 1, start: false, end: false };
       }
       ;
       const newSlide = this.#currentSlide - 1;
@@ -221,8 +221,12 @@
         }
         const promises = [];
         for (let i = 0; i < files.length; i++) {
-          if (files[i].size > 2097152) {
-            alert("Uno de los archivos es muy grande, maximo 2MB");
+          if (files[i].size > 4 * 1024 * 1024) {
+            alert("Uno de los archivos es muy grande, m\xE1ximo 4MB");
+            return;
+          }
+          if (!files[i].startsWith("image/")) {
+            alert("Solo puedes cargar im\xE1genes");
             return;
           }
           promises.push(this.#loadImage(files[i]));
@@ -323,7 +327,7 @@
        * @private
        */
       #setupVariants() {
-        if (this.#mainSelector || !this.#secondarySelector) {
+        if (!this.#mainSelector || !this.#secondarySelector) {
           console.info("DialogController -> setupVariants() -> Any variant picker found");
           return;
         }
@@ -404,10 +408,6 @@
        */
       #reviews = [];
       /**
-       * @type {Review}
-       */
-      lastExpanded;
-      /**
        * @param {Database} database
        */
       constructor(database2) {
@@ -420,7 +420,7 @@
           image.src = `${image.src}&width=900`;
           delete image.preview_image;
         }
-        this.#imagesPerReview = parseInt(document.querySelector("#images-per-review").value);
+        this.#imagesPerReview = parseInt(document.querySelector("#images-per-review")?.value ?? 1);
         this.#images = images;
       }
       /**
@@ -651,7 +651,7 @@
       },
       reviews: [],
       rating: state.rating,
-      expandedReview: state.lastExpanded,
+      expandedReview: null,
       country: state.country,
       initialized: true,
       loading: true,
@@ -659,7 +659,6 @@
       error: null,
       expand(review) {
         if (review) {
-          state.lastExpanded = review;
           this.expandedReview = review;
           modal.show();
         } else {

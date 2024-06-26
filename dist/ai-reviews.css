@@ -88,6 +88,7 @@
 
   .slideshow-scrollable {
     display: flex;
+    align-items: center;
 
     > .slideshow-slide {
       flex: none;
@@ -138,7 +139,7 @@
 @layer ai-reviews {
   /*#region Actions */
   .reviews-actions {
-    justify-content: center;
+    justify-content: center ;
   }
   
   .reviews-actions button {
@@ -380,7 +381,7 @@
   .reviews-layout-1, .reviews-layout-2 {
     --gap: 0rem;
     --columns: 1;
-    --slide-padding: 10px;
+    --slide-padding: 5px;
     align-items: start;
     
     & .review-slide__image {
@@ -425,6 +426,10 @@
     }
     
     @media (width >= 750px) {
+      --columns: 2;
+    }
+
+    @media screen and (width >= 990px) {
       --columns: 3;
     }
   }
@@ -506,16 +511,16 @@
       max-width: 770px;
     }
 
-    .dialog-slideshow {
-      height: 250px;
-    }
-
     .dialog-wrapper {
       flex-direction: row !important;
     }
 
     .dialog-media {
       width: 45%;
+    }
+
+    .dialog-slideshow {
+      height: 250px;
     }
 
     .dialog-content {
@@ -602,14 +607,6 @@
 
   .justify-between {
     justify-content: space-between;
-  }
-
-  .self-end {
-    align-self: end;
-  }
-
-  .align-end {
-    align-items: end;
   }
 
   .w-full {

@@ -1,10 +1,12 @@
-<link href="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@935e0229cbf546e83e1bae6e591ae2c42ddb7f84/dist/ai-reviews.css" rel="stylesheet" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@ae404452255c345f72731d3dc00e1404db94033e/dist/ai-reviews.css" rel="stylesheet" crossorigin="anonymous">
 
-<script defer src="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@935e0229cbf546e83e1bae6e591ae2c42ddb7f84/dist/ai-reviews-db.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@ae404452255c345f72731d3dc00e1404db94033e/dist/ai-reviews-db.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.0/dist/cdn.min.js"></script>
 
 {% liquid
   assign reviews = section.settings
+  
+  assign limit = product.media.size | minus: product.metafields.custom.reviews_with_images | plus: 1
 
   assign to = product.metafields.custom.reviews_with_images | default: 0
 
@@ -17,6 +19,14 @@
 %}
 
 {% style %}
+  .product__media-list > li:nth-child(n+{{ limit }}) {
+    display:none !important;
+  }
+
+  .thumbnail-list > li:nth-child(n+{{ limit }}) {
+    display: none !important;
+  }
+
   #shopify-section-{{ section.id }} {
     background-color: {{ reviews.background_color | default: 'transparent' }};
     --color-background: {{ reviews.background_color | default: '#fff' }};
@@ -47,7 +57,6 @@
 <div class="reviews-wrapper flex-col gap-4{% unless reviews.full_width %} page-width{% endunless %}" x-data="aiReviews" @form-submitted.window="addReview(event.detail)">
   <input id="store-id" type="hidden" value="{{ shop.id }}">
   <input id="product-id" type="hidden" value="{{ product.id }}">
-  <input id="scroll-type" type="hidden" value="{{ reviews.scroll }}">
   <input id="images-per-review" type="hidden" value="{{ product.metafields.custom.images_per_review | default: 1 }}">
 
   <!-- ACTION BUTTONS -->
@@ -266,7 +275,7 @@
                   <template x-if="!images.length">
                     <label class="review-form__file-button--upload col-center leading-sm scale-effect" tabindex="0" for="review-form__file-input">
                       Sube una imagen
-                      <span>Máximo 2MB</span>
+                      <span>Máximo 4MB</span>
                     </label>
                   </template>
                   
@@ -367,6 +376,17 @@
         {%- assign props = block.settings -%}
 
         {%- style -%}
+          #reviews-dialog {
+            & .product-form__input--pill input[type=radio]+label {
+              border: 1px solid {{ props.foreground_color | default: "black" | color_modify: 'alpha', 0.55 }};
+            }
+
+            & .product-form__input--pill input[type=radio]:checked+label {
+              background-color: {{ props.foreground_color | default: "black" }};
+              color: {{ props.background_color }};
+            }
+          }
+
           .review-slide__author {
             font-size: {{ props.author_size_mobile }}rem;
             {% if props.author_bold %}
@@ -376,6 +396,7 @@
 
           .review-slide__body {
             font-size: {{ props.description_size_mobile }}rem;
+            text-align: {{ props.align }};
           }
 
           .review-slide__date {
@@ -424,7 +445,7 @@
                   </button>
                 </div>
               {%- when 'snap' -%}
-                <div class="row-center self-end" style="color: {{ reviews.foreground_color | default: "currentColor" }}; margin-right: 1rem; justify-content: end;">
+                <div class="row-center" style="color: {{ props.button_background_color | default: "currentColor" }}; margin-right: 1rem; justify-content: end;">
                   Desliza
     
                   <span class="review-icon">
@@ -518,7 +539,7 @@
                         </div>
           
                         <!-- BODY -->
-                        <div class="review-slide__body leading-md" style="text-align: {{  props.align }}">
+                        <div class="review-slide__body leading-md">
                           <p class="m-0" x-text="review.description"></p>
                         </div>
                       </div>
@@ -594,20 +615,20 @@
                       </template>
           
                       <!-- BODY -->
-                      <div class="review-slide__body leading-md" style="text-align: {{  props.align }}">
+                      <div class="review-slide__body leading-md">
                         <p class="m-0" x-text="review.description"></p>
                       </div>
           
                       <!-- DATE -->
-                      <div class="flex flex-1 align-end">
-                        <span class="review-slide__date" x-text="review.date"></span>
+                      <div class="review-slide__date">
+                        <span x-text="review.date"></span>
                       </div>
                     </div>
                   </div>
                 </template>
               </div>
             {%- when 'layout-3' -%}
-              <div class="reviews reviews-layout-3">
+              <div class="reviews-layout-3">
                 <template x-for="(review, index) in reviews">
                   <div class="review-closable">
                     <!-- DELETE BUTTON -->
@@ -676,7 +697,7 @@
                         </div>
                         
                         <!-- BODY -->
-                        <div class="review-slide__body leading-md" style="text-align: {{ props.align }}">
+                        <div class="review-slide__body leading-md">
                           <p class="m-0" x-text="review.description"></p>
                         </div>
                         
@@ -690,68 +711,15 @@
               </div>
           {%- endcase -%}
         </custom-slideshow>
-      {%- when 'dialog' -%}
-        {%- assign props = block.settings -%}
 
-        {%- style -%}
-          #reviews-dialog {
-            & .product-form__input--pill input[type=radio]+label {
-              border: 1px solid {{ props.foreground_color | default: "black" | color_modify: 'alpha', 0.55 }};
-            }
-
-            & .product-form__input--pill input[type=radio]:checked+label {
-              background-color: {{ props.foreground_color | default: "black" }};
-              color: {{ props.background_color }};
-            }
-          }
-
-          .review-detail__author {
-            font-size: {{ props.author_size_mobile }}rem;
-            {% if props.author_bold %}
-            font-weight: bold;
-            {% endif %}
-          }
-
-          .review-detail__body {
-            font-size: {{ props.description_size_mobile }}rem;
-          }
-
-          .review-detail__date {
-            font-size: {{ props.date_size_mobile }}rem;
-          }
-
-          @media screen and (width >= 750px) {
-            .review-detail__author {
-              font-size: {{ props.author_size_desktop }}rem;
-            }
-            
-            .review-detail__body {
-              font-size: {{ props.description_size_desktop }}rem;
-            }
-
-            .review-detail__date {
-              font-size: {{ props.date_size_desktop }}rem;
-            }
-          }
-
-          .hide {
-            display: none !important;
-          }
-        {%- endstyle -%}
-
-        <dialog x-data="scroll"
-          id="reviews-dialog" {{ block.shopify_attributes }}
+        <dialog id="reviews-dialog" x-data="scroll" {%- if props.visible -%}open{%- endif -%}
           style="background-color: {{ props.background_color }}; color: {{ props.foreground_color | default: "black" }};"
-          {%- if props.visible -%}open{%- endif -%}
         >
           {%- assign product_form_id = 'product-form-' | append: section.id -%}
 
           <!-- CLOSE BUTTON -->
-          <button 
-            class="reviews-button dialog-button--close scale-effect"
-            style="background-color: {{ props.button_background_color }}; color: {{ props.button_foreground_color }};"
-          >
-            <span class="review-icon">
+          <button class="reviews-button dialog-button--close scale-effect" style="color: {{ props.foreground_color | default: "black" }}">
+            <span class="review-icon--large">
               <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
               </svg>
@@ -763,7 +731,6 @@
             id="ProductInfo-{{ section.id }}"
             data-section="{{ section.id }}"
             data-url="{{ product.url }}"
-            class="relative"
           >
             <div class="dialog-wrapper flex-col gap-4" @mousedown.outside="expand(null)"> 
               <!-- DIALOG MEDIA -->
@@ -805,7 +772,7 @@
                 </custom-slideshow>
 
                 <!-- CURRENT SLIDE -->
-                <div x-text="`${dialog.current}/${expandedReview?.images?.length ?? ''}`"></div>
+                <div x-text="`${dialog.current}/${expandedReview?.images?.length ?? 1}`"></div>
               </div>
 
               <!-- DIALOG CONTENT -->
@@ -820,7 +787,7 @@
                       </svg>
                     </span>
                     
-                    <span class="review-detail__author" x-text="expandedReview?.author"></span>
+                    <span class="review-slide__author" x-text="expandedReview?.author"></span>
                     
                     <img :src="`https://res.cloudinary.com/dwzr9lray/image/upload/v1716677958/Shopify/country_flags/${country}.svg`" width="20" height="20" alt="country-flag" loading="lazy">
                   </div>
@@ -838,7 +805,7 @@
                 </div>
 
                 <!-- BODY -->
-                <div class="review-detail__body leading-md" style="text-align: {{  props.align }}">
+                <div class="review-slide__body leading-md">
                   <p class="m-0" x-text="expandedReview?.description"></p>
                 </div>
 
@@ -846,7 +813,7 @@
 
                 <!-- PRODUCT FORM -->
                 <div class="flex-col">
-                  <div>
+                  <div style="text-align: start;">
                     {% render 'product-variant-picker',
                       product: product,
                       block: section.blocks.last,
@@ -874,7 +841,7 @@
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@935e0229cbf546e83e1bae6e591ae2c42ddb7f84/dist/ai-reviews.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@ae404452255c345f72731d3dc00e1404db94033e/dist/ai-reviews.js"></script>
 
 {% schema %}
   {
@@ -1107,7 +1074,8 @@
           {
             "type": "checkbox",
             "id": "visible",
-            "label": "Visible",
+            "label": "Mantener abierto",
+            "info": "Desactivar cuando se termine de personalizar",
             "default": false,
           },
           {
@@ -1319,148 +1287,7 @@
         ]
       },
 
-      {
-        "name": "Detalle",
-        "type": "dialog",
-        "limit": 1,
-        "settings": [
-          {
-            "type": "checkbox",
-            "id": "visible",
-            "label": "Visible",
-            "default": false,
-          },
-          {
-            "type": "color",
-            "id": "background_color",
-            "label": "Color del fondo",
-            "default": "#fff"
-          },
-          {
-            "type": "color",
-            "id": "foreground_color",
-            "label": "Color del texto"
-          },
-          {
-            "type": "color",
-            "id": "star_color",
-            "label": "Color estrellas"
-          },
-          {
-            "type": "range",
-            "id": "star_size",
-            "label": "Tamaño estrellas",
-            "min": 20,
-            "max": 40,
-            "step": 1,
-            "unit": "px",
-            "default": 20
-          },
-          {
-            "type": "color",
-            "id": "check_color",
-            "label": "Color del verificado"
-          },
-          {
-            "type": "select",
-            "id": "align",
-            "label": "Alineacion del texto",
-            "options": [
-              {
-                "value": "start",
-                "label": "Normal"
-              },
-              {
-                "value": "justify",
-                "label": "Justificado"
-              },
-            ],
-            "default": "start"
-          },
-
-          {
-            "type": "color",
-            "id": "button_background_color",
-            "label": "Color de fondo botones",
-            "default": "#000"
-          },
-          {
-            "type": "color",
-            "id": "button_foreground_color",
-            "label": "Color de texto botones",
-            "default": "#fff"
-          },
-          
-
-          {
-            "type": "range",
-            "id": "author_size_mobile",
-            "label": "Tamaño autor celular",
-            "min": 0,
-            "max": 3,
-            "step": 0.1,
-            "unit": "rem",
-            "default": 1.8
-          },
-          {
-            "type": "range",
-            "id": "author_size_desktop",
-            "label": "Tamaño autor computador",
-            "min": 0,
-            "max": 5,
-            "step": 0.1,
-            "unit": "rem",
-            "default": 2
-          },
-          {
-            "type": "checkbox",
-            "id": "author_bold",
-            "label": "Autor en negrilla",
-            "default": false
-          },
-          {
-            "type": "range",
-            "id": "description_size_mobile",
-            "label": "Tamaño descripción celular",
-            "min": 0,
-            "max": 3,
-            "step": 0.1,
-            "unit": "rem",
-            "default": 1.5
-          },
-          {
-            "type": "range",
-            "id": "description_size_desktop",
-            "label": "Tamaño descripción computador",
-            "min": 0,
-            "max": 5,
-            "step": 0.1,
-            "unit": "rem",
-            "default": 1.8
-          },
-          {
-            "type": "range",
-            "id": "date_size_mobile",
-            "label": "Tamaño fecha celular",
-            "min": 0,
-            "max": 3,
-            "step": 0.1,
-            "unit": "rem",
-            "default": 1.5
-          },
-          {
-            "type": "range",
-            "id": "date_size_desktop",
-            "label": "Tamaño fecha computador",
-            "min": 0,
-            "max": 5,
-            "step": 0.1,
-            "unit": "rem",
-            "default": 1.8
-          },
-        ]
-      },
-
+      
       {
         "type": "variant_picker",
         "name": "t:sections.main-product.blocks.variant_picker.name",
@@ -1518,9 +1345,6 @@
           },
           {
             "type": "reviews"
-          },
-          {
-            "type": "dialog"
           },
           {
             "type": "variant_picker"
