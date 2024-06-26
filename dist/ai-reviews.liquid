@@ -1,6 +1,6 @@
-<link href="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@67ebcc21a8da77be01e370d3a8562c39fe52714c/dist/ai-reviews.css" rel="stylesheet" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@935e0229cbf546e83e1bae6e591ae2c42ddb7f84/dist/ai-reviews.css" rel="stylesheet" crossorigin="anonymous">
 
-<script defer src="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@67ebcc21a8da77be01e370d3a8562c39fe52714c/dist/ai-reviews-db.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@935e0229cbf546e83e1bae6e591ae2c42ddb7f84/dist/ai-reviews-db.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.0/dist/cdn.min.js"></script>
 
 {% liquid
@@ -77,8 +77,8 @@
           <input type="hidden" name="productId" value="{{ product.id }}">
           <input type="hidden" name="llm" value="{{ reviews.llm }}">
           <input type="hidden" name="style" value="{{ reviews.style }}">
-          <input type="hidden" name="prompt" value="{{ reviews.prompt }}">
-          <input type="hidden" name="gender" value="{{ reviews.gender }}">
+          <input type="hidden" name="slangs" value="{{ reviews.slangs }}">
+          <input type="hidden" name="description" value="{{ reviews.description }}">
           <input type="hidden" name="length" value="{{ reviews.length }}">
           <input type="hidden" name="words" value="{{ reviews.words }}">
           <input type="hidden" name="custom" value="{{ reviews.custom }}">
@@ -346,8 +346,8 @@
                   </div>
           
                   <div class="flex-col">
-                    <label for="review-text">Descripción</label>
-                    <textarea class="reviews-input" id="review-text" name="text" type="text" rows="3" style="resize:none;" required></textarea>
+                    <label for="review-description">Descripción</label>
+                    <textarea class="reviews-input" id="review-description" name="description" type="text" rows="3" style="resize:none;" required></textarea>
                   </div>
                   
                   <!-- SUBMIT BUTTON -->
@@ -519,7 +519,7 @@
           
                         <!-- BODY -->
                         <div class="review-slide__body leading-md" style="text-align: {{  props.align }}">
-                          <p class="m-0" x-text="review.text"></p>
+                          <p class="m-0" x-text="review.description"></p>
                         </div>
                       </div>
                     </div>
@@ -595,7 +595,7 @@
           
                       <!-- BODY -->
                       <div class="review-slide__body leading-md" style="text-align: {{  props.align }}">
-                        <p class="m-0" x-text="review.text"></p>
+                        <p class="m-0" x-text="review.description"></p>
                       </div>
           
                       <!-- DATE -->
@@ -677,7 +677,7 @@
                         
                         <!-- BODY -->
                         <div class="review-slide__body leading-md" style="text-align: {{ props.align }}">
-                          <p class="m-0" x-text="review.text"></p>
+                          <p class="m-0" x-text="review.description"></p>
                         </div>
                         
                         <!-- DATE -->
@@ -839,7 +839,7 @@
 
                 <!-- BODY -->
                 <div class="review-detail__body leading-md" style="text-align: {{  props.align }}">
-                  <p class="m-0" x-text="expandedReview?.text"></p>
+                  <p class="m-0" x-text="expandedReview?.description"></p>
                 </div>
 
                 <hr style="margin: 0; background-color: currentColor">
@@ -874,7 +874,7 @@
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@35f7de7568271bd3f3b9e3ab4d341573be22fe3f/dist/ai-reviews.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Velkamhell97/shopify-ai-reviews@935e0229cbf546e83e1bae6e591ae2c42ddb7f84/dist/ai-reviews.js"></script>
 
 {% schema %}
   {
@@ -922,8 +922,13 @@
         "default": "neutral"
       },
       {
+        "type": "checkbox",
+        "id": "slangs",
+        "label": "Utilizar expresiones locales",
+      },
+      {
         "type": "textarea",
-        "id": "prompt",
+        "id": "description",
         "label": "Descripción del producto"
       },
       {
