@@ -122,7 +122,7 @@
   customElements.define("custom-slideshow", CustomSlideshow);
   document.addEventListener("alpine:init", () => {
     function hasError(response) {
-      return "error" in response;
+      return "message" in response;
     }
     const database = firestore;
     class FormController {
@@ -547,8 +547,11 @@
           const storeId = document.querySelector("#store-id").value;
           const productId = document.querySelector("#product-id").value;
           const response = await this.#database.reviews(storeId, productId);
+          console.log(response);
           if (hasError(response)) {
-            throw new Error(this.error);
+            console.log("haserror");
+            console.log(response);
+            throw new Error(response);
           }
           let reviews = response.reviews;
           if (!response.exists) {
