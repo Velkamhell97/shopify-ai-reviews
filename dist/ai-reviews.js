@@ -616,6 +616,7 @@
           this.reviews = state.reviews;
           this.rating = state.rating;
         } catch (error) {
+          console.log("entre");
           console.error(error);
           this.error = error;
         } finally {
