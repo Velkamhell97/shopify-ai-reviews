@@ -272,10 +272,10 @@
         this.#setupVariants();
       }
       show() {
-        this.#dialog.showModal();
+        console.log("show");
       }
       hide() {
-        this.#dialog.close();
+        console.log("hide");
       }
       /**
        * @param {Event} e
