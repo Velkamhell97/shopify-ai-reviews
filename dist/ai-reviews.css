@@ -13,6 +13,15 @@
     transform: scale(1.05);
   }
 
+  .focus-border:focus-visible {
+    outline: 0;
+    outline-offset: 0.3rem;
+    box-shadow: 
+      0 0 0 .3rem rgb(255, 255, 255), 
+      0 0 0 .5rem rgba(var(18, 18, 18), .5), 
+      0 0 .5rem .4rem rgba(var(18, 18, 18), .3);
+  }
+
   .reviews-input {
     all: unset;
     padding: 1rem;
