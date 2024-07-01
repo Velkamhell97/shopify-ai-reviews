@@ -398,11 +398,6 @@
        */
       #images = [];
       /**
-       * @type {number}
-       * @private
-       */
-      #imagesPerReview;
-      /**
        * @type {number[]}
        * @private
        */
@@ -425,7 +420,6 @@
           image.src = `${image.src}&width=900`;
           delete image.preview_image;
         }
-        this.#imagesPerReview = parseInt(document.querySelector("#images-per-review")?.value ?? 1);
         const textPattern = document.querySelector("#images-pattern").value.replace(/ /g, "");
         let values = textPattern.split(",").map(Number);
         const pattern = [...values];
@@ -439,7 +433,6 @@
             }
           }
         }
-        console.log(pattern);
         this.#pattern = pattern;
         this.#images = images;
       }
@@ -464,27 +457,17 @@
       group() {
         const reviews = this.#reviews;
         const chunks = [];
-        const chunks2 = [];
-        for (let i = 0; i < this.#images.length; i += this.#imagesPerReview) {
-          const chunk = this.#images.slice(i, i + this.#imagesPerReview);
-          chunks.push(chunk);
-        }
         const last = this.#pattern[this.#pattern.length - 1];
-        console.log(`last: ${last}`);
-        console.log(`limit: ${this.#pattern.length - 1}`);
         let acc = 0;
         for (let i = 0; i < this.#pattern.length - 1; i++) {
-          console.log(`index: ${i}`);
-          console.log(`acc: ${acc} - end: ${this.#pattern[i]}`);
           const chunk = this.#images.slice(acc, acc + this.#pattern[i]);
-          chunks2.push(chunk);
+          chunks.push(chunk);
           acc += this.#pattern[i];
         }
         for (let i = acc; i < this.#images.length; i += last) {
           const chunk = this.#images.slice(i, i + last);
-          chunks2.push(chunk);
+          chunks.push(chunk);
         }
-        console.log(chunks2);
         for (let i = 0; i < chunks.length; i++) {
           reviews[i].images = chunks[i];
           if (chunks[i].length === 1) {
