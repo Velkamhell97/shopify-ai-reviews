@@ -148,7 +148,7 @@
        * @type {Review}
        * @private
        */
-      #fields = { stars: 0, single: false };
+      #fields = { stars: 1, single: false };
       /**
        * @type {boolean}
        * @readonly
