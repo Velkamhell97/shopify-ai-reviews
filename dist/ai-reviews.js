@@ -180,6 +180,7 @@
        * @param {number} value
        */
       set stars(value) {
+        console.log(`stars: ${value}`);
         this.#fields.stars = value;
       }
       /**
@@ -453,6 +454,8 @@
        */
       add(review2) {
         this.#reviews.unshift(review2);
+        console.log(`sta: ${review2.stars}`);
+        console.log(this.#rating.individuals);
         this.#rating.individuals[review2.stars - 1] = this.#rating.individuals[review2.stars - 1] + 1;
         const sum = this.#reviews.reduce((acc, review3) => acc + review3.stars, 0);
         const average = sum / this.#reviews.length;
