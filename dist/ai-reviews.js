@@ -254,7 +254,7 @@
        */
       submit() {
         const review = this.#data();
-        this.#fields = { stars: 0, single: false };
+        this.#fields = { stars: 1, single: false };
         this.#images = [];
         this.#form?.reset();
         if (review) {
