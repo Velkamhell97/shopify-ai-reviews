@@ -18,8 +18,8 @@
     outline-offset: 0.3rem;
     box-shadow: 
       0 0 0 .3rem rgb(255, 255, 255), 
-      0 0 0 .5rem rgba(var(18, 18, 18), .5), 
-      0 0 .5rem .4rem rgba(var(18, 18, 18), .3);
+      0 0 0 .5rem rgba(18, 18, 18, .5), 
+      0 0 .5rem .4rem rgba(18, 18, 18, .3) !important;
   }
 
   .reviews-input {
