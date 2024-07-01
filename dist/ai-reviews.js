@@ -155,7 +155,7 @@
        */
       submitted = false;
       constructor() {
-        this.#maxFiles = parseInt(document.querySelector("#images-per-review")?.value ?? 1);
+        this.#maxFiles = 3;
         this.reload();
       }
       reload() {
