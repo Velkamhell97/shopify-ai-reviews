@@ -173,8 +173,8 @@
         const datetime = new Intl.DateTimeFormat("es", options);
         const date = datetime.format(/* @__PURE__ */ new Date());
         const { author, description } = Object.fromEntries(new FormData(this.#form));
-        const review = { author, description, ...this.#fields, images: this.#images, date };
-        return review;
+        const review2 = { author, description, ...this.#fields, images: this.#images, date };
+        return review2;
       }
       /**
        * @param {number} value
@@ -253,14 +253,14 @@
        * @returns {Review?}
        */
       submit() {
-        const review = this.#data();
+        const review2 = this.#data();
         this.#fields = { stars: 0, single: false };
         this.#images = [];
         this.#form?.reset();
-        if (review) {
+        if (review2) {
           this.submitted = true;
         }
-        return review;
+        return review2;
       }
     }
     const form = new FormController();
@@ -451,20 +451,28 @@
       /**
        * @param {Review} review
        */
-      add(review) {
-        this.#reviews.unshift(review);
+      add(review2) {
+        this.#reviews.unshift(review2);
+        this.#rating.individuals[review2.stars - 1] = this.#rating.individuals[review2.stars - 1] + 1;
+        const sum = this.#reviews.reduce((acc, review3) => acc + review3.stars, 0);
+        const average = sum / reviews.length;
+        this.#rating.average = average.toFixed(1);
       }
       /**
        * @param {number} index
        */
       remove(index) {
         this.#reviews.splice(index, 1);
+        this.#rating.individuals[review.stars - 1] = this.#rating.individuals[review.stars - 1] - 1;
+        const sum = this.#reviews.reduce((acc, review2) => acc + review2.stars, 0);
+        const average = sum / reviews.length;
+        this.#rating.average = average.toFixed(1);
       }
       group() {
         if (!this.#images.length) {
           return;
         }
-        const reviews = this.#reviews;
+        const reviews2 = this.#reviews;
         const chunks = [];
         const last = this.#pattern[this.#pattern.length - 1];
         let acc = 0;
@@ -478,41 +486,41 @@
           chunks.push(chunk);
         }
         for (let i = 0; i < chunks.length; i++) {
-          reviews[i].images = chunks[i];
+          reviews2[i].images = chunks[i];
           if (chunks[i].length === 1) {
-            reviews[i].single = true;
+            reviews2[i].single = true;
           }
         }
       }
       rate() {
-        const reviews = this.#reviews;
+        const reviews2 = this.#reviews;
         const weight = 0.05;
         let sum = 0;
         const starsAcc = [0, 0, 0, 0, 0];
-        for (let i = 0; i < reviews.length; i++) {
+        for (let i = 0; i < reviews2.length; i++) {
           const stars = Math.random() < weight ? 4 : 5;
-          reviews[i].stars = stars;
+          reviews2[i].stars = stars;
           starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
           sum = sum + stars;
         }
         for (let i = 0; i < 5; i++) {
           const v = starsAcc[i];
-          const p = Math.round(v / reviews.length * 100);
+          const p = Math.round(v / reviews2.length * 100);
           this.#rating.individuals[i] = { v, p };
         }
-        const average = sum / reviews.length;
+        const average = sum / reviews2.length;
         this.#rating.average = average.toFixed(1);
       }
       date() {
-        const reviews = this.#reviews;
+        const reviews2 = this.#reviews;
         const now = /* @__PURE__ */ new Date();
         const dayinMillis = 864e5;
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
-        for (let i = 0; i < reviews.length; i++) {
+        for (let i = 0; i < reviews2.length; i++) {
           const randomTime = Math.floor(Math.random() * 11) * dayinMillis;
           const date = new Date(now.getTime() - randomTime);
-          reviews[i].date = datetime.format(date);
+          reviews2[i].date = datetime.format(date);
         }
       }
       /**
@@ -531,10 +539,10 @@
        * @returns {Review[]}
        */
       get raw() {
-        const reviews = structuredClone(this.#reviews);
+        const reviews2 = structuredClone(this.#reviews);
         const raw = [];
-        for (let i = 0; i < reviews.length; i++) {
-          const { author, description } = reviews[i];
+        for (let i = 0; i < reviews2.length; i++) {
+          const { author, description } = reviews2[i];
           raw.push({ author, description });
         }
         return raw;
@@ -543,18 +551,18 @@
        * @param {string[]} value
        */
       set reviews(value) {
-        const reviews = [];
+        const reviews2 = [];
         const diff = value.length - this.#reviews.length;
         for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
           const author = this.#reviews[i].author;
-          reviews.push({ author, description: value[i] });
+          reviews2.push({ author, description: value[i] });
         }
         if (diff > 0) {
           for (let i = value.length - diff; i < value.length; i++) {
-            reviews.push({ description: value[i] });
+            reviews2.push({ description: value[i] });
           }
         }
-        this.#reviews = reviews;
+        this.#reviews = reviews2;
         this.group();
         this.rate();
         this.date();
@@ -579,14 +587,14 @@
           if (hasError(response)) {
             throw response;
           }
-          let reviews = response.reviews;
+          let reviews2 = response.reviews;
           if (!response.exists) {
-            reviews = this.#defaultReviews;
+            reviews2 = this.#defaultReviews;
           }
           this.active = response.active;
           this.exists = response.exists;
           this.country = response.country;
-          this.#reviews = reviews;
+          this.#reviews = reviews2;
           this.group();
           this.rate();
           this.date();
@@ -649,15 +657,15 @@
         this.lastStar = this.$el;
       },
       submit() {
-        const review = form.submit();
+        const review2 = form.submit();
         this.lastStar?.classList?.remove("active");
         this.single = false, this.images = [];
-        if (!review) {
+        if (!review2) {
           console.error("FormController -> submit() -> this.#form is undefined");
           alert("Ocurri\xF3 un error al momento de subir la rese\xF1a. Por favor, recargue la p\xE1gina.");
           return;
         }
-        this.$dispatch("form-submitted", review);
+        this.$dispatch("form-submitted", review2);
         this.submitted = true;
       }
     }));
@@ -691,9 +699,9 @@
       success: null,
       info: null,
       error: null,
-      expand(review) {
-        if (review) {
-          this.expandedReview = review;
+      expand(review2) {
+        if (review2) {
+          this.expandedReview = review2;
           modal.show();
         } else {
           this.$dispatch("dialog-close");
@@ -819,13 +827,15 @@
         this.reviews = state.reviews;
         this.rating = state.rating;
       },
-      addReview(review) {
-        state.add(review);
-        this.reviews.unshift(review);
+      addReview(review2) {
+        state.add(review2);
+        this.reviews.unshift(review2);
+        this.reviews.rating = state.rating;
       },
       removeReview(index) {
         state.remove(index);
         this.reviews.splice(index, 1);
+        this.reviews.rating = state.rating;
       }
     }));
   });
