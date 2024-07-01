@@ -228,7 +228,6 @@
             alert("Uno de los archivos es muy grande, m\xE1ximo 4MB");
             return [];
           }
-          console.log(files[i]["type"]);
           if (!files[i]["type"].startsWith("image/")) {
             alert("Solo puedes cargar im\xE1genes");
             return [];
@@ -257,7 +256,9 @@
         this.#fields = { stars: 0, single: false };
         this.#images = [];
         this.#form?.reset();
-        this.submitted = true;
+        if (review) {
+          this.submitted = true;
+        }
         return review;
       }
     }
@@ -459,6 +460,9 @@
         this.#reviews.splice(index, 1);
       }
       group() {
+        if (!this.#images.length) {
+          return;
+        }
         const reviews = this.#reviews;
         const chunks = [];
         const last = this.#pattern[this.#pattern.length - 1];
@@ -599,26 +603,23 @@
     }
     ;
     Alpine.data("scroll", () => ({
-      init() {
-        const slideshow = document.querySelector("#reviews-dialog custom-slideshow");
-        window.addEventListener("dialog-close", () => {
-          this.dialog = { current: 1, start: true, end: false };
-          slideshow.reset();
-        });
-      },
       reviews: { current: 1, start: true, end: false },
       dialog: { current: 1, start: true, end: false },
       nextReviewSlide() {
-        this.reviews = this.$el.closest("custom-slideshow").nextSlide();
+        this.reviews = this.$el?.closest("custom-slideshow")?.nextSlide();
       },
       previousReviewSlide() {
-        this.reviews = this.$el.closest("custom-slideshow").previousSlide();
+        this.reviews = this.$el?.closest("custom-slideshow")?.previousSlide();
+      },
+      resetDialog() {
+        this.dialog = { current: 1, start: true, end: false };
+        this.$el?.reset();
       },
       nextDialogSlide() {
-        this.dialog = this.$el.closest("custom-slideshow").nextSlide();
+        this.dialog = this.$el?.closest("custom-slideshow")?.nextSlide();
       },
       previousDialogSlide() {
-        this.dialog = this.$el.closest("custom-slideshow").previousSlide();
+        this.dialog = this.$el?.closest("custom-slideshow")?.previousSlide();
       }
     }));
     Alpine.data("form", () => ({
@@ -643,13 +644,13 @@
       rate(index) {
         form.stars = index + 1;
         this.lastStar?.classList?.remove("active");
-        this.$el.classList.add("active");
+        this.$el?.classList?.add("active");
         this.lastStar = this.$el;
       },
       submit() {
         const review = form.submit();
         this.lastStar?.classList?.remove("active");
-        this.images = [];
+        this.single = false, this.images = [];
         if (!review) {
           console.error("FormController -> submit() -> this.#form is undefined");
           alert("Ocurri\xF3 un error al momento de subir la rese\xF1a. Por favor, recargue la p\xE1gina.");
@@ -710,6 +711,10 @@
       },
       async saveReviews() {
         if (this.loading) return;
+        if (!this.$el) {
+          console.error("SaveReviews -> this.$el (form) is not defined");
+          return;
+        }
         this.reset();
         try {
           const form2 = Object.fromEntries(new FormData(this.$el));
@@ -743,6 +748,10 @@
       },
       async generateReviews() {
         if (this.loading) return;
+        if (!this.$el) {
+          console.error("GenerateReviews -> this.$el (form) is not defined");
+          return;
+        }
         try {
           const form2 = Object.fromEntries(new FormData(this.$el));
           if (!form2.description) {
@@ -775,6 +784,10 @@
       },
       async generateNames() {
         if (this.loading) return;
+        if (!this.$el) {
+          console.error("GenerateNames -> this.$el (form) is not defined");
+          return;
+        }
         this.reset();
         try {
           const form2 = Object.fromEntries(new FormData(this.$el));

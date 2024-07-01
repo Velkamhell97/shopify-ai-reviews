@@ -225,7 +225,7 @@
 
   .reviews-rating__bars {
     position: relative;
-    width: 15rem;
+    width: 150px;
     height: 10px;
     border-radius: 20px;
 
@@ -534,7 +534,7 @@
     }
 
     .dialog-slideshow {
-      height: 250px;
+      height: 270px;
     }
 
     .dialog-content {
