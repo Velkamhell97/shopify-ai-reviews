@@ -228,7 +228,8 @@
             alert("Uno de los archivos es muy grande, m\xE1ximo 4MB");
             return [];
           }
-          if (!files[i].startsWith("image/")) {
+          console.log(files[i]["type"]);
+          if (!files[i]["type"].startsWith("image/")) {
             alert("Solo puedes cargar im\xE1genes");
             return [];
           }
