@@ -436,7 +436,6 @@
             }
           }
         }
-        console.log(pattern);
         this.#pattern = pattern;
         this.#images = images;
       }
