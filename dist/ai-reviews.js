@@ -148,7 +148,7 @@
        * @type {Review}
        * @private
        */
-      #fields = { stars: 0, single: true };
+      #fields = { stars: 0, single: false };
       /**
        * @type {boolean}
        * @readonly
@@ -235,6 +235,7 @@
           promises.push(this.#loadImage(files[i]));
         }
         this.#images = await Promise.all(promises);
+        this.#fields.single = this.#images.length === 1;
         return [...this.#images];
       }
       /**

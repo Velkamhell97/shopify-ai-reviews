@@ -517,6 +517,7 @@
 
   .dialog-button--close {
     margin-bottom: 6px;
+    background-color: transparent;
     transition: transform 0.2s ease;
   }
 
