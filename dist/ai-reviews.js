@@ -166,9 +166,7 @@
        * @private
        */
       #data() {
-        if (!this.#form) {
-          return null;
-        }
+        if (!this.#form) return null;
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
         const date = datetime.format(/* @__PURE__ */ new Date());
