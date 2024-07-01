@@ -3,7 +3,7 @@ require('esbuild').build({
   outfile: "dist/ai-reviews.js",
   // outdir: "dist",
   bundle: true,
-  minify: true,
+  // minify: true,
   // treeShaking: true,
   // legalComments: "linked"
 }).catch(() => process.exit(1))
