@@ -493,7 +493,10 @@
         const reviews = this.#reviews;
         let sum = 0;
         const starsAcc = [0, 0, 0, 0, 0];
+        console.log(`leng: ${reviews.length}`);
+        console.log(this.#rating);
         if (keepOld) {
+          console.log(`old`);
           for (let i = 0; i < reviews.length; i++) {
             const stars = reviews[i].stars;
             starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
@@ -513,6 +516,7 @@
           const p = Math.round(v / reviews.length * 100);
           this.#rating.individuals[i] = { v, p };
         }
+        console.log(this.#rating);
         const average = sum / reviews.length;
         this.#rating.average = average.toFixed(1);
       }
