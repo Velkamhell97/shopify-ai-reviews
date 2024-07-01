@@ -173,8 +173,8 @@
         const datetime = new Intl.DateTimeFormat("es", options);
         const date = datetime.format(/* @__PURE__ */ new Date());
         const { author, description } = Object.fromEntries(new FormData(this.#form));
-        const review2 = { author, description, ...this.#fields, images: this.#images, date };
-        return review2;
+        const review = { author, description, ...this.#fields, images: this.#images, date };
+        return review;
       }
       /**
        * @param {number} value
@@ -253,14 +253,14 @@
        * @returns {Review?}
        */
       submit() {
-        const review2 = this.#data();
+        const review = this.#data();
         this.#fields = { stars: 0, single: false };
         this.#images = [];
         this.#form?.reset();
-        if (review2) {
+        if (review) {
           this.submitted = true;
         }
-        return review2;
+        return review;
       }
     }
     const form = new FormController();
@@ -451,20 +451,16 @@
       /**
        * @param {Review} review
        */
-      add(review2) {
-        this.#reviews.unshift(review2);
-        console.log(review2);
-        console.log(this.#rating.individuals);
+      add(review) {
+        this.#reviews.unshift(review);
+        this.rate(true);
       }
       /**
        * @param {number} index
        */
       remove(index) {
         this.#reviews.splice(index, 1);
-        this.#rating.individuals[review.stars - 1] = this.#rating.individuals[review.stars - 1] - 1;
-        const sum = this.#reviews.reduce((acc, review2) => acc + review2.stars, 0);
-        const average = sum / this.#reviews.length;
-        this.#rating.average = average.toFixed(1);
+        this.rate(true);
       }
       group() {
         if (!this.#images.length) {
@@ -490,16 +486,27 @@
           }
         }
       }
-      rate() {
+      /**
+       * @param {boolean} keepOld
+       */
+      rate(keepOld) {
         const reviews = this.#reviews;
-        const weight = 0.05;
         let sum = 0;
         const starsAcc = [0, 0, 0, 0, 0];
-        for (let i = 0; i < reviews.length; i++) {
-          const stars = Math.random() < weight ? 4 : 5;
-          reviews[i].stars = stars;
-          starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
-          sum = sum + stars;
+        if (keepOld) {
+          for (let i = 0; i < reviews.length; i++) {
+            const stars = reviews[i].stars;
+            starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
+            sum = sum + stars;
+          }
+        } else {
+          const weight = 0.05;
+          for (let i = 0; i < reviews.length; i++) {
+            const stars = Math.random() < weight ? 4 : 5;
+            reviews[i].stars = stars;
+            starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
+            sum = sum + stars;
+          }
         }
         for (let i = 0; i < 5; i++) {
           const v = starsAcc[i];
@@ -655,15 +662,15 @@
         this.lastStar = this.$el;
       },
       submit() {
-        const review2 = form.submit();
+        const review = form.submit();
         this.lastStar?.classList?.remove("active");
         this.single = false, this.images = [];
-        if (!review2) {
+        if (!review) {
           console.error("FormController -> submit() -> this.#form is undefined");
           alert("Ocurri\xF3 un error al momento de subir la rese\xF1a. Por favor, recargue la p\xE1gina.");
           return;
         }
-        this.$dispatch("form-submitted", review2);
+        this.$dispatch("form-submitted", review);
         this.submitted = true;
       }
     }));
@@ -697,9 +704,9 @@
       success: null,
       info: null,
       error: null,
-      expand(review2) {
-        if (review2) {
-          this.expandedReview = review2;
+      expand(review) {
+        if (review) {
+          this.expandedReview = review;
           modal.show();
         } else {
           this.$dispatch("dialog-close");
@@ -825,9 +832,9 @@
         this.reviews = state.reviews;
         this.rating = state.rating;
       },
-      addReview(review2) {
-        state.add(review2);
-        this.reviews.unshift(review2);
+      addReview(review) {
+        state.add(review);
+        this.reviews.unshift(review);
         this.reviews.rating = state.rating;
       },
       removeReview(index) {
