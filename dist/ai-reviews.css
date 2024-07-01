@@ -49,6 +49,11 @@
     color: #58151c;
   }
 
+  .info-container {
+    background-color: #fff3cd;
+    color: #664d03;
+  }
+
   .success-container {
     background-color: #d1e7dd;
     color: #0a3622;
@@ -385,7 +390,7 @@
     align-items: start;
     
     & .review-slide__image {
-      height: 230px;
+      height: 280px;
       overflow: hidden;
     }
 
@@ -393,7 +398,7 @@
       --columns: 2;
 
       & .review-slide__image {
-        height: 240px;
+        height: 290px;
       }
     }
 
@@ -401,7 +406,7 @@
       --columns: 3;
 
       & .review-slide__image {
-        height: 250px;
+        height: 300px;
       }
     }
   }
@@ -418,7 +423,7 @@
     }
 
     & .review-slide__image {
-      height: 230px;
+      height: 280px;
 
       > img {
        border-radius: 0.5rem 0.5rem 0px 0px;
@@ -498,7 +503,7 @@
     --columns:1;
     --gap: 0rem;
     --slide-padding: 0px;
-    height: 230px;
+    height: 270px;
   }
 
   .dialog-button--close {
@@ -611,6 +616,10 @@
 
   .w-full {
     width: 100%;
+  }
+
+  .h-full {
+    height: 100%;
   }
 
   .h-auto {
