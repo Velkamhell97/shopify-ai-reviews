@@ -433,6 +433,7 @@
             }
           }
         }
+        console.log(pattern);
         this.#pattern = pattern;
         this.#images = images;
       }
@@ -595,6 +596,12 @@
     }
     ;
     Alpine.data("scroll", () => ({
+      init() {
+        window.addEventListener("dialog-close", () => {
+          console.log("cerrado");
+          this.dialog = { current: 1, start: true, end: false };
+        });
+      },
       reviews: { current: 1, start: true, end: false },
       dialog: { current: 1, start: true, end: false },
       nextReviewSlide() {
@@ -683,6 +690,7 @@
           this.expandedReview = review;
           modal.show();
         } else {
+          this.$dispatch("dialog-close");
           modal.hide();
           this.expandedReview = null;
         }
