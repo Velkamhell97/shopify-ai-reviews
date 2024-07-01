@@ -455,7 +455,7 @@
         this.#reviews.unshift(review2);
         this.#rating.individuals[review2.stars - 1] = this.#rating.individuals[review2.stars - 1] + 1;
         const sum = this.#reviews.reduce((acc, review3) => acc + review3.stars, 0);
-        const average = sum / reviews.length;
+        const average = sum / this.#reviews.length;
         this.#rating.average = average.toFixed(1);
       }
       /**
@@ -465,14 +465,14 @@
         this.#reviews.splice(index, 1);
         this.#rating.individuals[review.stars - 1] = this.#rating.individuals[review.stars - 1] - 1;
         const sum = this.#reviews.reduce((acc, review2) => acc + review2.stars, 0);
-        const average = sum / reviews.length;
+        const average = sum / this.#reviews.length;
         this.#rating.average = average.toFixed(1);
       }
       group() {
         if (!this.#images.length) {
           return;
         }
-        const reviews2 = this.#reviews;
+        const reviews = this.#reviews;
         const chunks = [];
         const last = this.#pattern[this.#pattern.length - 1];
         let acc = 0;
@@ -486,41 +486,41 @@
           chunks.push(chunk);
         }
         for (let i = 0; i < chunks.length; i++) {
-          reviews2[i].images = chunks[i];
+          reviews[i].images = chunks[i];
           if (chunks[i].length === 1) {
-            reviews2[i].single = true;
+            reviews[i].single = true;
           }
         }
       }
       rate() {
-        const reviews2 = this.#reviews;
+        const reviews = this.#reviews;
         const weight = 0.05;
         let sum = 0;
         const starsAcc = [0, 0, 0, 0, 0];
-        for (let i = 0; i < reviews2.length; i++) {
+        for (let i = 0; i < reviews.length; i++) {
           const stars = Math.random() < weight ? 4 : 5;
-          reviews2[i].stars = stars;
+          reviews[i].stars = stars;
           starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
           sum = sum + stars;
         }
         for (let i = 0; i < 5; i++) {
           const v = starsAcc[i];
-          const p = Math.round(v / reviews2.length * 100);
+          const p = Math.round(v / reviews.length * 100);
           this.#rating.individuals[i] = { v, p };
         }
-        const average = sum / reviews2.length;
+        const average = sum / reviews.length;
         this.#rating.average = average.toFixed(1);
       }
       date() {
-        const reviews2 = this.#reviews;
+        const reviews = this.#reviews;
         const now = /* @__PURE__ */ new Date();
         const dayinMillis = 864e5;
         const options = { year: "numeric", month: "long", day: "numeric" };
         const datetime = new Intl.DateTimeFormat("es", options);
-        for (let i = 0; i < reviews2.length; i++) {
+        for (let i = 0; i < reviews.length; i++) {
           const randomTime = Math.floor(Math.random() * 11) * dayinMillis;
           const date = new Date(now.getTime() - randomTime);
-          reviews2[i].date = datetime.format(date);
+          reviews[i].date = datetime.format(date);
         }
       }
       /**
@@ -539,10 +539,10 @@
        * @returns {Review[]}
        */
       get raw() {
-        const reviews2 = structuredClone(this.#reviews);
+        const reviews = structuredClone(this.#reviews);
         const raw = [];
-        for (let i = 0; i < reviews2.length; i++) {
-          const { author, description } = reviews2[i];
+        for (let i = 0; i < reviews.length; i++) {
+          const { author, description } = reviews[i];
           raw.push({ author, description });
         }
         return raw;
@@ -551,18 +551,18 @@
        * @param {string[]} value
        */
       set reviews(value) {
-        const reviews2 = [];
+        const reviews = [];
         const diff = value.length - this.#reviews.length;
         for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
           const author = this.#reviews[i].author;
-          reviews2.push({ author, description: value[i] });
+          reviews.push({ author, description: value[i] });
         }
         if (diff > 0) {
           for (let i = value.length - diff; i < value.length; i++) {
-            reviews2.push({ description: value[i] });
+            reviews.push({ description: value[i] });
           }
         }
-        this.#reviews = reviews2;
+        this.#reviews = reviews;
         this.group();
         this.rate();
         this.date();
@@ -587,14 +587,14 @@
           if (hasError(response)) {
             throw response;
           }
-          let reviews2 = response.reviews;
+          let reviews = response.reviews;
           if (!response.exists) {
-            reviews2 = this.#defaultReviews;
+            reviews = this.#defaultReviews;
           }
           this.active = response.active;
           this.exists = response.exists;
           this.country = response.country;
-          this.#reviews = reviews2;
+          this.#reviews = reviews;
           this.group();
           this.rate();
           this.date();
