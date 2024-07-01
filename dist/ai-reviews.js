@@ -217,20 +217,20 @@
        */
       async uploadImages(event) {
         const files = event.target.files;
-        if (!files.length) return;
+        if (!files.length) return [];
         if (files.length > this.#maxFiles) {
           alert(`Solo pueden subirse ${this.#maxFiles} archivo(s)`);
-          return;
+          return [];
         }
         const promises = [];
         for (let i = 0; i < files.length; i++) {
           if (files[i].size > 4 * 1024 * 1024) {
             alert("Uno de los archivos es muy grande, m\xE1ximo 4MB");
-            return;
+            return [];
           }
           if (!files[i].startsWith("image/")) {
             alert("Solo puedes cargar im\xE1genes");
-            return;
+            return [];
           }
           promises.push(this.#loadImage(files[i]));
         }
