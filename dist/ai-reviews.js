@@ -470,8 +470,12 @@
           chunks.push(chunk);
         }
         const last = this.#pattern[this.#pattern.length - 1];
+        console.log(`last: ${last}`);
+        console.log(`limit: ${this.#pattern.length - 1}`);
         let acc = 0;
         for (let i = 0; i < this.#pattern.length - 1; i++) {
+          console.log(`index: ${i}`);
+          console.log(`acc: ${acc} - end: ${this.#pattern[i]}`);
           const chunk = this.#images.slice(acc, acc + this.#pattern[i]);
           chunks2.push(chunk);
           acc += this.#pattern[i];
