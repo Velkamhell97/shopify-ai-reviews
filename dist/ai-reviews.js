@@ -58,6 +58,9 @@
         newValue === null ? this.#pause() : this.#play();
       }
     }
+    reset() {
+      this.#currentSlide = 2;
+    }
     get columns() {
       if (!this.#slideshow) {
         console.error("CustomSlideShow -> columns getter -> this.#slideshow is undefinied");
@@ -597,9 +600,10 @@
     ;
     Alpine.data("scroll", () => ({
       init() {
+        const slideshow = document.querySelector("#reviews-dialog custom-slideshow");
         window.addEventListener("dialog-close", () => {
-          console.log("cerrado");
           this.dialog = { current: 1, start: true, end: false };
+          slideshow.reset();
         });
       },
       reviews: { current: 1, start: true, end: false },
