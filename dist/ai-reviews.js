@@ -772,6 +772,7 @@
         const url = resource.sources[0].url;
         if (url.startsWith("blob")) {
           console.log("revoked");
+          URL.revokeObjectURL(url);
         }
       },
       reset() {
