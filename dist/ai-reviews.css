@@ -496,6 +496,21 @@
     }
   }
 
+  .review-slide__video-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-items: center;
+    align-items: center;
+
+    > div {
+      border-radius: 50%;
+      background-color: white;
+      color: black;
+      padding: 0.5rem;
+    }
+  }
+
   .review-slide__media {
     display: inline-block;
     position: relative;
