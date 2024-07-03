@@ -222,7 +222,7 @@
           video.src = url;
           const template = document.querySelector("#video-preload").content.cloneNode(true);
           const container = template.querySelector("div");
-          video.addEventListener("loadedmetadata", (_) => {
+          video.addEventListener("loadeddata", (_) => {
             try {
               const thumbnail = this.#captureFrame(video);
               const loadedVideo = {
