@@ -425,6 +425,13 @@
             resource.src = `${resource.src}&width=900`;
             delete resource.preview_image;
           } else {
+            resource.src = `${resource.preview_image.src}`;
+            resource.width = `${resource.preview_image.width}`;
+            resource.height = `${resource.preview_image.height}`;
+            resource.srcset = `${resource.src} ${resource.width}w`;
+            resource.video_width = `${resource.sources[0].width}`;
+            resource.video_height = `${resource.sources[0].height}`;
+            delete resource.preview_image;
           }
         }
         const textPattern = document.querySelector("#images-pattern").value.replace(/ /g, "");
