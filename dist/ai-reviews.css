@@ -555,7 +555,7 @@
     --columns:1;
     --gap: 0rem;
     --slide-padding: 0px;
-    height: 270px;
+    height: 300px;
   }
 
   .dialog-button--close {
@@ -578,7 +578,7 @@
     }
 
     .dialog-slideshow {
-      height: 270px;
+      height: 300px;
     }
 
     .dialog-content {
