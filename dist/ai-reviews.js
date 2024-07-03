@@ -269,11 +269,11 @@
       /**
        * @param {number} index
        */
-      deleteMedia(index2) {
-        if (this.#media[index2].media_type === "video") {
-          URL.revokeObjectURL(this.#media[index2].src);
+      deleteMedia(index) {
+        if (this.#media[index].media_type === "video") {
+          URL.revokeObjectURL(this.#media[index].src);
         }
-        this.#media.splice(index2, 1);
+        this.#media.splice(index, 1);
         this.#fields.single = this.#media.length === 1;
         if (!this.#media.length) {
           const file = this.#form?.querySelector("input[type='file']");
@@ -287,7 +287,7 @@
         const review = this.#data();
         for (let i = 0; i < this.#media.length; i++) {
           if (this.#media[i].media_type === "video") {
-            URL.revokeObjectURL(this.#media[index].src);
+            URL.revokeObjectURL(this.#media[i].src);
           }
         }
         this.#fields = { stars: 1, single: false };
@@ -351,8 +351,8 @@
       #mainSelectorHandler(e) {
         const mainInputs = this.#mainSelector.querySelectorAll("input");
         const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
-        const index2 = [...mainInputs].indexOf(e.target);
-        secondaryInputs[index2].checked = true;
+        const index = [...mainInputs].indexOf(e.target);
+        secondaryInputs[index].checked = true;
       }
       /**
        * @param {Event} e
@@ -362,8 +362,8 @@
         e.stopImmediatePropagation();
         const mainInputs = this.#mainSelector.querySelectorAll("input");
         const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
-        const index2 = [...secondaryInputs].indexOf(e.target);
-        mainInputs[index2].click();
+        const index = [...secondaryInputs].indexOf(e.target);
+        mainInputs[index].click();
       }
       /**
        * @private
@@ -504,8 +504,8 @@
       /**
        * @param {number} index
        */
-      remove(index2) {
-        this.#reviews.splice(index2, 1);
+      remove(index) {
+        this.#reviews.splice(index, 1);
         this.rate(true);
       }
       group() {
@@ -696,13 +696,13 @@
           alert(error);
         }
       },
-      deleteMedia(index2) {
-        this.media.splice(index2, 1);
+      deleteMedia(index) {
+        this.media.splice(index, 1);
         this.single = this.media.length === 1;
-        form.deleteMedia(index2);
+        form.deleteMedia(index);
       },
-      rate(index2) {
-        form.stars = index2 + 1;
+      rate(index) {
+        form.stars = index + 1;
         this.lastStar?.classList?.remove("active");
         this.$el?.classList?.add("active");
         this.lastStar = this.$el;
@@ -884,9 +884,9 @@
         this.reviews.unshift(review);
         this.rating = state.rating;
       },
-      removeReview(index2) {
-        state.remove(index2);
-        this.reviews.splice(index2, 1);
+      removeReview(index) {
+        state.remove(index);
+        this.reviews.splice(index, 1);
         this.rating = state.rating;
       }
     }));
