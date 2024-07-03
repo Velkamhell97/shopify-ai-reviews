@@ -220,6 +220,8 @@
           const canvas = document.createElement("canvas");
           const video = document.createElement("video");
           const url = URL.createObjectURL(file);
+          video.autoplay = true;
+          video.muted = true;
           video.src = url;
           video.onloadeddata = () => {
             const context = canvas.getContext("2d");
@@ -246,25 +248,6 @@
             };
             resolve(loadedVideo);
           };
-        });
-      }
-      /**
-       * @param {HTMLVideoElement} video
-       * @returns {Promise<Blob | null>}
-       * @private
-       */
-      #captureFrame(video) {
-        return new Promise((resolve, reject) => {
-          const canvas = document.createElement("canvas");
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const context = canvas.getContext("2d");
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          context.canvas.toBlob(
-            (blob) => resolve(blob),
-            "image/jpeg",
-            0.75
-          );
         });
       }
       /**
@@ -302,9 +285,6 @@
        * @param {number} index
        */
       deleteMedia(index) {
-        if (this.#media[index].media_type === "video") {
-          URL.revokeObjectURL(this.#media[index].src);
-        }
         this.#media.splice(index, 1);
         this.#fields.single = this.#media.length === 1;
         if (!this.#media.length) {
@@ -317,10 +297,6 @@
        */
       submit() {
         const review = this.#data();
-        for (let i = 0; i < this.#media.length; i++) {
-          if (this.#media[i].media_type === "video") {
-          }
-        }
         this.#fields = { stars: 1, single: false };
         this.#media = [];
         this.#form?.reset();
@@ -791,6 +767,9 @@
           modal.hide();
           this.expandedReview = null;
         }
+      },
+      revoke(resource) {
+        console.log("entre");
       },
       reset() {
         this.loading = true;
