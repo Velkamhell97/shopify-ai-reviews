@@ -220,8 +220,11 @@
           const video = document.createElement("video");
           const url = URL.createObjectURL(file);
           video.src = url;
+          const template = document.querySelector("#video-preload").content.cloneNode(true);
+          const container = template.querySelector("div");
           video.addEventListener("loadedmetadata", (_) => {
-            this.#captureFrame(video, url).then((thumbnail) => {
+            try {
+              const thumbnail = this.#captureFrame(video);
               const loadedVideo = {
                 src: thumbnail,
                 width: video.videoWidth,
@@ -239,30 +242,32 @@
                 ]
               };
               resolve(loadedVideo);
-            });
+            } catch (error) {
+              reject(error);
+            } finally {
+              container.remove();
+            }
           });
           video.addEventListener("error", reject);
+          container.appendChild(video);
+          const wrapper = document.querySelector(".reviews-wrapper");
+          wrapper.appendChild(container);
+          video.load();
         });
       }
       /**
        * @param {HTMLVideoElement} video
-       * @param {string} fileURL
        * @private
        */
-      #captureFrame(video, fileURL) {
-        return new Promise((resolve, reject) => {
-          video.addEventListener("canplay", () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const context = canvas.getContext("2d");
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const thumbnail = canvas.toDataURL("image/png");
-            console.log(thumbnail);
-            resolve(thumbnail);
-          });
-          video.addEventListener("error", reject);
-        });
+      #captureFrame(video) {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const thumbnail = canvas.toDataURL("image/png");
+        console.log(thumbnail);
+        return thumbnail;
       }
       /**
        * @param {Event} event
@@ -316,7 +321,6 @@
         const review = this.#data();
         for (let i = 0; i < this.#media.length; i++) {
           if (this.#media[i].media_type === "video") {
-            URL.revokeObjectURL(this.#media[i].src);
           }
         }
         this.#fields = { stars: 1, single: false };
