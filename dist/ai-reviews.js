@@ -220,24 +220,47 @@
           const video = document.createElement("video");
           const url = URL.createObjectURL(file);
           video.src = url;
-          video.addEventListener("loadedmetadata", (e) => {
-            const loadedVideo = {
-              video_width: video.videoWidth,
-              video_height: video.videoHeight,
-              aspect_ratio: video.videoWidth / video.videoHeight,
-              media_type: "video",
-              sources: [
-                {
-                  url,
-                  mime_type: file.type
-                }
-              ]
-            };
-            resolve(loadedVideo);
+          video.addEventListener("loadedmetadata", (_) => {
+            this.#captureFrame(video, url).then((thumbnail) => {
+              const loadedVideo = {
+                src: thumbnail,
+                width: video.videoWidth,
+                height: video.videoHeight,
+                video_width: video.videoWidth,
+                video_height: video.videoHeight,
+                aspect_ratio: video.videoWidth / video.videoHeight,
+                media_type: "video",
+                srcset: "",
+                sources: [
+                  {
+                    url,
+                    mime_type: file.type
+                  }
+                ]
+              };
+              resolve(loadedVideo);
+            });
           });
-          video.addEventListener("error", (e) => {
-            reject(e);
+          video.addEventListener("error", reject);
+        });
+      }
+      /**
+       * @param {HTMLVideoElement} video
+       * @param {string} fileURL
+       * @private
+       */
+      #captureFrame(video, fileURL) {
+        return new Promise((resolve, reject) => {
+          video.addEventListener("canplay", () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext("2d");
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const thumbnail = canvas.toDataURL("image/png");
+            resolve(thumbnail);
           });
+          video.addEventListener("error", reject);
         });
       }
       /**
