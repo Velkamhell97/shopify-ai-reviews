@@ -424,6 +424,7 @@
             resource.srcset = `${resource.src}&width=300 300w, ${resource.src}&width=500 500w, ${resource.src}&width=750 750w, ${resource.src}&width=900 900w`;
             resource.src = `${resource.src}&width=900`;
             delete resource.preview_image;
+          } else {
           }
         }
         const textPattern = document.querySelector("#images-pattern").value.replace(/ /g, "");
