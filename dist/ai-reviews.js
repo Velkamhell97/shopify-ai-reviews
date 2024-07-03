@@ -143,7 +143,7 @@
        * @type {ReviewMedia[]}
        * @private
        */
-      #images;
+      #media;
       /**
        * @type {Review}
        * @private
@@ -171,7 +171,7 @@
         const datetime = new Intl.DateTimeFormat("es", options);
         const date = datetime.format(/* @__PURE__ */ new Date());
         const { author, description } = Object.fromEntries(new FormData(this.#form));
-        const review = { author, description, ...this.#fields, images: this.#images, date };
+        const review = { author, description, ...this.#fields, media: this.#media, date };
         return review;
       }
       /**
@@ -198,7 +198,8 @@
                 width: image.width,
                 height: image.height,
                 aspectRatio: image.width / image.height,
-                srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
+                media_type: "image",
+                srcset: `${image.src} ${image.src}w`
               };
               resolve(loadedImage);
             };
@@ -210,10 +211,35 @@
         });
       }
       /**
+       * @param {any} file
+       * @returns {Promise<ReviewMedia>}
+       * @private
+       */
+      #loadVideo(file) {
+        return new Promise((resolve, reject) => {
+          const video = document.createElement("video");
+          const url = URL.createObjectURL(file);
+          video.src = url;
+          video.addEventListener("loadedmetadata", (e) => {
+            const loadedVideo = {
+              src: url,
+              video_width: video.videoWidth,
+              video_height: video.videoHeight,
+              aspectRatio: video.videoWidth / video.videoHeight,
+              media_type: "video"
+            };
+            resolve(loadedVideo);
+          });
+          video.addEventListener("error", (e) => {
+            reject(e);
+          });
+        });
+      }
+      /**
        * @param {Event} event
        * @returns {Promise<ReviewMedia[]>}
        */
-      async uploadImages(event) {
+      async uploadFiles(event) {
         const files = event.target.files;
         if (!files.length) return [];
         if (files.length > this.#maxFiles) {
@@ -222,27 +248,34 @@
         }
         const promises = [];
         for (let i = 0; i < files.length; i++) {
+          console.log(files[i]);
           if (files[i].size > 4 * 1024 * 1024) {
             alert("Uno de los archivos es muy grande, m\xE1ximo 4MB");
             return [];
           }
-          if (!files[i]["type"].startsWith("image/")) {
-            alert("Solo puedes cargar im\xE1genes");
+          if (files[i].type.startsWith("image/")) {
+            promises.push(this.#loadImage(files[i]));
+          } else if (files[i].type.startsWith("video/")) {
+            promises.push(this.#loadVideo(files[i]));
+          } else {
+            alert("Solo puedes cargar imagenes o videos");
             return [];
           }
-          promises.push(this.#loadImage(files[i]));
         }
-        this.#images = await Promise.all(promises);
-        this.#fields.single = this.#images.length === 1;
-        return [...this.#images];
+        this.#media = await Promise.all(promises);
+        this.#fields.single = this.#media.length === 1;
+        return [...this.#media];
       }
       /**
        * @param {number} index
        */
-      deleteImage(index) {
-        this.#images.splice(index, 1);
-        this.#fields.single = this.#images.length === 1;
-        if (!this.#images.length) {
+      deleteMedia(index2) {
+        if (this.#media[index2].media_type === "video") {
+          URL.revokeObjectURL(this.#media[index2].src);
+        }
+        this.#media.splice(index2, 1);
+        this.#fields.single = this.#media.length === 1;
+        if (!this.#media.length) {
           const file = this.#form?.querySelector("input[type='file']");
           if (file) file.value = "";
         }
@@ -252,8 +285,13 @@
        */
       submit() {
         const review = this.#data();
+        for (let i = 0; i < this.#media.length; i++) {
+          if (this.#media[i].media_type === "video") {
+            URL.revokeObjectURL(this.#media[index].src);
+          }
+        }
         this.#fields = { stars: 1, single: false };
-        this.#images = [];
+        this.#media = [];
         this.#form?.reset();
         if (review) {
           this.submitted = true;
@@ -313,8 +351,8 @@
       #mainSelectorHandler(e) {
         const mainInputs = this.#mainSelector.querySelectorAll("input");
         const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
-        const index = [...mainInputs].indexOf(e.target);
-        secondaryInputs[index].checked = true;
+        const index2 = [...mainInputs].indexOf(e.target);
+        secondaryInputs[index2].checked = true;
       }
       /**
        * @param {Event} e
@@ -324,8 +362,8 @@
         e.stopImmediatePropagation();
         const mainInputs = this.#mainSelector.querySelectorAll("input");
         const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
-        const index = [...secondaryInputs].indexOf(e.target);
-        mainInputs[index].click();
+        const index2 = [...secondaryInputs].indexOf(e.target);
+        mainInputs[index2].click();
       }
       /**
        * @private
@@ -434,7 +472,7 @@
             delete resource.preview_image;
           }
         }
-        const textPattern = document.querySelector("#images-pattern").value.replace(/ /g, "");
+        const textPattern = document.querySelector("#media-pattern").value.replace(/ /g, "");
         let values = textPattern.split(",").map(Number);
         const pattern = [...values];
         for (let i = 0; i < values.length; i++) {
@@ -466,8 +504,8 @@
       /**
        * @param {number} index
        */
-      remove(index) {
-        this.#reviews.splice(index, 1);
+      remove(index2) {
+        this.#reviews.splice(index2, 1);
         this.rate(true);
       }
       group() {
@@ -645,26 +683,26 @@
       }
     }));
     Alpine.data("form", () => ({
-      images: [],
+      media: [],
       single: true,
       submitted: false,
       lastStar: null,
-      async uploadImages(e) {
+      async uploadFiles(e) {
         try {
-          const images = await form.uploadImages(e);
-          this.single = images.length === 1;
-          this.images = images;
+          const media = await form.uploadFiles(e);
+          this.single = media.length === 1;
+          this.media = media;
         } catch (error) {
           alert(error);
         }
       },
-      deleteImage(index) {
-        this.images.splice(index, 1);
-        this.single = this.images.length === 1;
-        form.deleteImage(index);
+      deleteMedia(index2) {
+        this.media.splice(index2, 1);
+        this.single = this.media.length === 1;
+        form.deleteMedia(index2);
       },
-      rate(index) {
-        form.stars = index + 1;
+      rate(index2) {
+        form.stars = index2 + 1;
         this.lastStar?.classList?.remove("active");
         this.$el?.classList?.add("active");
         this.lastStar = this.$el;
@@ -672,7 +710,7 @@
       submit() {
         const review = form.submit();
         this.lastStar?.classList?.remove("active");
-        this.single = false, this.images = [];
+        this.single = false, this.media = [];
         if (!review) {
           console.error("FormController -> submit() -> this.#form is undefined");
           alert("Ocurri\xF3 un error al momento de subir la rese\xF1a. Por favor, recargue la p\xE1gina.");
@@ -846,9 +884,9 @@
         this.reviews.unshift(review);
         this.rating = state.rating;
       },
-      removeReview(index) {
-        state.remove(index);
-        this.reviews.splice(index, 1);
+      removeReview(index2) {
+        state.remove(index2);
+        this.reviews.splice(index2, 1);
         this.rating = state.rating;
       }
     }));
