@@ -223,8 +223,7 @@
           const template = document.querySelector("#video-preload").content.cloneNode(true);
           const container = template.querySelector("div");
           video.addEventListener("canplay", (_) => {
-            try {
-              const thumbnail = this.#captureFrame(video);
+            this.#captureFrame(video).then((thumbnail) => {
               const loadedVideo = {
                 src: thumbnail,
                 width: video.videoWidth,
@@ -242,11 +241,7 @@
                 ]
               };
               resolve(loadedVideo);
-            } catch (error) {
-              reject(error);
-            } finally {
-              container.remove();
-            }
+            });
           });
           video.addEventListener("error", reject);
           container.appendChild(video);
@@ -257,17 +252,22 @@
       }
       /**
        * @param {HTMLVideoElement} video
+       * @returns {Promise<Blob | null>}
        * @private
        */
       #captureFrame(video) {
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const context = canvas.getContext("2d");
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const thumbnail = canvas.toDataURL("image/png");
-        console.log(thumbnail);
-        return thumbnail;
+        return new Promise((resolve, reject) => {
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const context = canvas.getContext("2d");
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          context.canvas.toBlob(
+            (blob) => resolve(blob),
+            "image/jpeg",
+            0.75
+          );
+        });
       }
       /**
        * @param {Event} event
