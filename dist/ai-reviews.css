@@ -70,6 +70,8 @@
   }
 
   .images-length-caption {
+    display: flex;
+    align-items: center;
     padding: 0.5rem 1rem;
     border-bottom-left-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
@@ -484,12 +486,12 @@
 
   .review-slide__image-wrapper {
     max-width: 100%;
+    text-align: center;
   }
 
   .reviews-slide__image {
     display: inline-block;
     position: relative;
-    margin: 0 auto;
     height: 100%; 
 
     & img {
