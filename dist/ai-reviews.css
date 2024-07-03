@@ -399,15 +399,14 @@
     --slide-padding: 5px;
     align-items: start;
     
-    & .review-slide__image {
+    & .review-slide__image-wrapper {
       height: 280px;
-      overflow: hidden;
     }
 
     @media screen and (width >= 750px) {
       --columns: 2;
 
-      & .review-slide__image {
+      & .review-slide__image-wrapper {
         height: 290px;
       }
     }
@@ -415,7 +414,7 @@
     @media screen and (width >= 990px) {
       --columns: 3;
 
-      & .review-slide__image {
+      & .review-slide__image-wrapper {
         height: 300px;
       }
     }
@@ -432,7 +431,7 @@
       display: inline-flex !important;
     }
 
-    & .review-slide__image {
+    & .review-slide__image-wrapper {
       height: 280px;
 
       > img {
@@ -483,9 +482,22 @@
     transition: transform 0.2s ease;
   }
 
-  .review-slide__image {
+  .review-slide__image-wrapper {
     max-width: 100%;
+  }
+
+  .reviews-slide__image {
+    display: inline-block;
     position: relative;
+    margin: 0 auto;
+    height: 100%; 
+
+    & img {
+      display: block;
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+    }
   }
   /*#endregion */
 
