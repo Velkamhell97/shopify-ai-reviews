@@ -197,7 +197,7 @@
                 src: image.src,
                 width: image.width,
                 height: image.height,
-                aspectRatio: image.width / image.height,
+                aspect_ratio: image.width / image.height,
                 media_type: "image",
                 srcset: ""
               };
@@ -225,7 +225,7 @@
               src: url,
               video_width: video.videoWidth,
               video_height: video.videoHeight,
-              aspectRatio: video.videoWidth / video.videoHeight,
+              aspect_ratio: video.videoWidth / video.videoHeight,
               media_type: "video"
             };
             resolve(loadedVideo);
