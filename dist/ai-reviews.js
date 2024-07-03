@@ -140,7 +140,7 @@
        */
       #maxFiles;
       /**
-       * @type {ReviewImage[]}
+       * @type {ReviewMedia[]}
        * @private
        */
       #images;
@@ -182,7 +182,7 @@
       }
       /**
        * @param {any} file
-       * @returns {Promise<ReviewImage>}
+       * @returns {Promise<ReviewMedia>}
        * @private
        */
       #loadImage(file) {
@@ -190,20 +190,20 @@
           const reader = new FileReader();
           reader.onload = () => {
             reader.onload = null;
-            const image = new Image();
-            image.onload = () => {
-              image.onload = null;
+            const image2 = new Image();
+            image2.onload = () => {
+              image2.onload = null;
               const loadedImage = {
-                src: image.src,
-                width: image.width,
-                height: image.height,
-                aspectRatio: image.width / image.height,
-                srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
+                src: image2.src,
+                width: image2.width,
+                height: image2.height,
+                aspectRatio: image2.width / image2.height,
+                srcset: `${image2.src} 300w, ${image2.src} 500w, ${image2.src} 750w, ${image2.src} 900w`
               };
               resolve(loadedImage);
             };
-            image.onerror = reject;
-            image.src = reader.result;
+            image2.onerror = reject;
+            image2.src = reader.result;
           };
           reader.onerror = reject;
           reader.readAsDataURL(file);
@@ -211,7 +211,7 @@
       }
       /**
        * @param {Event} event
-       * @returns {Promise<ReviewImage[]>}
+       * @returns {Promise<ReviewMedia[]>}
        */
       async uploadImages(event) {
         const files = event.target.files;
@@ -397,10 +397,10 @@
         { author: "Andr\xE9s Mendoza", description: "Este producto me ha facilitado mucho la vida. Lleg\xF3 antes de lo previsto y en perfectas condiciones. Estoy muy satisfecho con la compra y lo recomendar\xE9 sin dudas a quienes buscan soluciones pr\xE1cticas y de calidad." }
       ];
       /**
-       * @type {ReviewImage[]}
+       * @type {ReviewMedia[]}
        * @private
        */
-      #images = [];
+      #media = [];
       /**
        * @type {number[]}
        * @private
@@ -416,13 +416,15 @@
        */
       constructor(database2) {
         this.#database = database2;
-        const images = JSON.parse(document.querySelector("#reviews-media").textContent);
-        if (!images) return;
-        for (let i = 0; i < images.length; i++) {
-          const image = images[i];
-          image.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
-          image.src = `${image.src}&width=900`;
-          delete image.preview_image;
+        const media = JSON.parse(document.querySelector("#reviews-media").textContent);
+        if (!media) return;
+        for (let i = 0; i < media.length; i++) {
+          const resource = media[i];
+          if (resource.media_type === "image") {
+            resource.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
+            resource.src = `${image.src}&width=900`;
+            delete resource.preview_image;
+          }
         }
         const textPattern = document.querySelector("#images-pattern").value.replace(/ /g, "");
         let values = textPattern.split(",").map(Number);
@@ -438,7 +440,7 @@
           }
         }
         this.#pattern = pattern;
-        this.#images = images;
+        this.#media = media;
       }
       /**
        * @returns {Promise<void>}
@@ -461,7 +463,7 @@
         this.rate(true);
       }
       group() {
-        if (!this.#images.length) {
+        if (!this.#media.length) {
           return;
         }
         const reviews = this.#reviews;
@@ -469,16 +471,16 @@
         const last = this.#pattern[this.#pattern.length - 1];
         let acc = 0;
         for (let i = 0; i < this.#pattern.length - 1; i++) {
-          const chunk = this.#images.slice(acc, acc + this.#pattern[i]);
+          const chunk = this.#media.slice(acc, acc + this.#pattern[i]);
           chunks.push(chunk);
           acc += this.#pattern[i];
         }
-        for (let i = acc; i < this.#images.length; i += last) {
-          const chunk = this.#images.slice(i, i + last);
+        for (let i = acc; i < this.#media.length; i += last) {
+          const chunk = this.#media.slice(i, i + last);
           chunks.push(chunk);
         }
         for (let i = 0; i < chunks.length; i++) {
-          reviews[i].images = chunks[i];
+          reviews[i].media = chunks[i];
           if (chunks[i].length === 1) {
             reviews[i].single = true;
           }
