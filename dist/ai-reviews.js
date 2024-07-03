@@ -226,10 +226,12 @@
               video_height: video.videoHeight,
               aspect_ratio: video.videoWidth / video.videoHeight,
               media_type: "video",
-              sources: {
-                url,
-                mime_type: file.type
-              }
+              sources: [
+                {
+                  url,
+                  mime_type: file.type
+                }
+              ]
             };
             resolve(loadedVideo);
           });
