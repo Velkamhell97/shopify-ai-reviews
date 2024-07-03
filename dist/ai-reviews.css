@@ -276,6 +276,7 @@
   .review-form__file {
     width: 350px;
     padding: 1rem;
+    max-height: 380px;
   }
 
   .review-form__file-button--upload {
@@ -297,6 +298,7 @@
     --columns:1;
     --gap: 0rem;
     --slide-padding: 15px;
+    height: 100%;
   }
 
   .review-form__file-button--delete {
