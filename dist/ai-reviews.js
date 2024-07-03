@@ -199,7 +199,7 @@
                 height: image.height,
                 aspectRatio: image.width / image.height,
                 media_type: "image",
-                srcset: `${image.src} ${image.src}w`
+                srcset: ""
               };
               resolve(loadedImage);
             };
