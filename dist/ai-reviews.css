@@ -519,18 +519,13 @@
   .review-slide__media {
     display: inline-block;
     position: relative;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%; 
     border-radius: 0.5rem;
     overflow: hidden;
 
     & img {
       display: block;
       height: 100%;
-      width: auto;
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
       object-fit: contain;
     }
   }
