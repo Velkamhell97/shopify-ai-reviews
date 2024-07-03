@@ -220,11 +220,8 @@
           const canvas = document.createElement("canvas");
           const video = document.createElement("video");
           const url = URL.createObjectURL(file);
-          video.autoplay = true;
-          video.muted = true;
           video.src = url;
           video.onloadeddata = () => {
-            console.log("entre");
             const context = canvas.getContext("2d");
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -247,7 +244,6 @@
                 }
               ]
             };
-            console.log(loadedVideo);
             resolve(loadedVideo);
           };
         });
