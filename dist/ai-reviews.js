@@ -258,6 +258,7 @@
             const context = canvas.getContext("2d");
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             const thumbnail = canvas.toDataURL("image/png");
+            console.log(thumbnail);
             resolve(thumbnail);
           });
           video.addEventListener("error", reject);
