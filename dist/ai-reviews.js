@@ -222,11 +222,14 @@
           video.src = url;
           video.addEventListener("loadedmetadata", (e) => {
             const loadedVideo = {
-              src: url,
               video_width: video.videoWidth,
               video_height: video.videoHeight,
               aspect_ratio: video.videoWidth / video.videoHeight,
-              media_type: "video"
+              media_type: "video",
+              sources: {
+                url,
+                mime_type: file.type
+              }
             };
             resolve(loadedVideo);
           });
