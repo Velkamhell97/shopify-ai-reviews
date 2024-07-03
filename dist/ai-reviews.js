@@ -217,37 +217,39 @@
        */
       #loadVideo(file) {
         return new Promise((resolve, reject) => {
+          const canvas = document.createElement("canvas");
           const video = document.createElement("video");
           const url = URL.createObjectURL(file);
+          video.autoplay = true;
+          video.muted = true;
           video.src = url;
-          const template = document.querySelector("#video-preload").content.cloneNode(true);
-          const container = template.querySelector("div");
-          video.addEventListener("canplay", (_) => {
-            this.#captureFrame(video).then((thumbnail) => {
-              const loadedVideo = {
-                src: thumbnail,
-                width: video.videoWidth,
-                height: video.videoHeight,
-                video_width: video.videoWidth,
-                video_height: video.videoHeight,
-                aspect_ratio: video.videoWidth / video.videoHeight,
-                media_type: "video",
-                srcset: "",
-                sources: [
-                  {
-                    url,
-                    mime_type: file.type
-                  }
-                ]
-              };
-              resolve(loadedVideo);
-            });
-          });
-          video.addEventListener("error", reject);
-          container.appendChild(video);
-          const wrapper = document.querySelector(".reviews-wrapper");
-          wrapper.appendChild(container);
-          video.load();
+          video.onloadeddata = () => {
+            video.onloadeddata = null;
+            const context = canvas.getContext("2d");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            video.pause();
+            const thumbnail = canvas.toDataURL("image/png");
+            const loadedVideo = {
+              src: thumbnail,
+              width: video.videoWidth,
+              height: video.videoHeight,
+              video_width: video.videoWidth,
+              video_height: video.videoHeight,
+              aspect_ratio: video.videoWidth / video.videoHeight,
+              media_type: "video",
+              srcset: "",
+              sources: [
+                {
+                  url,
+                  mime_type: file.type
+                }
+              ]
+            };
+            console.log(loadedVideo);
+            resolve(loadedVideo);
+          };
         });
       }
       /**
