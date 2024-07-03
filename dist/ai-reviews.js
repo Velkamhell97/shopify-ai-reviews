@@ -285,6 +285,11 @@
        * @param {number} index
        */
       deleteMedia(index) {
+        const url = this.#media[index]?.sources[0]?.url;
+        if (url) {
+          console.log("revoked inside");
+          URL.revokeObjectURL(url);
+        }
         this.#media.splice(index, 1);
         this.#fields.single = this.#media.length === 1;
         if (!this.#media.length) {
