@@ -190,20 +190,20 @@
           const reader = new FileReader();
           reader.onload = () => {
             reader.onload = null;
-            const image2 = new Image();
-            image2.onload = () => {
-              image2.onload = null;
+            const image = new Image();
+            image.onload = () => {
+              image.onload = null;
               const loadedImage = {
-                src: image2.src,
-                width: image2.width,
-                height: image2.height,
-                aspectRatio: image2.width / image2.height,
-                srcset: `${image2.src} 300w, ${image2.src} 500w, ${image2.src} 750w, ${image2.src} 900w`
+                src: image.src,
+                width: image.width,
+                height: image.height,
+                aspectRatio: image.width / image.height,
+                srcset: `${image.src} 300w, ${image.src} 500w, ${image.src} 750w, ${image.src} 900w`
               };
               resolve(loadedImage);
             };
-            image2.onerror = reject;
-            image2.src = reader.result;
+            image.onerror = reject;
+            image.src = reader.result;
           };
           reader.onerror = reject;
           reader.readAsDataURL(file);
@@ -421,8 +421,8 @@
         for (let i = 0; i < media.length; i++) {
           const resource = media[i];
           if (resource.media_type === "image") {
-            resource.srcset = `${image.src}&width=300 300w, ${image.src}&width=500 500w, ${image.src}&width=750 750w, ${image.src}&width=900 900w`;
-            resource.src = `${image.src}&width=900`;
+            resource.srcset = `${resource.src}&width=300 300w, ${resource.src}&width=500 500w, ${resource.src}&width=750 750w, ${resource.src}&width=900 900w`;
+            resource.src = `${resource.src}&width=900`;
             delete resource.preview_image;
           }
         }
@@ -684,6 +684,7 @@
         });
         try {
           await state.init();
+          console.log(state.reviews);
           this.country = state.country;
           this.reviews = state.reviews;
           this.rating = state.rating;
