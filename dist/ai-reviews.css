@@ -389,24 +389,12 @@
     --slide-padding: 5px;
     align-items: start;
     
-    & .review-slide__media-wrapper {
-      height: 280px;
-    }
-
     @media screen and (width >= 750px) {
       --columns: 2;
-
-      & .review-slide__media-wrapper {
-        height: 290px;
-      }
     }
 
     @media screen and (width >= 990px) {
       --columns: 3;
-
-      & .review-slide__media-wrapper {
-        height: 300px;
-      }
     }
   }
   
@@ -422,10 +410,6 @@
       display: inline-flex !important;
     }
 
-    & .review-slide__media-wrapper {
-      height: 280px;
-    }
-    
     @media (width >= 750px) {
       --columns: 2;
     }
@@ -473,6 +457,7 @@
   }
 
   .btn-reviews--play {
+    display: inline-flex;
     color: black;
     background-color: white;
   }
@@ -570,6 +555,10 @@
 
   .absolute {
     position: absolute;
+  }
+
+  .expand {
+    inset: 0;
   }
 
   .flex {
