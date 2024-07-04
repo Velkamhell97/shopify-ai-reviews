@@ -288,8 +288,6 @@
 
   .btn-reviews--file {
     font-size: 16px;
-    background-color: #d6d4d4;
-    color: black;
     padding: 1rem;
     border-radius: 0.25rem;
     cursor: pointer;
@@ -506,7 +504,7 @@
     position: relative;
   }
 
-  .btn-reviews--close {
+  .btn-reviews--transparent {
     margin-bottom: 6px;
     background-color: transparent;
   }
