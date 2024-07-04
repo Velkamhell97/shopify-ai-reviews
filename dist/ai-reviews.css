@@ -121,7 +121,7 @@
   .reviews-dialog__slideshow > button, .reviews-form__slideshow > button {
     position: absolute;
     top: 50%;
-    translate: -50% 0px;
+    translate: 0px -50%;
   }
 
   .slideshow-controls-relative {
@@ -129,7 +129,7 @@
     justify-content: space-between;
 
     > button {
-      transition: transform 0.2s ease;
+      transition: scale 0.2s ease;
 
       &:disabled {
         opacity: 0.65;
@@ -137,7 +137,7 @@
       }
   
       &:not(:disabled):hover {
-        transform: scale(1.15);
+        scale: 1.15;
       }
     }
   }
