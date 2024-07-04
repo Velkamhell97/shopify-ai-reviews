@@ -483,6 +483,12 @@
     }
   }
 
+  .btn-reviews--transparent {
+    margin-bottom: 6px;
+    background-color: transparent;
+  }
+
+
   .reviews-dialog__wrapper {
     align-items: start;
   }
@@ -500,11 +506,10 @@
     position: relative;
   }
 
-  .btn-reviews--transparent {
-    margin-bottom: 6px;
-    background-color: transparent;
+  .reviews-dialog__content {
+    width: 100%;
   }
-
+ 
   @media screen and (width >= 750px) {
     #reviews-dialog {
       max-width: 770px;
