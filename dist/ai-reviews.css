@@ -78,10 +78,6 @@
     color: #0a3622;
   }
 
-  .rounded-button {
-    border-radius: 50%;
-  }
-
   .media-caption {
     padding: 0.5rem 1rem;
     font-size: 14px;
@@ -414,24 +410,6 @@
 
 
   /*#region Review Slide */
-  .review-slide__media-wrapper {
-    max-width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .review-slide {
-    cursor: pointer;
-    gap: 0.75rem;
-    box-shadow: 3px 4px 8px rgba(0, 0, 0, .2);
-    transition: box-shadow 0.2s ease;
-
-    &:hover {
-      box-shadow: 3px 4px 15px rgba(0, 0, 0, .4);
-    }
-  }
-
   .review-slide-wrapper {
     position: relative;
 
@@ -448,10 +426,28 @@
     }
   }
 
+  .review-slide {
+    cursor: pointer;
+    gap: 0.75rem;
+    box-shadow: 3px 4px 8px rgba(0, 0, 0, .2);
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+      box-shadow: 3px 4px 15px rgba(0, 0, 0, .4);
+    }
+  }
+
   .btn-reviews--play {
     display: inline-flex;
     color: black;
     background-color: white;
+  }
+
+  .review-slide__media-wrapper {
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .review-slide__media {
