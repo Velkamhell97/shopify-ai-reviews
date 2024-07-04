@@ -16,10 +16,10 @@
   }
 
   .scale-effect {
-    transition: transform 0.2s ease;
+    transition: scale 0.2s ease;
 
     &:hover {
-      transform: scale(1.05);
+      scale: 1.05;
     }
   }
 
@@ -121,7 +121,7 @@
   .reviews-dialog__slideshow > button, .reviews-form__slideshow > button {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
+    translate: -50% 0px;
   }
 
   .slideshow-controls-relative {
