@@ -118,12 +118,10 @@
     }
   }
 
-  .reviews-dialog__slideshow, .reviews-form__slideshow {
-    > button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-    }
+  .reviews-dialog__slideshow > button, .reviews-form__slideshow > button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .slideshow-controls-relative {
