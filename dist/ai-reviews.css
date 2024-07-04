@@ -438,6 +438,13 @@
 
 
   /*#region Review Slide */
+  .review-slide__media-wrapper {
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   .review-slide {
     cursor: pointer;
     gap: 0.75rem;
