@@ -1,5 +1,8 @@
 (() => {
   // src/ai-reviews.js
+  function hasError(response) {
+    return "message" in response;
+  }
   var CustomCollapsible = class extends HTMLElement {
     /**
      * @type {any}
@@ -123,557 +126,551 @@
     }
   };
   customElements.define("custom-slideshow", CustomSlideshow);
-  document.addEventListener("alpine:init", () => {
-    function hasError(response) {
-      return "message" in response;
+  var FormController = class {
+    /**
+     * @type {HTMLFormElement}
+     * @private
+     */
+    #form = null;
+    /**
+     * @type {number}
+     * @private
+     */
+    #maxFiles;
+    /**
+     * @type {ReviewMedia[]}
+     * @private
+     */
+    #media;
+    /**
+     * @type {Review}
+     * @private
+     */
+    #fields = { stars: 1, single: false };
+    /**
+     * @type {boolean}
+     * @readonly
+     */
+    submitted = false;
+    constructor() {
+      this.#maxFiles = 3;
+      this.reload();
     }
-    const database = firestore;
-    class FormController {
-      /**
-       * @type {HTMLFormElement}
-       * @private
-       */
-      #form = null;
-      /**
-       * @type {number}
-       * @private
-       */
-      #maxFiles;
-      /**
-       * @type {ReviewMedia[]}
-       * @private
-       */
-      #media;
-      /**
-       * @type {Review}
-       * @private
-       */
-      #fields = { stars: 1, single: false };
-      /**
-       * @type {boolean}
-       * @readonly
-       */
-      submitted = false;
-      constructor() {
-        this.#maxFiles = 3;
-        this.reload();
-      }
-      reload() {
-        this.#form = document.querySelector("#review-form");
-      }
-      /**
-       * @returns {Review?}
-       * @private
-       */
-      #data() {
-        if (!this.#form) return null;
-        const options = { year: "numeric", month: "long", day: "numeric" };
-        const datetime = new Intl.DateTimeFormat("es", options);
-        const date = datetime.format(/* @__PURE__ */ new Date());
-        const { author, description } = Object.fromEntries(new FormData(this.#form));
-        const review = { author, description, ...this.#fields, media: this.#media, date };
-        return review;
-      }
-      /**
-       * @param {number} value
-       */
-      set stars(value) {
-        this.#fields.stars = value - 1;
-      }
-      /**
-       * @param {any} file
-       * @returns {Promise<ReviewMedia>}
-       * @private
-       */
-      #loadImage(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            reader.onload = null;
-            const image = new Image();
-            image.onload = () => {
-              image.onload = null;
-              const loadedImage = {
-                src: image.src,
-                width: image.width,
-                height: image.height,
-                aspect_ratio: image.width / image.height,
-                media_type: "image",
-                srcset: ""
-              };
-              resolve(loadedImage);
+    reload() {
+      this.#form = document.querySelector("#review-form");
+    }
+    /**
+     * @returns {Review?}
+     * @private
+     */
+    #data() {
+      if (!this.#form) return null;
+      const options = { year: "numeric", month: "long", day: "numeric" };
+      const datetime = new Intl.DateTimeFormat("es", options);
+      const date = datetime.format(/* @__PURE__ */ new Date());
+      const { author, description } = Object.fromEntries(new FormData(this.#form));
+      const review = { author, description, ...this.#fields, media: this.#media, date };
+      return review;
+    }
+    /**
+     * @param {number} value
+     */
+    set stars(value) {
+      this.#fields.stars = value - 1;
+    }
+    /**
+     * @param {any} file
+     * @returns {Promise<ReviewMedia>}
+     * @private
+     */
+    #loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          reader.onload = null;
+          const image = new Image();
+          image.onload = () => {
+            image.onload = null;
+            const loadedImage = {
+              src: image.src,
+              width: image.width,
+              height: image.height,
+              aspect_ratio: image.width / image.height,
+              media_type: "image",
+              srcset: ""
             };
-            image.onerror = reject;
-            image.src = reader.result;
+            resolve(loadedImage);
           };
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      }
-      /**
-       * @param {any} file
-       * @returns {Promise<ReviewMedia>}
-       * @private
-       */
-      #loadVideo(file) {
-        return new Promise((resolve, reject) => {
-          const canvas = document.createElement("canvas");
-          const video = document.createElement("video");
-          const url = URL.createObjectURL(file);
-          video.autoplay = true;
-          video.muted = true;
-          video.src = url;
-          video.onloadeddata = () => {
-            const context = canvas.getContext("2d");
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            video.pause();
-            const thumbnail = canvas.toDataURL("image/png");
-            const loadedVideo = {
-              src: thumbnail,
-              width: video.videoWidth,
-              height: video.videoHeight,
-              video_width: video.videoWidth,
-              video_height: video.videoHeight,
-              aspect_ratio: video.videoWidth / video.videoHeight,
-              media_type: "video",
-              srcset: "",
-              sources: [
-                {
-                  url,
-                  mime_type: file.type
-                }
-              ]
-            };
-            resolve(loadedVideo);
+          image.onerror = reject;
+          image.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    /**
+     * @param {any} file
+     * @returns {Promise<ReviewMedia>}
+     * @private
+     */
+    #loadVideo(file) {
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        const video = document.createElement("video");
+        const url = URL.createObjectURL(file);
+        video.autoplay = true;
+        video.muted = true;
+        video.src = url;
+        video.onloadeddata = () => {
+          const context = canvas.getContext("2d");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          video.pause();
+          const thumbnail = canvas.toDataURL("image/png");
+          const loadedVideo = {
+            src: thumbnail,
+            width: video.videoWidth,
+            height: video.videoHeight,
+            video_width: video.videoWidth,
+            video_height: video.videoHeight,
+            aspect_ratio: video.videoWidth / video.videoHeight,
+            media_type: "video",
+            srcset: "",
+            sources: [
+              {
+                url,
+                mime_type: file.type
+              }
+            ]
           };
-        });
+          resolve(loadedVideo);
+        };
+      });
+    }
+    /**
+     * @param {Event} event
+     * @returns {Promise<ReviewMedia[]>}
+     */
+    async uploadFiles(event) {
+      const files = event.target.files;
+      if (!files.length) return [];
+      if (files.length > this.#maxFiles) {
+        alert(`Solo pueden subirse ${this.#maxFiles} archivo(s)`);
+        return [];
       }
-      /**
-       * @param {Event} event
-       * @returns {Promise<ReviewMedia[]>}
-       */
-      async uploadFiles(event) {
-        const files = event.target.files;
-        if (!files.length) return [];
-        if (files.length > this.#maxFiles) {
-          alert(`Solo pueden subirse ${this.#maxFiles} archivo(s)`);
+      const promises = [];
+      for (let i = 0; i < files.length; i++) {
+        if (files[i].size > 4 * 1024 * 1024) {
+          alert("Uno de los archivos es muy grande, m\xE1ximo 4MB");
           return [];
         }
-        const promises = [];
-        for (let i = 0; i < files.length; i++) {
-          console.log(files[i]);
-          if (files[i].size > 4 * 1024 * 1024) {
-            alert("Uno de los archivos es muy grande, m\xE1ximo 4MB");
-            return [];
-          }
-          if (files[i].type.startsWith("image/")) {
-            promises.push(this.#loadImage(files[i]));
-          } else if (files[i].type.startsWith("video/")) {
-            promises.push(this.#loadVideo(files[i]));
-          } else {
-            alert("Solo puedes cargar imagenes o videos");
-            return [];
-          }
-        }
-        this.#media = await Promise.all(promises);
-        this.#fields.single = this.#media.length === 1;
-        return [...this.#media];
-      }
-      /**
-       * @param {number} index
-       */
-      deleteMedia(index) {
-        const sources = this.#media[index].sources;
-        if (sources) {
-          console.log("revoked inside");
-          URL.revokeObjectURL(sources[0].url);
-        }
-        this.#media.splice(index, 1);
-        this.#fields.single = this.#media.length === 1;
-        if (!this.#media.length) {
-          const file = this.#form?.querySelector("input[type='file']");
-          if (file) file.value = "";
-        }
-      }
-      /**
-       * @returns {Review?}
-       */
-      submit() {
-        const review = this.#data();
-        this.#fields = { stars: 1, single: false };
-        this.#media = [];
-        this.#form?.reset();
-        if (review) {
-          this.submitted = true;
-        }
-        return review;
-      }
-    }
-    const form = new FormController();
-    class DialogController {
-      /**
-       * @type {HTMLElement}
-       * @private
-       */
-      #dialog;
-      /**
-       * @type {HTMLElement}
-       * @private
-       */
-      #mainSelector;
-      /**
-       * @type {HTMLElement}
-       * @private
-       */
-      #secondarySelector;
-      /**
-       * @type {any}
-       * @private
-       */
-      #mainSelectorListener;
-      /**
-       * @type {any}
-       * @private
-       */
-      #secondarySelectorListener;
-      constructor() {
-        this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
-        this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
-        this.reload();
-      }
-      reload() {
-        this.#dialog = document.querySelector("#reviews-dialog");
-        const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
-        this.#mainSelector = mainSelector;
-        this.#secondarySelector = secondarySelector;
-        this.#setupVariants();
-      }
-      show() {
-        this.#dialog?.showModal();
-      }
-      hide() {
-        this.#dialog?.close();
-      }
-      /**
-       * @param {Event} e
-       * @private
-       */
-      #mainSelectorHandler(e) {
-        const mainInputs = this.#mainSelector.querySelectorAll("input");
-        const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
-        const index = [...mainInputs].indexOf(e.target);
-        secondaryInputs[index].checked = true;
-      }
-      /**
-       * @param {Event} e
-       * @private
-       */
-      #secondarySelectorHandler(e) {
-        e.stopImmediatePropagation();
-        const mainInputs = this.#mainSelector.querySelectorAll("input");
-        const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
-        const index = [...secondaryInputs].indexOf(e.target);
-        mainInputs[index].click();
-      }
-      /**
-       * @private
-       */
-      #setupVariants() {
-        if (!this.#mainSelector || !this.#secondarySelector) {
-          console.info("DialogController -> setupVariants() -> Any variant picker found");
-          return;
-        }
-        this.#mainSelector.removeEventListener("change", this.#mainSelectorListener);
-        this.#mainSelector.addEventListener("change", this.#mainSelectorListener);
-        this.#secondarySelector.removeEventListener("change", this.#secondarySelectorListener);
-        this.#secondarySelector.addEventListener("change", this.#secondarySelectorListener);
-      }
-    }
-    const modal = new DialogController();
-    class State {
-      /**
-       * @type {Database}
-       * @private
-       */
-      #database;
-      /**
-       * @type {boolean}
-       * @private
-       */
-      #fetched = false;
-      /**
-       * @type {boolean}
-       */
-      active;
-      /**
-       * @type {boolean}
-       */
-      exists;
-      /**
-       * @type {string}
-       */
-      country;
-      /**
-       * @type {Rating}
-       * @private
-       */
-      #rating = { average: "0.0", individuals: [{ v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }] };
-      /**
-       * @type {Review[]}
-       * @private
-       */
-      #defaultReviews = [
-        { author: "Mar\xEDa Gonz\xE1lez", description: "Desde que compr\xE9 este producto, he ahorrado tanto tiempo como dinero. La entrega lleg\xF3 rapid\xEDsimo y en perfectas condiciones. Es incre\xEDble c\xF3mo facilita mi d\xEDa a d\xEDa. \xA1Definitivamente vale la pena probarlo, no me arrepiento de la compra!" },
-        { author: "Carlos Ram\xEDrez", description: "Llevaba meses buscando algo as\xED y finalmente lo encontr\xE9 aqu\xED. La atenci\xF3n al cliente fue muy buena, despejaron todas mis dudas con rapidez y profesionalismo. Muy satisfecho con la compra, es justo lo que necesitaba para resolver mi problema" },
-        { author: "Laura Fern\xE1ndez", description: "No esperaba que este producto fuera de tanta calidad, pero ahora estoy muy satisfecha. La entrega fue r\xE1pida y sin complicaciones, lo que me dio mucha tranquilidad. Recomiendo este producto sin dudarlo, realmente super\xF3 mis expectativas iniciales." },
-        { author: "Juan Mart\xEDnez", description: "Nunca me fiaba de comprar en estas p\xE1ginas, pero este producto me hizo cambiar de opini\xF3n. El servicio al cliente fue muy amable y eficiente. Estoy muy contento con la compra y siento que puedo confiar en este sitio para futuras compras." },
-        { author: "Ana L\xF3pez", description: "Pens\xE9 que ser\xEDa una estafa, pero el producto lleg\xF3 en muy poco tiempo y fue tal como lo describen. Funcion\xF3 perfectamente desde el primer d\xEDa. Honestamente, estoy muy impresionado y definitivamente lo recomendar\xEDa a cualquiera." },
-        { author: "Luis P\xE9rez", description: "Este producto ha solucionado un problema que ten\xEDa desde hace tiempo. La entrega fue incre\xEDblemente r\xE1pida y eficiente. Realmente cambi\xF3 mi rutina diaria para mejor. Muy satisfecho con la compra y siempre lo recomiendo a amigos y conocidos." },
-        { author: "Marta S\xE1nchez", description: "Estaba buscando una soluci\xF3n a mi problema y este producto fue perfecto. El servicio al cliente fue muy servicial y atento, me ayudaron en todo momento. Lo recomiendo sin dudar, es una inversi\xF3n que realmente vale la pena." },
-        { author: "Diego Rivera", description: "El precio me pareci\xF3 muy razonable para la calidad que ofrece. Realmente ha sido una muy buena inversi\xF3n. He notado mejoras significativas en mi rutina diaria desde que lo uso. Es definitivamente algo que recomendar\xEDa a quien busque calidad a buen precio." },
-        { author: "Patricia G\xF3mez", description: "Es justo lo que necesitaba. La atenci\xF3n al cliente fue excelente y siempre estuvieron dispuestos a ayudar con mis dudas. Estoy muy satisfecho con mi compra y no dudar\xE9 en recomendar este producto a mis amigos y familiares." },
-        { author: "Javier Torres", description: "Ten\xEDa mis dudas pero este producto cumpli\xF3 con todas mis expectativas. La entrega fue muy r\xE1pida, lleg\xF3 antes de lo que esperaba y sin ning\xFAn inconveniente. Estoy muy contento con la compra y lo recomendar\xEDa sin dudar." },
-        { author: "Claudia Hern\xE1ndez", description: "Este producto ha sido de gran ayuda para mi d\xEDa a d\xEDa. La atenci\xF3n al cliente es fenomenal y resolvieron todas mis dudas inmediatamente. Lo recomiendo a quienes busquen una buena soluci\xF3n para facilitar su rutina diaria." },
-        { author: "Alberto Ruiz", description: "No era f\xE1cil encontrar algo as\xED, pero aqu\xED lo tienen. La entrega fue sorprendentemente r\xE1pida y eficiente, lo cual agradezco mucho. Muy feliz con mi compra, el producto funciona perfectamente y cumple con todas mis expectativas." },
-        { author: "Daniela Castillo", description: "La durabilidad de este producto es impresionante. Lo uso todos los d\xEDas y sigue como nuevo. Realmente lo recomendar\xEDa a cualquiera que busque un producto fiable y duradero. Estoy extremadamente satisfecho con mi compra." },
-        { author: "Pablo Vargas", description: "Me sorprendi\xF3 lo r\xE1pido que lleg\xF3 el paquete y la calidad del producto. El env\xEDo fue tan r\xE1pido que no tuve que esperar nada. Estoy muy satisfecho con la compra y el producto cumple todas mis expectativas." },
-        { author: "Sof\xEDa Morales", description: "Este producto ha sido clave para mejorar mi rutina diaria. Me ahorra mucho tiempo y esfuerzo, y la verdad es que fue una inversi\xF3n excelente. Sin duda, fue una buena compra que volver\xEDa a hacer sin pensarlo dos veces." },
-        { author: "Fernando Guti\xE9rrez", description: "La rapidez en la entrega me sorprendi\xF3 gratamente. El producto es de buena calidad y cumple su funci\xF3n perfectamente, justo lo que necesitaba. Definitivamente lo recomendar\xEDa a quienes buscan eficiencia y calidad en un mismo producto." },
-        { author: "Carolina Castro", description: "El producto es justo lo que necesitaba y la atenci\xF3n al cliente fue estupenda. Me ayudaron con todas mis dudas de forma r\xE1pida y efectiva. Lo recomendar\xE9 a mis amigos, estoy completamente satisfecho con mi experiencia de compra." },
-        { author: "Ricardo D\xEDaz", description: "Hab\xEDa probado otros y ninguno como este. La calidad del producto es excelente y cumpli\xF3 con todas mis expectativas. La entrega fue muy r\xE1pida y sin problemas. \xA1Lo recomiendo a cualquiera que busque calidad y eficiencia en un solo producto!" },
-        { author: "Elena Vargas", description: "Desde que lo tengo, he notado una mejora significativa en mis actividades diarias. La atenci\xF3n al cliente fue muy cordial y siempre estuvieron disponibles para ayudarme. Definitivamente lo recomendar\xE9, realmente ha marcado una diferencia en mi rutina." },
-        { author: "Andr\xE9s Mendoza", description: "Este producto me ha facilitado mucho la vida. Lleg\xF3 antes de lo previsto y en perfectas condiciones. Estoy muy satisfecho con la compra y lo recomendar\xE9 sin dudas a quienes buscan soluciones pr\xE1cticas y de calidad." }
-      ];
-      /**
-       * @type {ReviewMedia[]}
-       * @private
-       */
-      #media = [];
-      /**
-       * @type {number[]}
-       * @private
-       */
-      #pattern;
-      /**
-       * @type {Review[]}
-       * @private
-       */
-      #reviews = [];
-      /**
-       * @param {Database} database
-       */
-      constructor(database2) {
-        this.#database = database2;
-        const media = JSON.parse(document.querySelector("#reviews-media").textContent);
-        if (!media) return;
-        for (let i = 0; i < media.length; i++) {
-          const resource = media[i];
-          if (resource.media_type === "image") {
-            resource.srcset = `${resource.src}&width=300 300w, ${resource.src}&width=500 500w, ${resource.src}&width=750 750w, ${resource.src}&width=900 900w`;
-            resource.src = `${resource.src}&width=900`;
-            delete resource.preview_image;
-          } else {
-            resource.src = `${resource.preview_image.src}`;
-            resource.width = `${resource.preview_image.width}`;
-            resource.height = `${resource.preview_image.height}`;
-            resource.srcset = `${resource.src} ${resource.width}w`;
-            resource.video_width = `${resource.sources[0].width}`;
-            resource.video_height = `${resource.sources[0].height}`;
-            delete resource.preview_image;
-          }
-        }
-        const textPattern = document.querySelector("#media-pattern").value.replace(/ /g, "");
-        let values = textPattern.split(",").map(Number);
-        const pattern = [...values];
-        for (let i = 0; i < values.length; i++) {
-          const number = pattern[i];
-          if (number > 9) {
-            const parts = number.toString().split("").map(Number);
-            pattern.splice(i, 1);
-            for (let j = 0; j < parts.length; j++) {
-              pattern.splice(i + j, 0, parts[j]);
-            }
-          }
-        }
-        this.#pattern = pattern;
-        this.#media = media;
-      }
-      /**
-       * @returns {Promise<void>}
-       */
-      async init() {
-        await this.#fetchReviews();
-      }
-      /**
-       * @param {Review} review
-       */
-      add(review) {
-        this.#reviews.unshift(review);
-        this.rate(true);
-      }
-      /**
-       * @param {number} index
-       */
-      remove(index) {
-        this.#reviews.splice(index, 1);
-        this.rate(true);
-      }
-      group() {
-        if (!this.#media.length) {
-          return;
-        }
-        const reviews = this.#reviews;
-        const chunks = [];
-        const last = this.#pattern[this.#pattern.length - 1];
-        let acc = 0;
-        for (let i = 0; i < this.#pattern.length - 1; i++) {
-          const chunk = this.#media.slice(acc, acc + this.#pattern[i]);
-          chunks.push(chunk);
-          acc += this.#pattern[i];
-        }
-        for (let i = acc; i < this.#media.length; i += last) {
-          const chunk = this.#media.slice(i, i + last);
-          chunks.push(chunk);
-        }
-        for (let i = 0; i < chunks.length; i++) {
-          reviews[i].media = chunks[i];
-          if (chunks[i].length === 1) {
-            reviews[i].single = true;
-          }
-        }
-      }
-      /**
-       * @param {boolean} keepOld
-       */
-      rate(keepOld) {
-        const reviews = this.#reviews;
-        let sum = 0;
-        const starsAcc = [0, 0, 0, 0, 0];
-        if (keepOld) {
-          for (let i = 0; i < reviews.length; i++) {
-            const stars = reviews[i].stars;
-            starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
-            sum = sum + stars;
-          }
+        if (files[i].type.startsWith("image/")) {
+          promises.push(this.#loadImage(files[i]));
+        } else if (files[i].type.startsWith("video/")) {
+          promises.push(this.#loadVideo(files[i]));
         } else {
-          const weight = 0.05;
-          for (let i = 0; i < reviews.length; i++) {
-            const stars = Math.random() < weight ? 4 : 5;
-            reviews[i].stars = stars;
-            starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
-            sum = sum + stars;
+          alert("Solo puedes cargar imagenes o videos");
+          return [];
+        }
+      }
+      this.#media = await Promise.all(promises);
+      this.#fields.single = this.#media.length === 1;
+      return [...this.#media];
+    }
+    /**
+     * @param {number} index
+     */
+    deleteMedia(index) {
+      const sources = this.#media[index].sources;
+      if (sources) {
+        URL.revokeObjectURL(sources[0].url);
+      }
+      this.#media.splice(index, 1);
+      this.#fields.single = this.#media.length === 1;
+      if (!this.#media.length) {
+        const file = this.#form?.querySelector("input[type='file']");
+        if (file) file.value = "";
+      }
+    }
+    /**
+     * @returns {Review?}
+     */
+    submit() {
+      const review = this.#data();
+      this.#fields = { stars: 1, single: false };
+      this.#media = [];
+      this.#form?.reset();
+      if (review) {
+        this.submitted = true;
+      }
+      return review;
+    }
+  };
+  var form = new FormController();
+  var DialogController = class {
+    /**
+     * @type {HTMLElement}
+     * @private
+     */
+    #dialog;
+    /**
+     * @type {HTMLElement}
+     * @private
+     */
+    #mainSelector;
+    /**
+     * @type {HTMLElement}
+     * @private
+     */
+    #secondarySelector;
+    /**
+     * @type {any}
+     * @private
+     */
+    #mainSelectorListener;
+    /**
+     * @type {any}
+     * @private
+     */
+    #secondarySelectorListener;
+    constructor() {
+      this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
+      this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
+      this.reload();
+    }
+    reload() {
+      this.#dialog = document.querySelector("#reviews-dialog");
+      const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
+      this.#mainSelector = mainSelector;
+      this.#secondarySelector = secondarySelector;
+      this.#setupVariants();
+    }
+    show() {
+      this.#dialog?.showModal();
+    }
+    hide() {
+      this.#dialog?.close();
+    }
+    /**
+     * @param {Event} e
+     * @private
+     */
+    #mainSelectorHandler(e) {
+      const mainInputs = this.#mainSelector.querySelectorAll("input");
+      const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
+      const index = [...mainInputs].indexOf(e.target);
+      secondaryInputs[index].checked = true;
+    }
+    /**
+     * @param {Event} e
+     * @private
+     */
+    #secondarySelectorHandler(e) {
+      e.stopImmediatePropagation();
+      const mainInputs = this.#mainSelector.querySelectorAll("input");
+      const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
+      const index = [...secondaryInputs].indexOf(e.target);
+      mainInputs[index].click();
+    }
+    /**
+     * @private
+     */
+    #setupVariants() {
+      if (!this.#mainSelector || !this.#secondarySelector) {
+        console.info("DialogController -> setupVariants() -> Any variant picker found");
+        return;
+      }
+      this.#mainSelector.removeEventListener("change", this.#mainSelectorListener);
+      this.#mainSelector.addEventListener("change", this.#mainSelectorListener);
+      this.#secondarySelector.removeEventListener("change", this.#secondarySelectorListener);
+      this.#secondarySelector.addEventListener("change", this.#secondarySelectorListener);
+    }
+  };
+  var modal = new DialogController();
+  var State = class {
+    /**
+     * @type {Database}
+     * @private
+     */
+    #database;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    #fetched = false;
+    /**
+     * @type {boolean}
+     */
+    active;
+    /**
+     * @type {boolean}
+     */
+    exists;
+    /**
+     * @type {string}
+     */
+    country;
+    /**
+     * @type {Rating}
+     * @private
+     */
+    #rating = { average: "0.0", individuals: [{ v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }] };
+    /**
+     * @type {Review[]}
+     * @private
+     */
+    #defaultReviews = [
+      { author: "Mar\xEDa Gonz\xE1lez", description: "Desde que compr\xE9 este producto, he ahorrado tanto tiempo como dinero. La entrega lleg\xF3 rapid\xEDsimo y en perfectas condiciones. Es incre\xEDble c\xF3mo facilita mi d\xEDa a d\xEDa. \xA1Definitivamente vale la pena probarlo, no me arrepiento de la compra!" },
+      { author: "Carlos Ram\xEDrez", description: "Llevaba meses buscando algo as\xED y finalmente lo encontr\xE9 aqu\xED. La atenci\xF3n al cliente fue muy buena, despejaron todas mis dudas con rapidez y profesionalismo. Muy satisfecho con la compra, es justo lo que necesitaba para resolver mi problema" },
+      { author: "Laura Fern\xE1ndez", description: "No esperaba que este producto fuera de tanta calidad, pero ahora estoy muy satisfecha. La entrega fue r\xE1pida y sin complicaciones, lo que me dio mucha tranquilidad. Recomiendo este producto sin dudarlo, realmente super\xF3 mis expectativas iniciales." },
+      { author: "Juan Mart\xEDnez", description: "Nunca me fiaba de comprar en estas p\xE1ginas, pero este producto me hizo cambiar de opini\xF3n. El servicio al cliente fue muy amable y eficiente. Estoy muy contento con la compra y siento que puedo confiar en este sitio para futuras compras." },
+      { author: "Ana L\xF3pez", description: "Pens\xE9 que ser\xEDa una estafa, pero el producto lleg\xF3 en muy poco tiempo y fue tal como lo describen. Funcion\xF3 perfectamente desde el primer d\xEDa. Honestamente, estoy muy impresionado y definitivamente lo recomendar\xEDa a cualquiera." },
+      { author: "Luis P\xE9rez", description: "Este producto ha solucionado un problema que ten\xEDa desde hace tiempo. La entrega fue incre\xEDblemente r\xE1pida y eficiente. Realmente cambi\xF3 mi rutina diaria para mejor. Muy satisfecho con la compra y siempre lo recomiendo a amigos y conocidos." },
+      { author: "Marta S\xE1nchez", description: "Estaba buscando una soluci\xF3n a mi problema y este producto fue perfecto. El servicio al cliente fue muy servicial y atento, me ayudaron en todo momento. Lo recomiendo sin dudar, es una inversi\xF3n que realmente vale la pena." },
+      { author: "Diego Rivera", description: "El precio me pareci\xF3 muy razonable para la calidad que ofrece. Realmente ha sido una muy buena inversi\xF3n. He notado mejoras significativas en mi rutina diaria desde que lo uso. Es definitivamente algo que recomendar\xEDa a quien busque calidad a buen precio." },
+      { author: "Patricia G\xF3mez", description: "Es justo lo que necesitaba. La atenci\xF3n al cliente fue excelente y siempre estuvieron dispuestos a ayudar con mis dudas. Estoy muy satisfecho con mi compra y no dudar\xE9 en recomendar este producto a mis amigos y familiares." },
+      { author: "Javier Torres", description: "Ten\xEDa mis dudas pero este producto cumpli\xF3 con todas mis expectativas. La entrega fue muy r\xE1pida, lleg\xF3 antes de lo que esperaba y sin ning\xFAn inconveniente. Estoy muy contento con la compra y lo recomendar\xEDa sin dudar." },
+      { author: "Claudia Hern\xE1ndez", description: "Este producto ha sido de gran ayuda para mi d\xEDa a d\xEDa. La atenci\xF3n al cliente es fenomenal y resolvieron todas mis dudas inmediatamente. Lo recomiendo a quienes busquen una buena soluci\xF3n para facilitar su rutina diaria." },
+      { author: "Alberto Ruiz", description: "No era f\xE1cil encontrar algo as\xED, pero aqu\xED lo tienen. La entrega fue sorprendentemente r\xE1pida y eficiente, lo cual agradezco mucho. Muy feliz con mi compra, el producto funciona perfectamente y cumple con todas mis expectativas." },
+      { author: "Daniela Castillo", description: "La durabilidad de este producto es impresionante. Lo uso todos los d\xEDas y sigue como nuevo. Realmente lo recomendar\xEDa a cualquiera que busque un producto fiable y duradero. Estoy extremadamente satisfecho con mi compra." },
+      { author: "Pablo Vargas", description: "Me sorprendi\xF3 lo r\xE1pido que lleg\xF3 el paquete y la calidad del producto. El env\xEDo fue tan r\xE1pido que no tuve que esperar nada. Estoy muy satisfecho con la compra y el producto cumple todas mis expectativas." },
+      { author: "Sof\xEDa Morales", description: "Este producto ha sido clave para mejorar mi rutina diaria. Me ahorra mucho tiempo y esfuerzo, y la verdad es que fue una inversi\xF3n excelente. Sin duda, fue una buena compra que volver\xEDa a hacer sin pensarlo dos veces." },
+      { author: "Fernando Guti\xE9rrez", description: "La rapidez en la entrega me sorprendi\xF3 gratamente. El producto es de buena calidad y cumple su funci\xF3n perfectamente, justo lo que necesitaba. Definitivamente lo recomendar\xEDa a quienes buscan eficiencia y calidad en un mismo producto." },
+      { author: "Carolina Castro", description: "El producto es justo lo que necesitaba y la atenci\xF3n al cliente fue estupenda. Me ayudaron con todas mis dudas de forma r\xE1pida y efectiva. Lo recomendar\xE9 a mis amigos, estoy completamente satisfecho con mi experiencia de compra." },
+      { author: "Ricardo D\xEDaz", description: "Hab\xEDa probado otros y ninguno como este. La calidad del producto es excelente y cumpli\xF3 con todas mis expectativas. La entrega fue muy r\xE1pida y sin problemas. \xA1Lo recomiendo a cualquiera que busque calidad y eficiencia en un solo producto!" },
+      { author: "Elena Vargas", description: "Desde que lo tengo, he notado una mejora significativa en mis actividades diarias. La atenci\xF3n al cliente fue muy cordial y siempre estuvieron disponibles para ayudarme. Definitivamente lo recomendar\xE9, realmente ha marcado una diferencia en mi rutina." },
+      { author: "Andr\xE9s Mendoza", description: "Este producto me ha facilitado mucho la vida. Lleg\xF3 antes de lo previsto y en perfectas condiciones. Estoy muy satisfecho con la compra y lo recomendar\xE9 sin dudas a quienes buscan soluciones pr\xE1cticas y de calidad." }
+    ];
+    /**
+     * @type {ReviewMedia[]}
+     * @private
+     */
+    #media = [];
+    /**
+     * @type {number[]}
+     * @private
+     */
+    #pattern;
+    /**
+     * @type {Review[]}
+     * @private
+     */
+    #reviews = [];
+    /**
+     * @param {Database} database
+     */
+    constructor(database) {
+      this.#database = database;
+      const media = JSON.parse(document.querySelector("#reviews-media").textContent);
+      if (!media) return;
+      for (let i = 0; i < media.length; i++) {
+        const resource = media[i];
+        if (resource.media_type === "image") {
+          resource.srcset = `${resource.src}&width=300 300w, ${resource.src}&width=500 500w, ${resource.src}&width=750 750w, ${resource.src}&width=900 900w`;
+          resource.src = `${resource.src}&width=900`;
+          delete resource.preview_image;
+        } else {
+          resource.src = `${resource.preview_image.src}`;
+          resource.width = `${resource.preview_image.width}`;
+          resource.height = `${resource.preview_image.height}`;
+          resource.srcset = `${resource.src} ${resource.width}w`;
+          resource.video_width = `${resource.sources[0].width}`;
+          resource.video_height = `${resource.sources[0].height}`;
+          delete resource.preview_image;
+        }
+      }
+      const textPattern = document.querySelector("#media-pattern").value.replace(/ /g, "");
+      let values = textPattern.split(",").map(Number);
+      const pattern = [...values];
+      for (let i = 0; i < values.length; i++) {
+        const number = pattern[i];
+        if (number > 9) {
+          const parts = number.toString().split("").map(Number);
+          pattern.splice(i, 1);
+          for (let j = 0; j < parts.length; j++) {
+            pattern.splice(i + j, 0, parts[j]);
           }
         }
-        for (let i = 0; i < 5; i++) {
-          const v = starsAcc[i];
-          const p = Math.round(v / reviews.length * 100);
-          this.#rating.individuals[i] = { v, p };
-        }
-        const average = sum / reviews.length;
-        this.#rating.average = average.toFixed(1);
       }
-      date() {
-        const reviews = this.#reviews;
-        const now = /* @__PURE__ */ new Date();
-        const dayinMillis = 864e5;
-        const options = { year: "numeric", month: "long", day: "numeric" };
-        const datetime = new Intl.DateTimeFormat("es", options);
+      this.#pattern = pattern;
+      this.#media = media;
+    }
+    /**
+     * @returns {Promise<void>}
+     */
+    async init() {
+      await this.#fetchReviews();
+    }
+    /**
+     * @param {Review} review
+     */
+    add(review) {
+      this.#reviews.unshift(review);
+      this.rate(true);
+    }
+    /**
+     * @param {number} index
+     */
+    remove(index) {
+      this.#reviews.splice(index, 1);
+      this.rate(true);
+    }
+    group() {
+      if (!this.#media.length) {
+        return;
+      }
+      const reviews = this.#reviews;
+      const chunks = [];
+      const last = this.#pattern[this.#pattern.length - 1];
+      let acc = 0;
+      for (let i = 0; i < this.#pattern.length - 1; i++) {
+        const chunk = this.#media.slice(acc, acc + this.#pattern[i]);
+        chunks.push(chunk);
+        acc += this.#pattern[i];
+      }
+      for (let i = acc; i < this.#media.length; i += last) {
+        const chunk = this.#media.slice(i, i + last);
+        chunks.push(chunk);
+      }
+      for (let i = 0; i < chunks.length; i++) {
+        reviews[i].media = chunks[i];
+        if (chunks[i].length === 1) {
+          reviews[i].single = true;
+        }
+      }
+    }
+    /**
+     * @param {boolean} keepOld
+     */
+    rate(keepOld) {
+      const reviews = this.#reviews;
+      let sum = 0;
+      const starsAcc = [0, 0, 0, 0, 0];
+      if (keepOld) {
         for (let i = 0; i < reviews.length; i++) {
-          const randomTime = Math.floor(Math.random() * 11) * dayinMillis;
-          const date = new Date(now.getTime() - randomTime);
-          reviews[i].date = datetime.format(date);
+          const stars = reviews[i].stars;
+          starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
+          sum = sum + stars;
         }
-      }
-      /**
-       * @returns {Rating}
-       */
-      get rating() {
-        return structuredClone(this.#rating);
-      }
-      /**
-       * @returns {Review[]}
-       */
-      get reviews() {
-        return structuredClone(this.#reviews);
-      }
-      /**
-       * @returns {Review[]}
-       */
-      get raw() {
-        const reviews = structuredClone(this.#reviews);
-        const raw = [];
+      } else {
+        const weight = 0.05;
         for (let i = 0; i < reviews.length; i++) {
-          const { author, description } = reviews[i];
-          raw.push({ author, description });
+          const stars = Math.random() < weight ? 4 : 5;
+          reviews[i].stars = stars;
+          starsAcc[stars - 1] = starsAcc[stars - 1] + 1;
+          sum = sum + stars;
         }
-        return raw;
       }
-      /**
-       * @param {string[]} value
-       */
-      set reviews(value) {
-        const reviews = [];
-        const diff = value.length - this.#reviews.length;
-        for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
-          const author = this.#reviews[i].author;
-          reviews.push({ author, description: value[i] });
+      for (let i = 0; i < 5; i++) {
+        const v = starsAcc[i];
+        const p = Math.round(v / reviews.length * 100);
+        this.#rating.individuals[i] = { v, p };
+      }
+      const average = sum / reviews.length;
+      this.#rating.average = average.toFixed(1);
+    }
+    date() {
+      const reviews = this.#reviews;
+      const now = /* @__PURE__ */ new Date();
+      const dayinMillis = 864e5;
+      const options = { year: "numeric", month: "long", day: "numeric" };
+      const datetime = new Intl.DateTimeFormat("es", options);
+      for (let i = 0; i < reviews.length; i++) {
+        const randomTime = Math.floor(Math.random() * 11) * dayinMillis;
+        const date = new Date(now.getTime() - randomTime);
+        reviews[i].date = datetime.format(date);
+      }
+    }
+    /**
+     * @returns {Rating}
+     */
+    get rating() {
+      return structuredClone(this.#rating);
+    }
+    /**
+     * @returns {Review[]}
+     */
+    get reviews() {
+      return structuredClone(this.#reviews);
+    }
+    /**
+     * @returns {Review[]}
+     */
+    get raw() {
+      const reviews = structuredClone(this.#reviews);
+      const raw = [];
+      for (let i = 0; i < reviews.length; i++) {
+        const { author, description } = reviews[i];
+        raw.push({ author, description });
+      }
+      return raw;
+    }
+    /**
+     * @param {string[]} value
+     */
+    set reviews(value) {
+      const reviews = [];
+      const diff = value.length - this.#reviews.length;
+      for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
+        const author = this.#reviews[i].author;
+        reviews.push({ author, description: value[i] });
+      }
+      if (diff > 0) {
+        for (let i = value.length - diff; i < value.length; i++) {
+          reviews.push({ description: value[i] });
         }
-        if (diff > 0) {
-          for (let i = value.length - diff; i < value.length; i++) {
-            reviews.push({ description: value[i] });
-          }
+      }
+      this.#reviews = reviews;
+      this.group();
+      this.rate();
+      this.date();
+    }
+    /**
+     * @param {string[]} value
+     */
+    set names(value) {
+      for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
+        this.#reviews[i].author = value[i];
+      }
+    }
+    /**
+     * @returns {Promise<void>}
+     * @private
+     */
+    async #fetchReviews() {
+      if (!this.#fetched) {
+        const storeId = document.querySelector("#store-id").value;
+        const productId = document.querySelector("#product-id").value;
+        const response = await this.#database.reviews(storeId, productId);
+        if (hasError(response)) {
+          throw response;
         }
+        let reviews = response.reviews;
+        if (!response.exists) {
+          reviews = this.#defaultReviews;
+        }
+        this.active = response.active;
+        this.exists = response.exists;
+        this.country = response.country;
         this.#reviews = reviews;
         this.group();
         this.rate();
         this.date();
-      }
-      /**
-       * @param {string[]} value
-       */
-      set names(value) {
-        for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
-          this.#reviews[i].author = value[i];
-        }
-      }
-      /**
-       * @returns {Promise<void>}
-       * @private
-       */
-      async #fetchReviews() {
-        if (!this.#fetched) {
-          const storeId = document.querySelector("#store-id").value;
-          const productId = document.querySelector("#product-id").value;
-          const response = await this.#database.reviews(storeId, productId);
-          if (hasError(response)) {
-            throw response;
-          }
-          let reviews = response.reviews;
-          if (!response.exists) {
-            reviews = this.#defaultReviews;
-          }
-          this.active = response.active;
-          this.exists = response.exists;
-          this.country = response.country;
-          this.#reviews = reviews;
-          this.group();
-          this.rate();
-          this.date();
-          this.#fetched = true;
-        }
+        this.#fetched = true;
       }
     }
+  };
+  function refresh() {
+    form.reload();
+    modal.reload();
+  }
+  if (Shopify.designMode) {
+    document.addEventListener("shopify:section:load", refresh);
+  }
+  document.addEventListener("alpine:init", () => {
+    const database = firestore;
     const state = new State(database);
-    function refresh() {
-      form.reload();
-      modal.reload();
-    }
-    if (Shopify.designMode) {
-      document.addEventListener("shopify:section:load", refresh);
-    }
-    ;
     Alpine.data("scroll", () => ({
       reviews: { current: 1, start: true, end: false },
       dialog: { current: 1, start: true, end: false },
@@ -742,7 +739,6 @@
         });
         try {
           await state.init();
-          console.log(state.reviews);
           this.country = state.country;
           this.reviews = state.reviews;
           this.rating = state.rating;
@@ -776,7 +772,6 @@
       revoke(resource) {
         const url = resource.sources[0].url;
         if (url.startsWith("blob")) {
-          console.log("revoked");
           URL.revokeObjectURL(url);
         }
       },
