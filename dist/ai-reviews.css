@@ -124,6 +124,7 @@
     z-index: 1;
 
     > button {
+      position: absolute;
       top: 50%;
       transform: translateY(-50%);
     }
@@ -192,7 +193,7 @@
     }
   }
 
-  .btn-revieews--generate {
+  .btn-reviews--generate {
     background-color: rgb(0, 0, 0);
     transition: box-shadow 0.2s, background-color 0.2s;
 
