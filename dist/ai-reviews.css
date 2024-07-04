@@ -274,6 +274,7 @@
     padding: .75rem 2rem;
     border-radius: 4px;
     width: max-content;
+    transition: box-shadow 0.2s;
   }
 
   .reviews-form__file {
