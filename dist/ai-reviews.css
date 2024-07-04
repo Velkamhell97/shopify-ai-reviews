@@ -118,11 +118,7 @@
     }
   }
 
-  .slideshow-controls-absolute {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-
+  .reviews-dialog__slideshow, .reviews-form__slideshow {
     > button {
       position: absolute;
       top: 50%;
