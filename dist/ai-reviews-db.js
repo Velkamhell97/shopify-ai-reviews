@@ -3756,14 +3756,17 @@
   async function reviews(storeId, productId) {
     try {
       if (!storeId || !productId) {
-        return { error: "Faltan argumentos" };
+        return { ok: false, message: "Faltan argumentos." };
       }
+      const storeRef = doc(firestore, `stores/${storeId}`);
+      const store = await getDoc(storeRef);
+      if (!store.exists()) {
+        return { ok: false, message: "La tienda no se encuentra registrada." };
+      }
+      const country = store.data()?.country ?? "CO";
       const productRef = doc(firestore, `stores/${storeId}/products/${productId}`);
       const product = await getDoc(productRef);
       const reviews2 = product.data()?.reviews ?? [];
-      const storeRef = doc(firestore, `stores/${storeId}`);
-      const store = await getDoc(storeRef);
-      const country = store.data()?.country ?? "CO";
       return { active: true, exists: product.exists(), country, reviews: reviews2 };
     } catch (error) {
       if (error.code == "permission-denied") {

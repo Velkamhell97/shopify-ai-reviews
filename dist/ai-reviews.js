@@ -74,9 +74,6 @@
       return parseInt(columns);
     }
     /**
-     * @typedef {{current: number, start?: boolean, end?: boolean}} Slide
-     */
-    /**
      * @param {boolean} reset
      * @returns {Slide}
      */
@@ -86,11 +83,14 @@
         return { current: 1, start: false, end: false };
       }
       ;
-      const newSlide = this.#currentSlide + 1;
+      let newSlide = this.#currentSlide + 1;
       const length = this.#slideshow.children.length - (this.columns - 1);
       if (newSlide > length) {
-        if (reset) this.#currentSlide = 2;
-        return { current: length - 1, start: false, end: null };
+        if (reset) {
+          newSlide = 2;
+        } else {
+          return { current: length - 1, start: false, end: true };
+        }
       }
       ;
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
@@ -109,7 +109,7 @@
       ;
       const newSlide = this.#currentSlide - 1;
       if (newSlide < 2) {
-        return { current: 1, start: null, end: false };
+        return { current: 1, start: true, end: false };
       }
       ;
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
@@ -176,7 +176,7 @@
      * @param {number} value
      */
     set stars(value) {
-      this.#fields.stars = value - 1;
+      this.#fields.stars = value;
     }
     /**
      * @param {any} file
@@ -535,9 +535,7 @@
       }
       for (let i = 0; i < chunks.length; i++) {
         reviews[i].media = chunks[i];
-        if (chunks[i].length === 1) {
-          reviews[i].single = true;
-        }
+        reviews[i].single = chunks[i].length === 1;
       }
     }
     /**
@@ -554,7 +552,7 @@
           sum = sum + stars;
         }
       } else {
-        const weight = 0.05;
+        const weight = 0.1;
         for (let i = 0; i < reviews.length; i++) {
           const stars = Math.random() < weight ? 4 : 5;
           reviews[i].stars = stars;
@@ -711,7 +709,7 @@
         form.deleteMedia(index);
       },
       rate(index) {
-        form.stars = index + 1;
+        form.stars = index;
         this.lastStar?.classList?.remove("active");
         this.$el?.classList?.add("active");
         this.lastStar = this.$el;
