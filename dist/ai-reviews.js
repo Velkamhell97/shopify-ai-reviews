@@ -791,9 +791,9 @@
       expand(review, index) {
         if (review) {
           this.expandedReview = review;
-          if (index) {
-            this.$dispatch("dialog-open", { index });
-          }
+          this.$nextTick(() => {
+            console.log("next tick");
+          });
           modal.show();
         } else {
           this.$dispatch("dialog-close");
