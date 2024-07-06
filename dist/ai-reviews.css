@@ -395,7 +395,7 @@
   }
   
   .reviews-layout-3 {
-    --columns: 1;
+    --columns: 2;
     column-count: var(--columns);
     -webkit-column-count: var(--columns);
     column-gap: 2rem;
@@ -487,6 +487,7 @@
   }
 
   .review-slide__rating {
+    padding: 0.5rem 0.75rem;
     position: absolute;
     border-radius: 20px;
     bottom: 0;
@@ -661,6 +662,14 @@
 
   .gap-4 {
     gap: 1rem;
+  }
+
+  .p-2 {
+    padding: 0.5rem;
+  }
+
+  .p-3 {
+    padding: 0.75rem;
   }
 
   .p-4 {
