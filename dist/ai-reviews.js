@@ -84,12 +84,6 @@
       }
       ;
       const newSlide = index + 2;
-      console.log(newSlide);
-      console.log(this.#slideshow);
-      console.log(this.querySelectorAll(".slideshow-slide"));
-      setTimeout(() => {
-        console.log(this.querySelectorAll(".slideshow-slide"));
-      }, 2e3);
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
       this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       this.#currentSlide = newSlide;
@@ -692,6 +686,7 @@
   if (Shopify.designMode) {
     document.addEventListener("shopify:section:load", refresh);
   }
+  var reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
   document.addEventListener("alpine:init", () => {
     const database = firestore;
     const state = new State(database);
@@ -770,6 +765,7 @@
           await state.init();
           this.country = state.country;
           this.reviews = state.reviews;
+          this.chunk = this.reviews.slice(0, reviewsPerPage);
           this.rating = state.rating;
         } catch (error) {
           console.error(error);
@@ -780,7 +776,9 @@
         }
       },
       reviews: [],
+      chunk: [],
       rating: state.rating,
+      page: 0,
       expandedReview: null,
       country: state.country,
       initialized: true,
@@ -792,10 +790,7 @@
         if (review) {
           this.expandedReview = review;
           this.$nextTick(() => {
-            console.log("next tick");
-            if (index) {
-              this.$dispatch("dialog-open", { index });
-            }
+            if (index) this.$dispatch("dialog-open", { index });
           });
           modal.show();
         } else {
@@ -883,6 +878,7 @@
           }
           state.reviews = json.reviews;
           this.reviews = state.reviews;
+          this.chunk = this.reviews.slice(0, reviewsPerPage);
           this.rating = state.rating;
           this.success = { message: `\xA1${json.reviews.length} rese\xF1as generadas exitosamente!. Si faltan nombres presionar el boton 'Nombres'` };
         } catch (error) {
@@ -927,6 +923,11 @@
         state.rate();
         this.reviews = state.reviews;
         this.rating = state.rating;
+      },
+      goToPage(page) {
+        this.page = page;
+        const start = page * reviewsPerPage;
+        this.chunk = this.reviews.slice(start, start + reviewsPerPage);
       },
       addReview(review) {
         state.add(review);
