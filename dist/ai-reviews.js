@@ -469,12 +469,13 @@
       for (let i = 0; i < media.length; i++) {
         const resource = media[i];
         if (resource.media_type === "image") {
-          resource.thumbnail = `${resource.src}&width=200`;
           resource.srcset = `${resource.src}&width=300 300w, ${resource.src}&width=500 500w, ${resource.src}&width=750 750w, ${resource.src}&width=900 900w`;
           resource.src = `${resource.src}&width=900`;
+          resource.thumbnail = `${resource.src}&width=200`;
           delete resource.preview_image;
         } else {
           resource.src = `${resource.preview_image.src}`;
+          resource.thumbnail = `${resource.preview_image.src}&width=200`;
           resource.width = `${resource.preview_image.width}`;
           resource.height = `${resource.preview_image.height}`;
           resource.srcset = `${resource.src} ${resource.width}w`;
