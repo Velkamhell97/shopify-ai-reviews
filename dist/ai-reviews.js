@@ -925,6 +925,7 @@
         this.rating = state.rating;
       },
       goToPage(page) {
+        console.log(page);
         this.page = page;
         const start = page * reviewsPerPage;
         this.chunk = this.reviews.slice(start, start + reviewsPerPage);
