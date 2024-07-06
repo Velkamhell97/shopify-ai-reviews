@@ -785,7 +785,7 @@
       expand(review, index) {
         if (review) {
           this.expandedReview = review;
-          if (!index) {
+          if (index) {
             this.$dispatch("dialog-open", { index });
           }
           modal.show();
