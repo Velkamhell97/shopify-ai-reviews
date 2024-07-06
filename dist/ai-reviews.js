@@ -48,7 +48,6 @@
       super();
     }
     connectedCallback() {
-      console.log("created slideshow");
       this.#slideshow = this.querySelector(".slideshow-scrollable");
       if (this.getAttribute("autoplay") !== null) {
         this.#play();
@@ -74,6 +73,18 @@
       const columns = getComputedStyle(this.#slideshow).getPropertyValue("--columns");
       return parseInt(columns);
     }
+    slideToIndex(index) {
+      if (!this.#slideshow) {
+        console.error("CustomSlideShow -> nextSlide() -> this.#slideshow is undefinied");
+        return { current: 1, start: false, end: false };
+      }
+      ;
+      const newSlide = index + 2;
+      const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
+      this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
+      this.#currentSlide = newSlide;
+      return { current: newSlide - 1, start: false, end: newSlide === length };
+    }
     /**
      * @param {boolean} reset
      * @returns {Slide}
@@ -85,19 +96,19 @@
       }
       ;
       let newSlide = this.#currentSlide + 1;
-      const length = this.#slideshow.children.length - (this.columns - 1);
-      if (newSlide > length) {
+      const length2 = this.#slideshow.children.length - (this.columns - 1);
+      if (newSlide > length2) {
         if (reset) {
           newSlide = 2;
         } else {
-          return { current: length - 1, start: false, end: true };
+          return { current: length2 - 1, start: false, end: true };
         }
       }
       ;
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
       this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       this.#currentSlide = newSlide;
-      return { current: newSlide - 1, start: false, end: newSlide === length };
+      return { current: newSlide - 1, start: false, end: newSlide === length2 };
     }
     /**
      * @returns {Slide}
@@ -683,7 +694,10 @@
       previousReviewSlide() {
         this.reviews = this.$el?.closest("custom-slideshow")?.previousSlide();
       },
-      resetDialog() {
+      move(e) {
+        console.log(e.detail);
+      },
+      reset() {
         this.dialog = { current: 1, start: true, end: false };
         this.$el?.reset();
       },
@@ -765,6 +779,9 @@
       expand(review, index) {
         if (review) {
           this.expandedReview = review;
+          if (index !== 0) {
+            this.$dispatch("dialog-open", { index });
+          }
           modal.show();
         } else {
           this.$dispatch("dialog-close");
