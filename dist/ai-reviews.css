@@ -468,6 +468,15 @@
       height: 100%;
     }
   }
+
+  .review-slide__thumbnail {
+    width: 150px;
+    aspect-ratio: 4 / 5;
+    
+    & img {
+      object-fit: cover;
+    }
+  }
   /*#endregion */
 
   
