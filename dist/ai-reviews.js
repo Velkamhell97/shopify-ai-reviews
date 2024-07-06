@@ -778,7 +778,7 @@
       reviews: [],
       chunk: [],
       rating: state.rating,
-      page: 0,
+      page: 1,
       expandedReview: null,
       country: state.country,
       initialized: true,
@@ -925,9 +925,8 @@
         this.rating = state.rating;
       },
       goToPage(page) {
-        console.log(page);
         this.page = page;
-        const start = page * reviewsPerPage;
+        const start = (page - 1) * reviewsPerPage;
         this.chunk = this.reviews.slice(start, start + reviewsPerPage);
       },
       addReview(review) {
