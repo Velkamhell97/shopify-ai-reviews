@@ -793,6 +793,9 @@
           this.expandedReview = review;
           this.$nextTick(() => {
             console.log("next tick");
+            if (index) {
+              this.$dispatch("dialog-open", { index });
+            }
           });
           modal.show();
         } else {
