@@ -26,7 +26,6 @@
       }
     }
     connectedCallback() {
-      console.log("created slideshow");
       if (this.getAttribute("id") !== null) {
         window.addEventListener("toggle-collapsible", this.#collapsableListenerRef);
       }
@@ -49,6 +48,7 @@
       super();
     }
     connectedCallback() {
+      console.log("created slideshow");
       this.#slideshow = this.querySelector(".slideshow-scrollable");
       if (this.getAttribute("autoplay") !== null) {
         this.#play();
