@@ -492,6 +492,16 @@
     left: 50%;
     transform: translate(-50%, 50%);
   }
+
+  .reviews-paginator {
+    list-style-type: none;
+    padding: 0;
+
+    & button {
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
+  }
   /*#endregion */
 
   
