@@ -86,6 +86,7 @@
       const newSlide = index + 2;
       console.log(newSlide);
       console.log(this.#slideshow);
+      console.log(this.querySelectorAll(".slideshow-slide"));
       const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
       this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       this.#currentSlide = newSlide;
