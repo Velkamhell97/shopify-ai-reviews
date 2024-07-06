@@ -437,7 +437,6 @@
 
   .review-slide {
     cursor: pointer;
-    gap: 0.75rem;
     box-shadow: 3px 4px 8px rgba(0, 0, 0, .2);
     transition: box-shadow 0.2s ease;
 
@@ -485,6 +484,13 @@
     & img {
       object-fit: cover;
     }
+  }
+
+  .review-slide__rating {
+    position: absolute;
+    border-radius: 20px;
+    bottom: 0;
+    left: 50%;
   }
   /*#endregion */
 
