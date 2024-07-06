@@ -26,6 +26,7 @@
       }
     }
     connectedCallback() {
+      console.log("created slideshow");
       if (this.getAttribute("id") !== null) {
         window.addEventListener("toggle-collapsible", this.#collapsableListenerRef);
       }
@@ -761,7 +762,7 @@
       success: null,
       info: null,
       error: null,
-      expand(review) {
+      expand(review, index) {
         if (review) {
           this.expandedReview = review;
           modal.show();
