@@ -776,6 +776,8 @@
         this.$watch("reviews", (value, oldValue) => {
           if (!value?.length) return;
           console.log("change");
+          console.log(value);
+          console.log(oldValue);
           if (value.length === oldValue.length) return;
           if (value.length > oldValue.length) {
             console.log("entre +");
@@ -951,7 +953,7 @@
       },
       addReview(review) {
         state.add(review);
-        this.reviews.unshift(review);
+        this.reviews.splice(0, 0, review);
         this.rating = state.rating;
       },
       removeReview(i, page) {
