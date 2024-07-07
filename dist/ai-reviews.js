@@ -933,7 +933,10 @@
       removeReview(i, page) {
         const index = this.chunkLength * (page - 1) + i;
         state.remove(index);
-        if (index === state.reviews.length - 1) {
+        console.log(index);
+        console.log(this.reviews.length);
+        if (index === this.reviews.length - 1) {
+          console.log("entre");
           this.page--;
         }
         this.reviews.splice(index, 1);
