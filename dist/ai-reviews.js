@@ -778,12 +778,13 @@
           console.log(`new: ${value.length} - old: ${oldValue.length}`);
           if (value.length > oldValue.length) {
             this.chunk = this.reviews.slice(0, reviewsPerPage);
-            this.pages = Math.floor(this.reviews.length / reviewsPerPage);
             this.page = 1;
           } else {
             const start = (this.page - 1) * reviewsPerPage;
             this.chunk = this.reviews.slice(start, start + reviewsPerPage);
+            if (!this.chunk.length) this.page = this.page - 1;
           }
+          this.pages = Math.floor(this.reviews.length / reviewsPerPage);
         });
         try {
           await state.init();
