@@ -545,13 +545,13 @@
       const last = this.#pattern[this.#pattern.length - 1];
       let acc = 0;
       for (let i = 0; i < this.#pattern.length - 1; i++) {
-        const chunk = this.#media.slice(acc, acc + this.#pattern[i]);
-        chunks.push(chunk);
+        const chunk2 = this.#media.slice(acc, acc + this.#pattern[i]);
+        chunks.push(chunk2);
         acc += this.#pattern[i];
       }
       for (let i = acc; i < this.#media.length; i += last) {
-        const chunk = this.#media.slice(i, i + last);
-        chunks.push(chunk);
+        const chunk2 = this.#media.slice(i, i + last);
+        chunks.push(chunk2);
       }
       for (let i = 0; i < chunks.length; i++) {
         reviews[i].media = chunks[i];
@@ -686,10 +686,10 @@
   if (Shopify.designMode) {
     document.addEventListener("shopify:section:load", refresh);
   }
-  var reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
   document.addEventListener("alpine:init", () => {
     const database = firestore;
     const state = new State(database);
+    const reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
     Alpine.data("scroll", () => ({
       reviews: { current: 1, start: true, end: false },
       dialog: { current: 1, start: true, end: false },
@@ -775,19 +775,25 @@
         });
         this.$watch("reviews", (value, oldValue) => {
           if (!value?.length) return;
+          console.log("change");
           if (value.length === oldValue.length) return;
           if (value.length > oldValue.length) {
+            console.log("entre +");
+            console.log(this.reviews);
+            console.log(value);
             this.chunk = this.reviews.slice(0, reviewsPerPage);
+            console.log(chunk);
             this.page = 1;
           } else {
+            console.log("entre -");
             let start = (this.page - 1) * reviewsPerPage;
-            const chunk = this.reviews.slice(start, start + reviewsPerPage);
-            if (!chunk.length) {
+            const chunk2 = this.reviews.slice(start, start + reviewsPerPage);
+            if (!chunk2.length) {
               start = (this.page - 2) * reviewsPerPage;
               this.chunk = this.reviews.slice(start, start + reviewsPerPage);
               this.page = this.page - 1;
             } else {
-              this.chunk = chunk;
+              this.chunk = chunk2;
             }
           }
           this.pages = Math.ceil(this.reviews.length / reviewsPerPage);

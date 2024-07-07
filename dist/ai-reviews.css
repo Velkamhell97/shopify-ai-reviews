@@ -397,7 +397,7 @@
     --columns: 2;
     column-count: var(--columns);
     -webkit-column-count: var(--columns);
-    column-gap: 2rem;
+    column-gap: 12px;
   
     & .review-slide {
       width: 100%;
@@ -475,7 +475,7 @@
   }
 
   .review-slide__thumbnail {
-    width: 115px;
+    width: 115px !important;
     aspect-ratio: 4 / 5;
     
     & img {
