@@ -944,7 +944,7 @@
         this.rating = state.rating;
       },
       removeReview(i, page) {
-        const index = reviewsPerPage * page + i;
+        const index = reviewsPerPage * (page - 1) + i;
         state.remove(index);
         this.reviews.splice(index, 1);
         this.rating = state.rating;
