@@ -780,7 +780,7 @@
             this.pages = Math.floor(this.reviews.length / reviewsPerPage);
             this.page = 1;
           } else {
-            const start = (this.pages - 1) * reviewsPerPage;
+            const start = (this.page - 1) * reviewsPerPage;
             this.chunk = this.reviews.slice(start, reviewsPerPage);
           }
         });
