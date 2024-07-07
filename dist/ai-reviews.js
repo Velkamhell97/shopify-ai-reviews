@@ -428,7 +428,7 @@
     /**
      * @type {string}
      */
-    country;
+    country = "CO";
     /**
      * @type {number}
      */
@@ -769,7 +769,7 @@
       }
     }));
     Alpine.data("aiReviews", () => ({
-      reviews: [],
+      reviews: state.reviews,
       rating: state.rating,
       chunk: state.chunk,
       page: state.page,
@@ -788,7 +788,6 @@
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
         try {
-          console.log(this.reviews.length);
           await state.init();
           this.reviews = state.reviews;
           this.country = state.country;
