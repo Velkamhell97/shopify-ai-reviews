@@ -935,7 +935,7 @@
         state.remove(index);
         console.log(index);
         console.log(this.reviews.length);
-        if (index === this.reviews.length - 1) {
+        if (i == 0 && index == this.reviews.length - 1) {
           console.log("entre");
           this.page--;
         }
