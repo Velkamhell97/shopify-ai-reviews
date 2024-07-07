@@ -776,6 +776,7 @@
         });
         this.$watch("reviews", (value, oldValue) => {
           if (!value?.length) return;
+          this.pages = Math.ceil(this.reviews.length / reviewsPerPage);
           if (value.length === oldValue.length) return;
           if (value.length > oldValue.length) {
             this.chunk = this.reviews.slice(0, reviewsPerPage);
@@ -791,7 +792,6 @@
               this.chunk = chunk;
             }
           }
-          this.pages = Math.ceil(this.reviews.length / reviewsPerPage);
         });
         try {
           await state.init();
