@@ -783,11 +783,12 @@
           } else {
             const start = (this.page - 1) * reviewsPerPage;
             console.log(start);
+            console.log(reviewsPerPage);
             console.log(this.reviews.length);
             console.log(this.reviews.slice(5, 9).length);
             console.log(this.reviews);
             console.log(this.reviews.slice(5, 9));
-            this.chunk = this.reviews.slice(5, 9);
+            this.chunk = this.reviews.slice(5, 10);
           }
         });
         try {
