@@ -689,8 +689,7 @@
   document.addEventListener("alpine:init", () => {
     const database = firestore;
     const state = new State(database);
-    const reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
-    console.log("init listener");
+    let reviewsPerPage;
     Alpine.data("scroll", () => ({
       reviews: { current: 1, start: true, end: false },
       dialog: { current: 1, start: true, end: false },
@@ -768,7 +767,7 @@
       info: null,
       error: null,
       async init() {
-        console.log("init state");
+        reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
         this.$watch("success", (value) => {
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
