@@ -497,6 +497,7 @@
     padding: 0;
 
     & button {
+      transition: background-color 0.2s;
       padding: 0 1rem;
       border-radius: 0.5rem;
     }

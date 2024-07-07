@@ -788,6 +788,7 @@
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
         try {
+          console.log(this.reviews.length);
           await state.init();
           this.reviews = state.reviews;
           this.country = state.country;
@@ -887,7 +888,7 @@
             throw json;
           }
           state.reviews = json.reviews;
-          this.page = 1;
+          this.goToPage(1);
           this.reviews = state.reviews;
           this.rating = state.rating;
           this.success = { message: `\xA1${json.reviews.length} rese\xF1as generadas exitosamente!. Si faltan nombres presionar el boton 'Nombres'` };
@@ -940,7 +941,7 @@
       },
       addReview(review) {
         state.add(review);
-        this.page = 1;
+        this.goToPage(1);
         this.reviews.unshift(review);
         this.rating = state.rating;
       },
@@ -948,7 +949,7 @@
         const index = this.chunk * (page - 1) + i;
         state.remove(index);
         if (i == 0 && index == this.reviews.length - 1) {
-          this.page = Math.min(this.page - 1, 0);
+          this.goToPage(Math.min(this.page - 1, 0));
         }
         ;
         this.reviews.splice(index, 1);
