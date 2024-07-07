@@ -533,10 +533,7 @@
     }
     reload() {
       const reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
-      if (reviewsPerPage !== this.chunk) {
-        console.log("diferente");
-        this.page = 1;
-      }
+      if (reviewsPerPage !== this.chunk) this.page = 1;
       this.chunk = reviewsPerPage;
     }
     /**
