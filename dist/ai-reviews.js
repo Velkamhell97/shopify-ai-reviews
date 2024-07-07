@@ -756,10 +756,8 @@
     Alpine.data("aiReviews", () => ({
       reviews: [],
       rating: state.rating,
-      chunk: [],
-      chunkLength: reviewsPerPage ?? 0,
+      chunkLength: 5,
       page: 1,
-      pages: 0,
       expandedReview: null,
       country: state.country,
       initialized: true,
@@ -768,7 +766,9 @@
       info: null,
       error: null,
       async init() {
-        this.chunkLength = parseInt(document.querySelector("#reviews-per-page").value);
+        reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
+        this.chunkLength = reviewsPerPage;
+        console.log(`init; ${this.chunkLength}`);
         this.$watch("success", (value) => {
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
@@ -787,9 +787,6 @@
           this.loading = false;
           this.initialized = false;
         }
-      },
-      goToPage(page) {
-        this.page = page;
       },
       expand(review, index) {
         if (review) {
@@ -927,18 +924,16 @@
       addReview(review) {
         state.add(review);
         this.page = 1;
-        this.reviews = [review, ...this.reviews];
+        this.reviews.unshift(review);
         this.rating = state.rating;
       },
       removeReview(i, page) {
         const index = this.chunkLength * (page - 1) + i;
         state.remove(index);
-        console.log(index);
-        console.log(this.reviews.length);
         if (i == 0 && index == this.reviews.length - 1) {
-          console.log("entre");
-          this.page--;
+          this.page = Math.min(this.page - 1, 0);
         }
+        ;
         this.reviews.splice(index, 1);
         this.rating = state.rating;
       }
