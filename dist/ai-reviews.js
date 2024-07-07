@@ -782,6 +782,7 @@
           } else {
             let start = (this.page - 1) * reviewsPerPage;
             const chunk = this.reviews.slice(start, start + reviewsPerPage);
+            console.log(chunk.length);
             if (!chunk.length) {
               start = (this.page - 2) * reviewsPerPage;
               this.chunk = this.reviews.slice(start, start + reviewsPerPage);
@@ -790,7 +791,7 @@
               this.chunk = chunk;
             }
           }
-          this.pages = Math.floor(this.reviews.length / reviewsPerPage);
+          this.pages = Math.ceil(this.reviews.length / reviewsPerPage);
         });
         try {
           await state.init();
