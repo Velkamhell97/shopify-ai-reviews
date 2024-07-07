@@ -927,7 +927,7 @@
       addReview(review) {
         state.add(review);
         this.reviews = [review, ...this.reviews];
-        this.page++;
+        this.page = 1;
         this.rating = state.rating;
       },
       removeReview(i, page) {
