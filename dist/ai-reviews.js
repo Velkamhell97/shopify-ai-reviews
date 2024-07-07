@@ -700,7 +700,8 @@
         this.reviews = this.$el?.closest("custom-slideshow")?.previousSlide();
       },
       move(e) {
-        const index = e.detail.index ?? 0;
+        const index = e.detail.index;
+        if (!index) return;
         this.dialog = this.$el?.slideToIndex(index);
       },
       reset() {
@@ -753,28 +754,6 @@
       }
     }));
     Alpine.data("aiReviews", () => ({
-      async init() {
-        this.$watch("success", (value) => {
-          if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
-        });
-        this.$watch("error", (value) => {
-          if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
-        });
-        try {
-          await state.init();
-          this.country = state.country;
-          this.reviews = state.reviews;
-          this.chunk = this.reviews.slice(0, reviewsPerPage);
-          this.rating = state.rating;
-          this.pages = Math.floor(this.reviews.length / reviewsPerPage);
-        } catch (error) {
-          console.error(error);
-          this.error = error;
-        } finally {
-          this.loading = false;
-          this.initialized = false;
-        }
-      },
       reviews: [],
       chunk: [],
       rating: state.rating,
@@ -787,16 +766,50 @@
       success: null,
       info: null,
       error: null,
+      async init() {
+        this.$watch("success", (value) => {
+          if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
+        });
+        this.$watch("error", (value) => {
+          if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
+        });
+        this.$watch("reviews", (value, oldValue) => {
+          if (!value?.length) return;
+          if (value.length > oldValue.length) {
+            this.chunk = this.reviews.slice(0, reviewsPerPage);
+            this.pages = Math.floor(this.reviews.length / reviewsPerPage);
+            this.page = 1;
+          } else {
+            const start = (this.pages - 1) * reviewsPerPage;
+            this.chunk = this.reviews.slice(start, reviewsPerPage);
+          }
+        });
+        try {
+          await state.init();
+          this.reviews = state.reviews;
+          this.country = state.country;
+          this.rating = state.rating;
+        } catch (error) {
+          console.error(error);
+          this.error = error;
+        } finally {
+          this.loading = false;
+          this.initialized = false;
+        }
+      },
+      goToPage(page) {
+        const start = (page - 1) * reviewsPerPage;
+        this.chunk = this.reviews.slice(start, start + reviewsPerPage);
+        this.page = page;
+      },
       expand(review, index) {
         if (review) {
           this.expandedReview = review;
-          this.$nextTick(() => {
-            if (index) this.$dispatch("dialog-open", { index });
-          });
+          this.$nextTick(() => this.$dispatch("dialog-open", { index }));
           modal.show();
         } else {
-          this.$dispatch("dialog-close");
           modal.hide();
+          this.$dispatch("dialog-close");
           this.expandedReview = null;
         }
       },
@@ -879,9 +892,7 @@
           }
           state.reviews = json.reviews;
           this.reviews = state.reviews;
-          this.chunk = this.reviews.slice(0, reviewsPerPage);
           this.rating = state.rating;
-          this.pages = Math.floor(this.reviews.length / reviewsPerPage);
           this.success = { message: `\xA1${json.reviews.length} rese\xF1as generadas exitosamente!. Si faltan nombres presionar el boton 'Nombres'` };
         } catch (error) {
           console.error(error);
@@ -925,11 +936,6 @@
         state.rate();
         this.reviews = state.reviews;
         this.rating = state.rating;
-      },
-      goToPage(page) {
-        this.page = page;
-        const start = (page - 1) * reviewsPerPage;
-        this.chunk = this.reviews.slice(start, start + reviewsPerPage);
       },
       addReview(review) {
         state.add(review);
