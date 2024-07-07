@@ -953,7 +953,7 @@
       },
       addReview(review) {
         state.add(review);
-        this.reviews.splice(0, 0, review);
+        this.reviews = [review, ...this.reviews];
         this.rating = state.rating;
       },
       removeReview(i, page) {
