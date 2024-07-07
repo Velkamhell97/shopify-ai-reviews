@@ -959,7 +959,7 @@
       removeReview(i, page) {
         const index = reviewsPerPage * (page - 1) + i;
         state.remove(index);
-        this.reviews.splice(index, 1);
+        this.reviews = this.reviews.filter((_, idx) => idx !== index);
         this.rating = state.rating;
       }
     }));
