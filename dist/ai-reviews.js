@@ -690,6 +690,7 @@
     const database = firestore;
     const state = new State(database);
     const reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
+    console.log("init listener");
     Alpine.data("scroll", () => ({
       reviews: { current: 1, start: true, end: false },
       dialog: { current: 1, start: true, end: false },
@@ -767,6 +768,7 @@
       info: null,
       error: null,
       async init() {
+        console.log("init state");
         this.$watch("success", (value) => {
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
@@ -775,19 +777,11 @@
         });
         this.$watch("reviews", (value, oldValue) => {
           if (!value?.length) return;
-          console.log("change");
-          console.log(value);
-          console.log(oldValue);
           if (value.length === oldValue.length) return;
           if (value.length > oldValue.length) {
-            console.log("entre +");
-            console.log(this.reviews);
-            console.log(value);
             this.chunk = this.reviews.slice(0, reviewsPerPage);
-            console.log(this.chunk);
             this.page = 1;
           } else {
-            console.log("entre -");
             let start = (this.page - 1) * reviewsPerPage;
             const chunk = this.reviews.slice(start, start + reviewsPerPage);
             if (!chunk.length) {
