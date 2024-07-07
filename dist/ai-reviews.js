@@ -785,7 +785,9 @@
             console.log(start);
             console.log(this.reviews.length);
             console.log(this.reviews.slice(5, 9).length);
-            this.chunk = this.reviews.slice(start, reviewsPerPage);
+            console.log(this.reviews);
+            console.log(this.reviews.slice(5, 9));
+            this.chunk = this.reviews.slice(5, 9);
           }
         });
         try {
