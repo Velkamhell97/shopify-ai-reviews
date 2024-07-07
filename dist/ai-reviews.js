@@ -948,7 +948,7 @@
         this.rating = state.rating;
       },
       removeReview(i, page) {
-        const index = this.chunkLength * (page - 1) + i;
+        const index = this.chunk * (page - 1) + i;
         state.remove(index);
         if (i == 0 && index == this.reviews.length - 1) {
           this.page = Math.min(this.page - 1, 0);
