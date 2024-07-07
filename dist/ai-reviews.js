@@ -782,13 +782,6 @@
             this.page = 1;
           } else {
             const start = (this.page - 1) * reviewsPerPage;
-            console.log(start);
-            console.log(reviewsPerPage);
-            console.log(start + reviewsPerPage);
-            console.log(this.reviews.length);
-            console.log(this.reviews.slice(5, 9).length);
-            console.log(this.reviews);
-            console.log(this.reviews.slice(5, 9));
             this.chunk = this.reviews.slice(start, start + reviewsPerPage);
           }
         });
@@ -950,7 +943,8 @@
         this.reviews.unshift(review);
         this.rating = state.rating;
       },
-      removeReview(index) {
+      removeReview(i, page) {
+        const index = reviewsPerPage * page + i;
         state.remove(index);
         this.reviews.splice(index, 1);
         this.rating = state.rating;
