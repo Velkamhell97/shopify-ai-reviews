@@ -775,14 +775,13 @@
         });
         this.$watch("reviews", (value, oldValue) => {
           if (!value?.length) return;
-          console.log(`new: ${value.length} - old: ${oldValue.length}`);
+          if (value.length === oldValue.length) return;
           if (value.length > oldValue.length) {
             this.chunk = this.reviews.slice(0, reviewsPerPage);
             this.page = 1;
           } else {
             let start = (this.page - 1) * reviewsPerPage;
             const chunk = this.reviews.slice(start, start + reviewsPerPage);
-            console.log(chunk.length);
             if (!chunk.length) {
               start = (this.page - 2) * reviewsPerPage;
               this.chunk = this.reviews.slice(start, start + reviewsPerPage);
