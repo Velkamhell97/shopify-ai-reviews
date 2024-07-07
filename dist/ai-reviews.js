@@ -755,8 +755,8 @@
     }));
     Alpine.data("aiReviews", () => ({
       reviews: [],
-      chunk: [],
       rating: state.rating,
+      chunk: [],
       page: 1,
       pages: 0,
       expandedReview: null,
@@ -823,9 +823,7 @@
       },
       revoke(resource) {
         const url = resource.sources[0].url;
-        if (url.startsWith("blob")) {
-          URL.revokeObjectURL(url);
-        }
+        if (url.startsWith("blob")) URL.revokeObjectURL(url);
       },
       reset() {
         this.loading = true;

@@ -133,7 +133,7 @@
       }
   
       &:not(:disabled):hover {
-        scale: 1.15;
+        scale: 1.10;
       }
     }
   }
@@ -372,7 +372,6 @@
     height: 100px;
   }
 
-  
   .reviews-layout-1 {
     display: flex;
     flex-direction: column;
@@ -426,10 +425,10 @@
     }
 
     > button {
-      color: white;
-      position: absolute;
       display: none;
+      color: white;
       background-color: red;
+      position: absolute;
     }
   }
 
