@@ -933,10 +933,10 @@
       removeReview(i, page) {
         const index = this.chunkLength * (page - 1) + i;
         state.remove(index);
-        this.reviews.splice(index, 1);
         if (index === state.reviews.length - 1) {
           this.page--;
         }
+        this.reviews.splice(index, 1);
         this.rating = state.rating;
       }
     }));
