@@ -757,6 +757,7 @@
       reviews: [],
       rating: state.rating,
       chunk: [],
+      chunkLength: reviewsPerPage ?? 0,
       page: 1,
       pages: 0,
       expandedReview: null,
@@ -767,31 +768,12 @@
       info: null,
       error: null,
       async init() {
-        reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
+        this.chunkLength = parseInt(document.querySelector("#reviews-per-page").value);
         this.$watch("success", (value) => {
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
         this.$watch("error", (value) => {
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
-        });
-        this.$watch("reviews", (value, oldValue) => {
-          if (!value?.length) return;
-          this.pages = Math.ceil(this.reviews.length / reviewsPerPage);
-          if (value.length === oldValue.length) return;
-          if (value.length > oldValue.length) {
-            this.chunk = this.reviews.slice(0, reviewsPerPage);
-            this.page = 1;
-          } else {
-            let start = (this.page - 1) * reviewsPerPage;
-            const chunk = this.reviews.slice(start, start + reviewsPerPage);
-            if (!chunk.length) {
-              start = (this.page - 2) * reviewsPerPage;
-              this.chunk = this.reviews.slice(start, start + reviewsPerPage);
-              this.page = this.page - 1;
-            } else {
-              this.chunk = chunk;
-            }
-          }
         });
         try {
           await state.init();
@@ -807,8 +789,6 @@
         }
       },
       goToPage(page) {
-        const start = (page - 1) * reviewsPerPage;
-        this.chunk = this.reviews.slice(start, start + reviewsPerPage);
         this.page = page;
       },
       expand(review, index) {
@@ -947,12 +927,17 @@
       addReview(review) {
         state.add(review);
         this.reviews = [review, ...this.reviews];
+        this.page++;
         this.rating = state.rating;
       },
       removeReview(i, page) {
         const index = reviewsPerPage * (page - 1) + i;
         state.remove(index);
         this.reviews = this.reviews.filter((_, idx) => idx !== index);
+        console.log(this.reviews.length);
+        if (index === state.reviews.length - 1) {
+          this.page--;
+        }
         this.rating = state.rating;
       }
     }));
