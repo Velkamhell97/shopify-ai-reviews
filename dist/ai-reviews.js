@@ -934,6 +934,8 @@
         const index = reviewsPerPage * (page - 1) + i;
         state.remove(index);
         this.reviews.splice(index, 1);
+        console.log(this.chunkLength);
+        console.log(this.page);
         console.log(index);
         console.log(this.reviews.length);
         console.log(state.reviews.length);
