@@ -780,9 +780,15 @@
             this.chunk = this.reviews.slice(0, reviewsPerPage);
             this.page = 1;
           } else {
-            const start = (this.page - 1) * reviewsPerPage;
-            this.chunk = this.reviews.slice(start, start + reviewsPerPage);
-            if (!this.chunk.length) this.page = this.page - 1;
+            let start = (this.page - 1) * reviewsPerPage;
+            const chunk = this.reviews.slice(start, start + reviewsPerPage);
+            if (!chunk.length) {
+              start = (this.page - 2) * reviewsPerPage;
+              this.chunk = this.reviews.slice(start, start + reviewsPerPage);
+              this.page = this.page - 1;
+            } else {
+              this.chunk = chunk;
+            }
           }
           this.pages = Math.floor(this.reviews.length / reviewsPerPage);
         });
