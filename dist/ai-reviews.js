@@ -430,6 +430,14 @@
      */
     country;
     /**
+     * @type {number}
+     */
+    chunk = 5;
+    /**
+     * @type {number}
+     */
+    page = 1;
+    /**
      * @type {Rating}
      * @private
      */
@@ -513,6 +521,7 @@
           }
         }
       }
+      this.reload();
       this.#pattern = pattern;
       this.#media = media;
     }
@@ -521,6 +530,14 @@
      */
     async init() {
       await this.#fetchReviews();
+    }
+    reload() {
+      const reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
+      if (reviewsPerPage !== this.chunk) {
+        console.log("diferente");
+        this.page = 1;
+      }
+      this.chunk = reviewsPerPage;
     }
     /**
      * @param {Review} review
@@ -679,17 +696,18 @@
       }
     }
   };
-  function refresh() {
-    form.reload();
-    modal.reload();
-  }
-  if (Shopify.designMode) {
-    document.addEventListener("shopify:section:load", refresh);
-  }
   document.addEventListener("alpine:init", () => {
     const database = firestore;
     const state = new State(database);
-    let reviewsPerPage;
+    function refresh() {
+      form.reload();
+      modal.reload();
+      state.reload();
+    }
+    if (Shopify.designMode) {
+      document.addEventListener("shopify:section:load", refresh);
+    }
+    ;
     Alpine.data("scroll", () => ({
       reviews: { current: 1, start: true, end: false },
       dialog: { current: 1, start: true, end: false },
@@ -756,8 +774,8 @@
     Alpine.data("aiReviews", () => ({
       reviews: [],
       rating: state.rating,
-      chunkLength: 5,
-      page: 1,
+      chunk: state.chunk,
+      page: state.page,
       expandedReview: null,
       country: state.country,
       initialized: true,
@@ -766,8 +784,6 @@
       info: null,
       error: null,
       async init() {
-        reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
-        this.chunkLength = reviewsPerPage;
         this.$watch("success", (value) => {
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
@@ -874,6 +890,7 @@
             throw json;
           }
           state.reviews = json.reviews;
+          this.page = 1;
           this.reviews = state.reviews;
           this.rating = state.rating;
           this.success = { message: `\xA1${json.reviews.length} rese\xF1as generadas exitosamente!. Si faltan nombres presionar el boton 'Nombres'` };
@@ -919,6 +936,10 @@
         state.rate();
         this.reviews = state.reviews;
         this.rating = state.rating;
+      },
+      goToPage(page) {
+        state.page = page;
+        this.page = page;
       },
       addReview(review) {
         state.add(review);
