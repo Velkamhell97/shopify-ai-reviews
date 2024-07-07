@@ -682,7 +682,6 @@
   function refresh() {
     form.reload();
     modal.reload();
-    console.log(parseInt(document.querySelector("#reviews-per-page").value));
   }
   if (Shopify.designMode) {
     document.addEventListener("shopify:section:load", refresh);
@@ -769,10 +768,6 @@
       async init() {
         reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
         this.chunkLength = reviewsPerPage;
-        setTimeout(() => {
-          console.log(parseInt(document.querySelector("#reviews-per-page").value));
-        }, 2e3);
-        console.log(`init; ${this.chunkLength}`);
         this.$watch("success", (value) => {
           if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
         });
