@@ -3,42 +3,76 @@
   function hasError(response) {
     return "message" in response;
   }
-  var CustomCollapsible = class extends HTMLElement {
+  var CollapsibleElement = class extends HTMLElement {
     /**
      * @type {any}
      * @private
      */
-    #collapsableListenerRef;
+    #onCollapseListener;
+    css = `
+    :host {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 300ms;
+
+      & ::slotted(*:first-child) {
+        overflow: hidden;
+      }
+    }
+
+    :host([open]) {
+      grid-template-rows: 1fr;
+    }
+  `;
+    template = () => `<slot></slot>`;
+    static observedAttributes = ["open", "control"];
+    get opened() {
+      return this.getAttribute("open") === "";
+    }
+    get control() {
+      return this.getAttribute("control");
+    }
     constructor() {
       super();
-      this.#collapsableListenerRef = this.#collapsibleListener.bind(this);
+      this.attachShadow({ mode: "open" });
+      this.#onCollapseListener = this.#onCollapse.bind(this);
+      this.render();
     }
     /**
      * @param {Event} e
      */
-    #collapsibleListener(e) {
+    #onCollapse(e) {
       const { id, open } = e.detail;
       if (id !== this.getAttribute("id")) return;
-      if (open) {
-        this.setAttribute("open", "");
-      } else {
-        this.removeAttribute("open");
-      }
+      this.toggleAttribute("open", !open);
     }
     connectedCallback() {
       if (this.getAttribute("id") !== null) {
-        window.addEventListener("toggle-collapsible", this.#collapsableListenerRef);
+        window.addEventListener("toggle-collapsible", this.#onCollapseListener);
+      }
+      if (this.control) {
+        this.setupControl();
       }
     }
     disconnectedCallback() {
-      window.removeEventListener("toggle-collapsible", this.#collapsableListenerRef);
+      window.removeEventListener("toggle-collapsible", this.#onCollapseListener);
+    }
+    attributeChangedCallback(name, oldValue, newValue) {
+    }
+    render() {
+      this.shadowRoot.innerHTML = `
+      <style>${this.css.trim()}</style>
+      ${this.template().trim()}
+    `;
+    }
+    setupControl() {
+      document.querySelector(`#${this.control}`)?.addEventListener("click", this.toggle.bind(this));
     }
     toggle() {
-      const open = this.getAttribute("open") !== null;
-      open ? this.removeAttribute("open") : this.setAttribute("open", "");
+      this.toggleAttribute("open", !this.opened);
     }
   };
-  customElements.define("custom-collapsible", CustomCollapsible);
+  customElements.define("collapsible-element", CollapsibleElement);
   var CustomSlideshow = class extends HTMLElement {
     #currentSlide = 2;
     #interval = null;
