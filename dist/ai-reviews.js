@@ -182,6 +182,8 @@
       ;
       this.#currentSlide = newSlide;
       const slide = this.#slides[this.#currentSlide];
+      console.log(this.#slider.offsetLeft);
+      console.log(this.slide.offsetLeft);
       this.#slider.scrollLeft = slide.offsetLeft - this.#slider.offsetLeft;
       return { current: newSlide, start: newSlide === 1, end: newSlide === maxLength };
     }
@@ -767,10 +769,12 @@
       reviews: { current: 1, start: true, end: false },
       dialog: { current: 1, start: true, end: false },
       nextReviewSlide() {
-        this.reviews = this.$el?.closest("custom-slideshow")?.nextSlide();
+        const slider = document.querySelector("#reviews-slider");
+        this.reviews = slider?.nextSlide();
       },
       previousReviewSlide() {
-        this.reviews = this.$el?.closest("custom-slideshow")?.previousSlide();
+        const slider = document.querySelector("#reviews-slider");
+        this.reviews = slider?.previousSlide();
       },
       move(e) {
         const index = e.detail.index;
