@@ -765,31 +765,32 @@
     Alpine.data("scroll", () => ({
       reviews: { current: 1, start: true, end: false },
       dialog: { current: 1, start: true, end: false },
+      reviewsSlider: null,
+      dialogSlider: null,
       nextReviewSlide() {
-        const slider = document.querySelector("#reviews-slider");
-        this.reviews = slider?.nextSlide();
+        this.reviews = this.reviewsSlider?.nextSlide();
       },
       previousReviewSlide() {
-        const slider = document.querySelector("#reviews-slider");
-        this.reviews = slider?.previousSlide();
+        this.reviews = this.reviewsSlider?.previousSlide();
       },
-      move(e) {
+      init() {
+        console.log("entre");
+        this.reviewsSlider = document.querySelector("#reviews-slider");
+        this.dialogSlider = document.querySelector("#dialog-slider");
+        document.querySelector("#reviews-dialog").addEventListener("close", () => {
+          this.dialogSlider?.reset();
+          this.dialog = { current: 1, start: true, end: false };
+        });
+      },
+      toDialogSlide(e) {
         if (!e?.detail?.index) return;
-        const slider = document.querySelector("#dialog-slider");
-        this.dialog = slider?.slideToIndex(e.detail.index + 1);
-      },
-      reset() {
-        const slider = document.querySelector("#dialog-slider");
-        this.dialog = { current: 1, start: true, end: false };
-        slider.reset();
+        this.dialog = this.dialogSlider?.slideToIndex(e.detail.index + 1);
       },
       nextDialogSlide() {
-        const slider = document.querySelector("#dialog-slider");
-        this.dialog = slider?.nextSlide();
+        this.dialog = this.dialogSlider?.nextSlide();
       },
       previousDialogSlide() {
-        const slider = document.querySelector("#dialog-slider");
-        this.dialog = slider?.previousSlide();
+        this.dialog = this.dialogSlider?.previousSlide();
       }
     }));
     Alpine.data("form", () => ({
