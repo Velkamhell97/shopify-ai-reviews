@@ -779,7 +779,6 @@
         this.reviewsSlider = document.querySelector("#reviews-slider");
         this.dialogSlider = document.querySelector("#dialog-slider");
         document.querySelector("#reviews-dialog").addEventListener("close", () => {
-          console.log("dialogo cerrado");
           this.dialogSlider?.reset();
           this.dialog = { current: 1, start: true, end: false };
         });
