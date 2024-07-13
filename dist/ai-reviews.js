@@ -4,64 +4,38 @@
     return "message" in response;
   }
   var CollapsibleElement = class extends HTMLElement {
-    /**
-     * @type {any}
-     * @private
-     */
-    #onCollapseListener;
     css = `
     :host {
       display: grid;
       grid-template-rows: 0fr;
       transition: grid-template-rows 300ms;
 
-      & ::slotted(*:first-child) {
+      & ::slotted(:first-child) {
         overflow: hidden;
       }
     }
 
-    :host([open]) {
+    :host([expanded]) {
       grid-template-rows: 1fr;
     }
   `;
     template = () => `<slot></slot>`;
-    static observedAttributes = ["open", "control"];
-    get opened() {
-      return this.getAttribute("open") === "";
+    static observedAttributes = ["expanded", "control"];
+    get expanded() {
+      return this.getAttribute("expanded") === "";
     }
     get control() {
       return this.getAttribute("control");
     }
     constructor() {
       super();
-      console.log("constructor");
       this.attachShadow({ mode: "open" });
-      this.#onCollapseListener = this.#onCollapse.bind(this);
       this.render();
     }
-    /**
-     * @param {Event} e
-     */
-    #onCollapse(e) {
-      const { id, open } = e.detail;
-      if (id !== this.getAttribute("id")) return;
-      this.toggleAttribute("open", !open);
-    }
     connectedCallback() {
-      if (this.getAttribute("id") !== null) {
-        window.addEventListener("toggle-collapsible", this.#onCollapseListener);
-      }
-      if (this.control) {
-        this.setupControl();
-      }
-    }
-    disconnectedCallback() {
-      window.removeEventListener("toggle-collapsible", this.#onCollapseListener);
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
+      if (this.control) this.setupControl();
     }
     render() {
-      console.log("entre");
       this.shadowRoot.innerHTML = `
       <style>${this.css.trim()}</style>
       ${this.template().trim()}
@@ -71,103 +45,149 @@
       document.querySelector(`#${this.control}`)?.addEventListener("click", this.toggle.bind(this));
     }
     toggle() {
-      this.toggleAttribute("open", !this.opened);
+      this.toggleAttribute("expanded", !this.expanded);
     }
   };
   customElements.define("collapsible-element", CollapsibleElement);
-  var CustomSlideshow = class extends HTMLElement {
+  var SliderElement = class extends HTMLElement {
+    /**
+     * @type {number}
+     * @private
+     */
     #currentSlide = 2;
+    /**
+     * @type {number | null}
+     * @private
+     */
     #interval = null;
-    #slideshow;
-    static observedAttributes = ["autoplay"];
+    /**
+     * @type {Element}
+     * @private
+     */
+    #slider;
+    /**
+     * @type {Element[]}
+     * @private
+     */
+    #slides;
+    /**
+     * @type {HTMLSlotElement}
+     * @private
+     */
+    #slot;
+    /**
+     * @type {any}
+     * @private
+     */
+    #onSlotChangeListener;
+    css = `
+    ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .slider {
+      display: flex;
+      align-items: center;  
+    }
+
+    ::slotted(*) {
+      flex: none;
+      scroll-snap-align: start;
+      width: calc((100% - (var(--slider-columns) - 1) * var(--slider-gap)) / var(--slider-columns));
+    }
+
+    :is(:host([type='manual']), :host([type='auto'])) > .slider {
+      overflow: hidden;
+      scroll-behavior: smooth;
+    }
+
+    :host([type='snap']) > .slider {
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  `;
+    template = () => `<ul class="list"><slot></slot></ul>`;
+    static observedAttributes = ["autoplay", "previouscontrol", "nextcontrol", "type"];
+    get autoplay() {
+      return this.getAttribute("autoplay") === "";
+    }
+    get type() {
+      return this.getAttribute("type") ?? "manual";
+    }
+    get previouscontrol() {
+      return this.getAttribute("previouscontrol");
+    }
+    get nextcontrol() {
+      return this.getAttribute("nextcontrol");
+    }
+    get columns() {
+      const columns = getComputedStyle(this).getPropertyValue("--slide-columns");
+      return parseInt(columns);
+    }
     constructor() {
       super();
+      this.attachShadow({ mode: "open" });
+      this.#onSlotChangeListener = this.#onSlotChange.bind(this);
+      this.render();
+    }
+    #onSlotChange() {
+      this.#slides = this.#slot.assignedElements();
     }
     connectedCallback() {
-      this.#slideshow = this.querySelector(".slideshow-scrollable");
-      if (this.getAttribute("autoplay") !== null) {
-        this.#play();
-      }
+      this.#slider = this.shadowRoot.querySelector(".slider");
+      this.#slot = this.shadowRoot.querySelector("slot");
+      this.#slot.addEventListener("slotchange", this.#onSlotChangeListener);
+      if (this.autoplay) this.#play();
+      this.setupControls();
     }
     disconnectedCallback() {
+      this.#slot.removeEventListener("slotchange", this.#onSlotChangeListener);
       this.#pause();
     }
-    attributeChangedCallback(name, _, newValue) {
-      if (name === "autoplay") {
-        newValue === null ? this.#pause() : this.#play();
-      }
+    render() {
+      this.shadowRoot.innerHTML = `
+      <style>${this.css.trim()}</style>
+      ${this.template().trim()}
+    `;
+    }
+    setupControls() {
+      document.querySelector(`#${this.previouscontrol}`)?.addEventListener("click", this.previousSlide.bind(this));
+      document.querySelector(`#${this.nextcontrol}`)?.addEventListener("click", this.nextSlide.bind(this));
     }
     reset() {
       this.#currentSlide = 2;
     }
-    get columns() {
-      if (!this.#slideshow) {
-        console.error("CustomSlideShow -> columns getter -> this.#slideshow is undefinied");
-        return 1;
-      }
-      ;
-      const columns = getComputedStyle(this.#slideshow).getPropertyValue("--columns");
-      return parseInt(columns);
-    }
     /**
      * @param {number} index
      * @returns {Slide}
-     */
+    */
     slideToIndex(index) {
-      if (!this.#slideshow) {
-        console.error("CustomSlideShow -> nextSlide() -> this.#slideshow is undefinied");
-        return { current: 1, start: false, end: false };
-      }
-      ;
-      const newSlide = index + 2;
-      const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
-      this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
-      this.#currentSlide = newSlide;
-      return { current: newSlide - 1, start: false, end: false };
-    }
-    /**
-     * @param {boolean} reset
-     * @returns {Slide}
-     */
-    nextSlide(reset) {
-      if (!this.#slideshow) {
-        console.error("CustomSlideShow -> nextSlide() -> this.#slideshow is undefinied");
-        return { current: 1, start: false, end: false };
-      }
-      ;
-      let newSlide = this.#currentSlide + 1;
-      const length = this.#slideshow.children.length - (this.columns - 1);
-      if (newSlide > length) {
-        if (reset) {
-          newSlide = 2;
-        } else {
-          return { current: length - 1, start: false, end: true };
-        }
-      }
-      ;
-      const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
-      this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
-      this.#currentSlide = newSlide;
-      return { current: newSlide - 1, start: false, end: newSlide === length };
-    }
-    /**
-     * @returns {Slide}
-     */
-    previousSlide() {
-      if (!this.#slideshow) {
-        console.error("CustomSlideShow -> previousSlide() -> this.#slideshow is undefinied");
-        return { current: 1, start: false, end: false };
-      }
-      ;
-      const newSlide = this.#currentSlide - 1;
-      if (newSlide < 2) {
+      let newSlide = index;
+      const maxLength = this.#slides.length - (this.columns - 1);
+      if (newSlide > maxLength) {
+        if (!this.autoplay) return { current: length - 1, start: false, end: true };
+        newSlide = 2;
+      } else if (newSlide < 2) {
         return { current: 1, start: true, end: false };
       }
       ;
-      const currentSlide = this.querySelector(`.slideshow-slide:nth-child(${newSlide})`);
-      this.#slideshow.scrollLeft = currentSlide.offsetLeft - this.#slideshow.offsetLeft;
       this.#currentSlide = newSlide;
-      return { current: newSlide - 1, start: newSlide === 2, end: false };
+      const slide = this.#slides[this.#currentSlide];
+      this.#slider.scrollLeft = slide.offsetLeft - this.#slider.offsetLeft;
+      return { current: newSlide - 1, start: newSlide === 2, end: newSlide === maxLength };
+    }
+    nextSlide() {
+      return this.slideToIndex(this.#currentSlide + 1);
+    }
+    previousSlide() {
+      return this.slideToIndex(this.#currentSlide - 1);
     }
     #play() {
       clearInterval(this.#interval);
@@ -177,7 +197,7 @@
       clearInterval(this.#interval);
     }
   };
-  customElements.define("custom-slideshow", CustomSlideshow);
+  customElements.define("slider-element", SliderElement);
   var FormController = class {
     /**
      * @type {HTMLFormElement}
@@ -753,7 +773,7 @@
       move(e) {
         const index = e.detail.index;
         if (!index) return;
-        this.dialog = this.$el?.slideToIndex(index);
+        this.dialog = this.$el?.slideToIndex(index + 2);
       },
       reset() {
         this.dialog = { current: 1, start: true, end: false };
@@ -817,11 +837,12 @@
       info: null,
       error: null,
       async init() {
+        const collapsible = document.querySelector("#request-collapsible");
         this.$watch("success", (value) => {
-          if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
+          if (value) collapsible.toggle();
         });
         this.$watch("error", (value) => {
-          if (value) this.$dispatch("toggle-collapsible", { id: "1", open: true });
+          if (value) collapsible.toggle();
         });
         try {
           await state.init();
@@ -851,9 +872,10 @@
         const url = resource.sources[0].url;
         if (url.startsWith("blob")) URL.revokeObjectURL(url);
       },
-      reset() {
+      reset(message) {
         this.loading = true;
-        this.$dispatch("toggle-collapsible", { id: "1", open: false });
+        const collapsible = document.querySelector("#request-collapsible");
+        collapsible.toggle();
         setTimeout(() => {
           this.success = null;
           this.info = null;

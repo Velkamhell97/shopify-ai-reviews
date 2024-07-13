@@ -42,20 +42,6 @@
     }
   }
 
-  .collapsible-wrapper {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 300ms;
-
-    > .collapsible-content {
-      overflow: hidden;
-    }
-  }
-
-  custom-collapsible[open] > .collapsible-wrapper {
-    grid-template-rows: 1fr;
-  }
-
   .contrast-container {
     color: white;
     background-color: rgba(128, 128, 128, 0.5);
@@ -295,8 +281,8 @@
   }
 
   .reviews-form__slideshow {
-    --columns:1;
-    --gap: 0rem;
+    --slider-columns:1;
+    --slider-gap: 0rem;
     --slide-padding: 0px;
     width: 100%;
     height: 100%;
