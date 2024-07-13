@@ -54,7 +54,7 @@
      * @type {number}
      * @private
      */
-    #currentSlide = 2;
+    #currentSlide = 1;
     /**
      * @type {number | null}
      * @private
