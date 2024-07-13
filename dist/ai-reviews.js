@@ -774,19 +774,22 @@
         this.reviews = slider?.previousSlide();
       },
       move(e) {
-        const index = e.detail.index;
-        if (!index) return;
-        this.dialog = this.$el?.slideToIndex(index + 2);
+        if (!e?.detail?.index) return;
+        const slider = document.querySelector("#dialog-slider");
+        this.dialog = slider?.slideToIndex(e.detail.index + 1);
       },
       reset() {
+        const slider = document.querySelector("#dialog-slider");
         this.dialog = { current: 1, start: true, end: false };
-        this.$el?.reset();
+        slider.reset();
       },
       nextDialogSlide() {
-        this.dialog = this.$el?.closest("custom-slideshow")?.nextSlide();
+        const slider = document.querySelector("#dialog-slider");
+        this.dialog = slider?.nextSlide();
       },
       previousDialogSlide() {
-        this.dialog = this.$el?.closest("custom-slideshow")?.previousSlide();
+        const slider = document.querySelector("#dialog-slider");
+        this.dialog = slider?.previousSlide();
       }
     }));
     Alpine.data("form", () => ({
