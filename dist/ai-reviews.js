@@ -71,6 +71,11 @@
      */
     #slides;
     /**
+     * @type {number}
+     * @private
+     */
+    #padding;
+    /**
      * @type {HTMLSlotElement}
      * @private
      */
@@ -91,7 +96,6 @@
       display: flex;
       align-items: start;  
       gap: var(--slider-gap, 1rem);
-      padding: var(--slider-padding);
     }
 
     ::slotted(*) {
@@ -182,8 +186,6 @@
       ;
       this.#currentSlide = newSlide;
       const slide = this.#slides[this.#currentSlide];
-      console.log(this.#slider.offsetLeft);
-      console.log(slide.offsetLeft);
       this.#slider.scrollLeft = slide.offsetLeft - this.#slider.offsetLeft;
       return { current: newSlide, start: newSlide === 1, end: newSlide === maxLength };
     }
