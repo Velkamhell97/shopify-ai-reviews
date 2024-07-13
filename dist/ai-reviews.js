@@ -60,6 +60,7 @@
     attributeChangedCallback(name, oldValue, newValue) {
     }
     render() {
+      console.log("entre");
       this.shadowRoot.innerHTML = `
       <style>${this.css.trim()}</style>
       ${this.template().trim()}
