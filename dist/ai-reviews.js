@@ -183,7 +183,7 @@
       this.#currentSlide = newSlide;
       const slide = this.#slides[this.#currentSlide];
       console.log(this.#slider.offsetLeft);
-      console.log(this.slide.offsetLeft);
+      console.log(slide.offsetLeft);
       this.#slider.scrollLeft = slide.offsetLeft - this.#slider.offsetLeft;
       return { current: newSlide, start: newSlide === 1, end: newSlide === maxLength };
     }
