@@ -280,7 +280,7 @@
     }
   }
 
-  .reviews-form__slideshow {
+  .reviews-form__slider {
     --slider-columns:1;
     --slider-gap: 0rem;
     --slide-padding: 0px;
@@ -365,9 +365,8 @@
   }
 
   .reviews-layout-2 {
-    --gap: 0rem;
-    --columns: 1;
-    --slide-padding: 5px;
+    --slider-gap: 0rem;
+    --slider-columns: 1;
     align-items: start;
     
     @media (width >= 750px) {
