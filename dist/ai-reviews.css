@@ -366,7 +366,6 @@
 
   .reviews-layout-2 {
     --slider-gap: 1rem;
-    --slider-padding: 10px;
     --slider-columns: 1;
 
     > .review-slide-wrapper {
