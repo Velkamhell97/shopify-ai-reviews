@@ -139,10 +139,12 @@
     }
     #onSlotChange() {
       this.#slides = this.#slot.assignedElements();
+      console.log(this.#slides);
     }
     connectedCallback() {
       this.#slider = this.shadowRoot.querySelector(".slider");
       this.#slot = this.shadowRoot.querySelector("slot");
+      console.log(this.#slot);
       this.#slot.addEventListener("slotchange", this.#onSlotChangeListener);
       if (this.autoplay) this.#play();
       this.setupControls();
@@ -179,6 +181,8 @@
       }
       ;
       this.#currentSlide = newSlide;
+      console.log(this.#currentSlide);
+      console.log(this.#slides);
       const slide = this.#slides[this.#currentSlide];
       this.#slider.scrollLeft = slide.offsetLeft - this.#slider.offsetLeft;
       return { current: newSlide - 1, start: newSlide === 2, end: newSlide === maxLength };
