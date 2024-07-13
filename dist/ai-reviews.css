@@ -365,9 +365,8 @@
   }
 
   .reviews-layout-2 {
-    --slider-gap: 0rem;
+    --slider-gap: 1rem;
     --slider-columns: 1;
-    align-items: start;
     
     @media (width >= 750px) {
       --slider-columns: 2;

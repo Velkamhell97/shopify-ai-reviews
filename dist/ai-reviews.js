@@ -89,7 +89,7 @@
 
     .slider {
       display: flex;
-      align-items: center;  
+      align-items: start;  
     }
 
     ::slotted(*) {
