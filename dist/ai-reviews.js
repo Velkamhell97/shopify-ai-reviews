@@ -765,11 +765,11 @@
     Alpine.data("slider", () => ({
       paginator: { current: 1, start: true, end: false },
       reviewsSlider: null,
-      nextReviewSlide() {
-        this.reviews = this.reviewsSlider?.nextSlide();
-      },
-      previousReviewSlide() {
+      previousSlide() {
         this.reviews = this.reviewsSlider?.previousSlide();
+      },
+      nextSlide() {
+        this.reviews = this.reviewsSlider?.nextSlide();
       }
     }));
     Alpine.data("dialog", () => ({
@@ -784,15 +784,15 @@
           this.dialog = { current: 1, start: true, end: false };
         });
       },
-      toDialogSlide(e) {
+      customSlide(e) {
         if (!e?.detail?.index) return;
         this.dialog = this.dialogSlider?.slideToIndex(e.detail.index + 1);
       },
-      nextDialogSlide() {
-        this.dialog = this.dialogSlider?.nextSlide();
-      },
-      previousDialogSlide() {
+      previouseSlide() {
         this.dialog = this.dialogSlider?.previousSlide();
+      },
+      nextSlide() {
+        this.dialog = this.dialogSlider?.nextSlide();
       }
     }));
     Alpine.data("form", () => ({
