@@ -71,11 +71,6 @@
      */
     #slides;
     /**
-     * @type {number}
-     * @private
-     */
-    #padding;
-    /**
      * @type {HTMLSlotElement}
      * @private
      */
