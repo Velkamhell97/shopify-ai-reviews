@@ -113,7 +113,7 @@
       }
     }
   `;
-    template = () => `<ul class="list"><slot></slot></ul>`;
+    template = () => `<ul class="slider"><slot></slot></ul>`;
     static observedAttributes = ["autoplay", "previouscontrol", "nextcontrol", "type"];
     get autoplay() {
       return this.getAttribute("autoplay") === "";
