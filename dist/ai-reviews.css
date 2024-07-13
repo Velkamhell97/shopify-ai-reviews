@@ -365,11 +365,12 @@
   }
 
   .reviews-layout-2 {
-    --slider-gap: 1rem;
+    --slider-gap: 0.5rem;
     --slider-columns: 1;
 
     > .review-slide-wrapper {
       padding: 10px;
+      box-sizing: border-box !important;
     }
     
     @media (width >= 750px) {
