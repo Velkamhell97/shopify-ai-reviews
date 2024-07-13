@@ -365,11 +365,12 @@
   }
 
   .reviews-layout-2 {
-    --slider-gap: 0.5rem;
+    --slider-gap: 0rem;
+    --slider-padding: 10px;
     --slider-columns: 1;
 
     > .review-slide-wrapper {
-      padding: 10px;
+      padding: var(--slider-padding);
       box-sizing: border-box !important;
     }
     
@@ -413,7 +414,8 @@
       display: inline-flex;
     }
 
-    > button {
+    > button {  
+      margin: var(--slider-padding, 0rem);
       display: none;
       color: white;
       background-color: red;
