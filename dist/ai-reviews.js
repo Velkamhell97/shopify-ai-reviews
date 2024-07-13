@@ -762,17 +762,19 @@
       document.addEventListener("shopify:section:load", refresh);
     }
     ;
-    Alpine.data("scroll", () => ({
-      reviews: { current: 1, start: true, end: false },
-      dialog: { current: 1, start: true, end: false },
+    Alpine.data("slider", () => ({
+      paginator: { current: 1, start: true, end: false },
       reviewsSlider: null,
-      dialogSlider: null,
       nextReviewSlide() {
         this.reviews = this.reviewsSlider?.nextSlide();
       },
       previousReviewSlide() {
         this.reviews = this.reviewsSlider?.previousSlide();
-      },
+      }
+    }));
+    Alpine.data("dialog", () => ({
+      paginator: { current: 1, start: true, end: false },
+      dialogSlider: null,
       init() {
         console.log("entre");
         this.reviewsSlider = document.querySelector("#reviews-slider");
@@ -831,7 +833,7 @@
         this.submitted = true;
       }
     }));
-    Alpine.data("aiReviews", () => ({
+    Alpine.data("aireviews", () => ({
       reviews: state.reviews,
       rating: state.rating,
       chunk: state.chunk,
