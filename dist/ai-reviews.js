@@ -90,6 +90,8 @@
     .slider {
       display: flex;
       align-items: start;  
+      gap: var(--slider-gap, 1rem);
+      padding: var(--slider-padding);
     }
 
     ::slotted(*) {
