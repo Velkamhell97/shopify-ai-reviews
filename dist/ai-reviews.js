@@ -34,6 +34,7 @@
     }
     constructor() {
       super();
+      console.log("constructor");
       this.attachShadow({ mode: "open" });
       this.#onCollapseListener = this.#onCollapse.bind(this);
       this.render();
