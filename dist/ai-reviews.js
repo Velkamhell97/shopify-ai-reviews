@@ -128,7 +128,7 @@
       return this.getAttribute("nextcontrol");
     }
     get columns() {
-      const columns = getComputedStyle(this).getPropertyValue("--slide-columns");
+      const columns = getComputedStyle(this).getPropertyValue("--slider-columns");
       return parseInt(columns);
     }
     constructor() {
@@ -171,6 +171,8 @@
     slideToIndex(index) {
       let newSlide = index;
       const maxLength = this.#slides.length - (this.columns - 1);
+      console.log(this.#slides.length);
+      console.log(this.columns);
       console.log(maxLength);
       console.log(newSlide);
       if (newSlide > maxLength) {
