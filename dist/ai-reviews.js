@@ -1005,10 +1005,9 @@
       },
       removeReview(i, page) {
         const index = this.chunk * (page - 1) + i;
-        console.log(`i: ${i} - index: ${index} - length: ${this.reviews.length}`);
+        console.log(`i: ${i} - index: ${index} - length: ${this.reviews.length} - length2: ${state.reviews.length} page: ${this.page}`);
         if (i == 0 && index == this.reviews.length - 1) {
-          this.page = Math.min(this.page - 1, 0);
-          this.goToPage(this.page);
+          this.goToPage(Math.min(this.page - 1, 0));
         }
         ;
         state.remove(index);
