@@ -172,8 +172,10 @@
     slideToIndex(index) {
       let newSlide = index;
       const maxLength = this.#slides.length - this.columns;
+      console.log(newSlide);
+      console.log(maxLength);
       if (newSlide > maxLength) {
-        if (!this.autoplay) return { current: length - 1, start: false, end: true };
+        if (!this.autoplay) return { current: maxLength - 1, start: false, end: true };
         newSlide = 1;
       } else if (newSlide < 1) {
         return { current: 1, start: true, end: false };
