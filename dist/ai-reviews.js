@@ -1005,14 +1005,15 @@
       },
       removeReview(i, page) {
         const index = this.chunk * (page - 1) + i;
+        console.log(`i: ${i} - index: ${index} - length: ${this.reviews.length}`);
+        if (i == 0 && index == this.reviews.length - 1) {
+          this.page = Math.min(this.page - 1, 0);
+          this.goToPage(this.page);
+        }
+        ;
         state.remove(index);
         this.reviews.splice(index, 1);
         this.rating = state.rating;
-        console.log(`i: ${i} - index: ${index} - length: ${this.reviews.length}`);
-        if (i == 0 && index == this.reviews.length - 1) {
-          this.goToPage(Math.min(this.page - 1, 0));
-        }
-        ;
       }
     }));
   });
