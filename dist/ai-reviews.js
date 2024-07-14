@@ -787,7 +787,7 @@
         if (!e?.detail?.index) return;
         this.paginator = modal.slider?.slideToIndex(e.detail.index + 1);
       },
-      previouseSlide() {
+      previousSlide() {
         this.paginator = modal.slider?.previousSlide();
       },
       nextSlide() {
@@ -875,10 +875,6 @@
           this.$dispatch("dialog-close");
           this.expandedReview = null;
         }
-      },
-      revoke(resource) {
-        const url = resource.sources[0].url;
-        if (url.startsWith("blob")) URL.revokeObjectURL(url);
       },
       reset() {
         this.loading = true;
