@@ -172,8 +172,6 @@
     slideToIndex(index) {
       let newSlide = index;
       const maxLength = this.#slides.length - this.columns;
-      console.log(newSlide);
-      console.log(maxLength);
       if (newSlide > maxLength) {
         if (!this.autoplay) return { current: length - 1, start: false, end: true };
         newSlide = 1;
@@ -781,7 +779,10 @@
     Alpine.data("dialog", () => ({
       paginator: { current: 1, start: true, end: false },
       init() {
+        console.log(modal.dialog);
+        console.log(modal.slider);
         modal.dialog?.addEventListener("close", () => {
+          console.log("cerrado");
           modal.slider?.reset();
           this.paginator = { current: 1, start: true, end: false };
         });
