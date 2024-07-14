@@ -385,10 +385,9 @@
   var form = new FormController();
   var DialogController = class {
     /**
-     * @type {HTMLElement}
-     * @private
+     * @type {HTMLDialogElement}
      */
-    #dialog;
+    dialog;
     /**
      * @type {HTMLElement}
      * @private
@@ -399,6 +398,10 @@
      * @private
      */
     #secondarySelector;
+    /**
+     * @type {HTMLElement}
+     */
+    slider;
     /**
      * @type {any}
      * @private
@@ -415,17 +418,18 @@
       this.reload();
     }
     reload() {
-      this.#dialog = document.querySelector("#reviews-dialog");
+      this.dialog = document.querySelector("#reviews-dialog");
       const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
       this.#mainSelector = mainSelector;
       this.#secondarySelector = secondarySelector;
+      this.slider = document.querySelector("#dialog-slider");
       this.#setupVariants();
     }
     show() {
-      this.#dialog?.showModal();
+      this.dialog?.showModal();
     }
     hide() {
-      this.#dialog?.close();
+      this.dialog?.close();
     }
     /**
      * @param {Event} e
@@ -474,14 +478,6 @@
      * @private
      */
     #fetched = false;
-    /**
-     * @type {boolean}
-     */
-    active;
-    /**
-     * @type {boolean}
-     */
-    exists;
     /**
      * @type {string}
      */
@@ -541,6 +537,14 @@
      */
     #reviews = [];
     /**
+     * @type {Element}
+     */
+    slider;
+    /**
+     * @type {Element}
+     */
+    collapsible;
+    /**
      * @param {Database} database
      */
     constructor(database) {
@@ -589,6 +593,8 @@
       await this.#fetchReviews();
     }
     reload() {
+      this.slider = document.querySelector("#reviews-slider");
+      this.collapsible = document.querySelector("#request-collapsible");
       const reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
       if (reviewsPerPage !== this.chunk) this.page = 1;
       this.chunk = reviewsPerPage;
@@ -739,8 +745,6 @@
         if (!response.exists) {
           reviews = this.#defaultReviews;
         }
-        this.active = response.active;
-        this.exists = response.exists;
         this.country = response.country;
         this.#reviews = reviews;
         this.group();
@@ -764,34 +768,30 @@
     ;
     Alpine.data("slider", () => ({
       paginator: { current: 1, start: true, end: false },
-      reviewsSlider: null,
       previousSlide() {
-        this.reviews = this.reviewsSlider?.previousSlide();
+        this.paginator = state.slider?.previousSlide();
       },
       nextSlide() {
-        this.reviews = this.reviewsSlider?.nextSlide();
+        this.paginator = state.slider?.nextSlide();
       }
     }));
     Alpine.data("dialog", () => ({
       paginator: { current: 1, start: true, end: false },
-      dialogSlider: null,
       init() {
-        this.reviewsSlider = document.querySelector("#reviews-slider");
-        this.dialogSlider = document.querySelector("#dialog-slider");
-        document.querySelector("#reviews-dialog").addEventListener("close", () => {
-          this.dialogSlider?.reset();
-          this.dialog = { current: 1, start: true, end: false };
+        modal.dialog?.addEventListener("close", () => {
+          modal.slider?.reset();
+          this.paginator = { current: 1, start: true, end: false };
         });
       },
       customSlide(e) {
         if (!e?.detail?.index) return;
-        this.dialog = this.dialogSlider?.slideToIndex(e.detail.index + 1);
+        this.paginator = modal.slider?.slideToIndex(e.detail.index + 1);
       },
       previouseSlide() {
-        this.dialog = this.dialogSlider?.previousSlide();
+        this.paginator = modal.slider?.previousSlide();
       },
       nextSlide() {
-        this.dialog = this.dialogSlider?.nextSlide();
+        this.paginator = modal.slider?.nextSlide();
       }
     }));
     Alpine.data("form", () => ({
@@ -880,15 +880,12 @@
         const url = resource.sources[0].url;
         if (url.startsWith("blob")) URL.revokeObjectURL(url);
       },
-      reset(message) {
+      reset() {
         this.loading = true;
-        const collapsible = document.querySelector("#request-collapsible");
-        collapsible.toggle();
-        setTimeout(() => {
-          this.success = null;
-          this.info = null;
-          this.error = null;
-        }, 300);
+        this.info = "Generando...";
+        if (!this.success && !this.error) {
+          state.collapsible.toggle();
+        }
       },
       async saveReviews() {
         if (this.loading) return;
