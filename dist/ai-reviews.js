@@ -115,12 +115,12 @@
     }
   `;
     template = () => `<ul class="slider"><slot></slot></ul>`;
-    static observedAttributes = ["autoplay", "previouscontrol", "nextcontrol", "type"];
-    get autoplay() {
-      return this.getAttribute("autoplay") === "";
-    }
+    static observedAttributes = ["type", "previouscontrol", "nextcontrol"];
     get type() {
       return this.getAttribute("type") ?? "manual";
+    }
+    get autoplay() {
+      return this.type === "auto";
     }
     get previouscontrol() {
       return this.getAttribute("previouscontrol");
@@ -1006,12 +1006,13 @@
       removeReview(i, page) {
         const index = this.chunk * (page - 1) + i;
         state.remove(index);
+        this.reviews.splice(index, 1);
+        this.rating = state.rating;
+        console.log(`i: ${i} - index: ${index} - length: ${this.reviews.length}`);
         if (i == 0 && index == this.reviews.length - 1) {
           this.goToPage(Math.min(this.page - 1, 0));
         }
         ;
-        this.reviews.splice(index, 1);
-        this.rating = state.rating;
       }
     }));
   });
