@@ -163,7 +163,7 @@
       document.querySelector(`#${this.nextcontrol}`)?.addEventListener("click", this.nextSlide.bind(this));
     }
     reset() {
-      this.#currentSlide = 2;
+      this.#currentSlide = 1;
     }
     /**
      * @param {number} index
@@ -185,7 +185,6 @@
       return { current: newSlide, start: newSlide === 1, end: newSlide === maxLength };
     }
     nextSlide() {
-      console.log(this.#currentSlide);
       return this.slideToIndex(this.#currentSlide + 1);
     }
     previousSlide() {
@@ -779,10 +778,7 @@
     Alpine.data("dialog", () => ({
       paginator: { current: 1, start: true, end: false },
       init() {
-        console.log(modal.dialog);
-        console.log(modal.slider);
         modal.dialog?.addEventListener("close", () => {
-          console.log("cerrado");
           modal.slider?.reset();
           this.paginator = { current: 1, start: true, end: false };
         });
@@ -795,7 +791,6 @@
         this.paginator = modal.slider?.previousSlide();
       },
       nextSlide() {
-        console.log(modal.slider);
         this.paginator = modal.slider?.nextSlide();
       }
     }));
