@@ -90,7 +90,7 @@
     .slider {
       display: flex;
       align-items: start;  
-      gap: var(--slider-gap, 1rem);
+      gap: var(--slider-gap);
     }
 
     ::slotted(*) {
@@ -172,6 +172,8 @@
     slideToIndex(index) {
       let newSlide = index;
       const maxLength = this.#slides.length - this.columns;
+      console.log(newSlide);
+      console.log(maxLength);
       if (newSlide > maxLength) {
         if (!this.autoplay) return { current: length - 1, start: false, end: true };
         newSlide = 1;
@@ -185,6 +187,7 @@
       return { current: newSlide, start: newSlide === 1, end: newSlide === maxLength };
     }
     nextSlide() {
+      console.log(this.#currentSlide);
       return this.slideToIndex(this.#currentSlide + 1);
     }
     previousSlide() {
@@ -791,6 +794,7 @@
         this.paginator = modal.slider?.previousSlide();
       },
       nextSlide() {
+        console.log(modal.slider);
         this.paginator = modal.slider?.nextSlide();
       }
     }));
