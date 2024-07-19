@@ -51,6 +51,10 @@
      * @private
      */
     observer;
+    /**
+     * @type {{current: number, start: boolean, end: boolean}}
+     */
+    #state = { current: 1, start: true, end: false };
     static observedAttributes = ["type", "previouscontrol", "nextcontrol"];
     get type() {
       return this.getAttribute("type") ?? "manual";
@@ -106,10 +110,11 @@
     slideToIndex(index) {
       const newSlide = index;
       const slide = this.#slides[newSlide];
-      if (!this.slide) return this.state;
+      if (!slide) return this.#state;
       this.#currentSlide = newSlide;
       this.#slider.scrollLeft = slide.offsetLeft - this.#slider.offsetLeft;
-      return { current: newSlide, start: newSlide === 1, end: newSlide === this.maxLength };
+      this.#state = { current: newSlide, start: newSlide === 1, end: newSlide === this.maxLength };
+      return this.#state;
     }
     nextSlide() {
       return this.slideToIndex(this.#currentSlide + 1);
