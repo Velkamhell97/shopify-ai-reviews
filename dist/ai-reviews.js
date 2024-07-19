@@ -72,7 +72,7 @@
       super();
     }
     connectedCallback() {
-      this.#slider = this.shadowRoot.querySelector(".reviews-slider");
+      this.#slider = this.querySelector(".reviews-slider");
       this.#slides = [...this.#slider.children];
       if (this.autoplay) this.#play();
       this.setupControls();
