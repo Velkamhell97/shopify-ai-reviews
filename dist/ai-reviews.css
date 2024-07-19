@@ -377,7 +377,7 @@
     --slider-padding: 10px;
     --slider-columns: 1;
 
-    > .review-card-wrapper {
+    & .review-card-wrapper {
       padding: var(--slider-padding);
       box-sizing: border-box !important;
     }
@@ -397,7 +397,7 @@
     -webkit-column-count: var(--columns);
     column-gap: 12px;
   
-    & .review-slide {
+    & .review-card-wrapper {
       width: 100%;
       margin-bottom: 1.5rem;
       display: inline-flex !important;
