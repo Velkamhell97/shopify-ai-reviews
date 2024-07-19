@@ -546,15 +546,10 @@
       this.rate(true);
     }
     group() {
-      console.log("entre gropud");
       if (!this.#media.length) {
         return;
       }
       const reviews = this.#reviews;
-      console.log(reviews);
-      console.log(reviews[0].media);
-      console.log(reviews[1].media);
-      console.log(reviews[2].media);
       const chunks = [];
       const last = this.#pattern[this.#pattern.length - 1];
       let acc = 0;
@@ -567,13 +562,10 @@
         const chunk = this.#media.slice(i, i + last);
         chunks.push(chunk);
       }
-      for (let i = 0; i < chunks.length; i++) {
-        console.log(`------------ index: ${i} ----------`);
-        console.log(reviews[i].media);
-        reviews[i].media = "media";
+      for (let i = 0; i < Math.min(reviews.length, chunks.length); i++) {
+        reviews[i].media = chunks[i];
+        reviews[i].single = chunks[i].length === 1;
       }
-      console.log(reviews);
-      console.log("sali");
     }
     /**
      * @param {boolean} keepOld
@@ -687,8 +679,6 @@
         }
         this.country = response.country;
         this.#reviews = reviews;
-        console.log("before");
-        console.log(this.#reviews);
         this.group();
         this.rate(true);
         this.date();
