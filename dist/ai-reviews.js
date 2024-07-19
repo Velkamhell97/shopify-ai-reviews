@@ -550,6 +550,12 @@
         return;
       }
       const reviews = this.#reviews;
+      console.log(chunks);
+      console.log(reviews);
+      console.log(reviews[0].media);
+      console.log(reviews[1].media);
+      console.log(reviews[2].media);
+      return;
       const chunks = [];
       const last = this.#pattern[this.#pattern.length - 1];
       let acc = 0;
@@ -562,10 +568,6 @@
         const chunk = this.#media.slice(i, i + last);
         chunks.push(chunk);
       }
-      console.log(chunks);
-      console.log(reviews[0].media);
-      console.log(reviews[1].media);
-      console.log(reviews[2].media);
       for (let i = 0; i < chunks.length; i++) {
         console.log(`------------ index: ${i} ----------`);
         console.log(reviews[i].media);
