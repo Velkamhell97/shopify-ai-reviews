@@ -377,7 +377,7 @@
     --slider-padding: 10px;
     --slider-columns: 1;
 
-    > .review-slide-wrapper {
+    > .review-card-wrapper {
       padding: var(--slider-padding);
       box-sizing: border-box !important;
     }
@@ -421,7 +421,7 @@
     translate: 0px -50%;
   }
 
-  .review-slide-wrapper {
+  .review-card-wrapper {
     position: relative;
 
     &:hover > button {
@@ -473,7 +473,7 @@
     }
   }
 
-  .review-slide__thumbnail {
+  .review-card__thumbnail {
     width: 115px !important;
     aspect-ratio: 4 / 5;
     
@@ -482,7 +482,7 @@
     }
   }
 
-  .review-slide__rating {
+  .review-card__rating {
     padding: 0.5rem 0.75rem;
     position: absolute;
     border-radius: 20px;
