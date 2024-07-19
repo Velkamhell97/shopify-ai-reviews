@@ -70,7 +70,6 @@
     }
     constructor() {
       super();
-      this.render();
     }
     connectedCallback() {
       this.#slider = this.shadowRoot.querySelector(".reviews-slider");
