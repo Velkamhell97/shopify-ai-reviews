@@ -6,7 +6,7 @@
   var CollapsibleElement = class extends HTMLElement {
     static observedAttributes = ["expanded", "control"];
     get expanded() {
-      return this.getAttribute("expanded") === "";
+      return this.getAttribute("expanded") !== null;
     }
     get control() {
       return this.getAttribute("control");
@@ -19,6 +19,12 @@
     }
     setupControl() {
       document.querySelector(`#${this.control}`)?.addEventListener("click", this.toggle.bind(this));
+    }
+    expand() {
+      this.setAttribute("expanded", "");
+    }
+    collapse() {
+      this.removeAttribute("expanded");
     }
     toggle() {
       this.toggleAttribute("expanded", !this.expanded);
@@ -779,10 +785,10 @@
       async init() {
         const collapsible = document.querySelector("#request-collapsible");
         this.$watch("success", (value) => {
-          if (value) collapsible.toggle();
+          if (value) collapsible.expand();
         });
         this.$watch("error", (value) => {
-          if (value) collapsible.toggle();
+          if (value) collapsible.expand();
         });
         try {
           await state.init();
