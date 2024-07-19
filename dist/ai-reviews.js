@@ -572,6 +572,7 @@
         console.log(reviews[i].media);
         reviews[i].media = "media";
       }
+      console.log(reviews);
       console.log("sali");
     }
     /**
