@@ -1,4 +1,5 @@
 @layer components {
+  /*---------------------- BUTTONS --------------------------*/
   .btn-reviews {
     display: inline-flex;
     align-items: center;
@@ -14,121 +15,6 @@
     z-index: 2;
   }
 
-  .scale-effect {
-    transition: scale 0.2s ease;
-
-    &:hover {
-      scale: 1.05;
-    }
-  }
-
-  .focus-border:focus-visible {
-    outline: 0;
-    outline-offset: 0.3rem;
-    box-shadow: 
-      0 0 0 .3rem rgb(255, 255, 255), 
-      0 0 0 .5rem rgba(18, 18, 18, .5), 
-      0 0 .5rem .4rem rgba(18, 18, 18, .3) !important;
-  }
-
-  .input-reviews {
-    all: unset;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    transition: box-shadow 200ms;
-
-    &:focus-visible {
-      outline: none !important;
-    }
-  }
-
-  .contrast-container {
-    color: white;
-    background-color: rgba(128, 128, 128, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.7);
-  }
-
-  .error-container {
-    background-color: #f8d7da;
-    color: #58151c;
-  }
-
-  .info-container {
-    background-color: #fff3cd;
-    color: #664d03;
-  }
-
-  .success-container {
-    background-color: #d1e7dd;
-    color: #0a3622;
-  }
-
-  .media-caption {
-    padding: 0.5rem 1rem;
-    font-size: 14px;
-    z-index: 1;
-  }
-
-  :is(.reviews-form__slider, .reviews-dialog__slider) > button {
-    position: absolute;
-    top: 50%;
-    translate: 0px -50%;
-  }
-
-  .reviews-slider-controls {
-    display: flex;
-    justify-content: space-between;
-    padding-block: 1rem;
-
-    > button {
-      transition: scale 0.2s ease;
-
-      &:disabled {
-        opacity: 0.65;
-        pointer-events:none;
-      }
-  
-      &:not(:disabled):hover {
-        scale: 1.10;
-      }
-    }
-  }
-
-  .icon-reviews {
-    display: inline-flex;
-    width: 20px;
-    height: 20px;
-  }
-
-  .icon-reviews--small {
-    width: 15px;
-    height: 15px;
-  }
-
-  .icon-reviews--large {
-    width: 30px;
-    height: 30px;
-  }
-}
- 
-
-@layer ai-reviews {
-  /*#region Actions */
-  .reviews-actions {
-    justify-content: center;
-
-    & button {
-      font-size: 16px;
-      gap: 0.75rem;
-      padding: .5rem 1.5rem;
-      border-radius: 4px;
-    }
-
-    @media (width >= 750px) {
-      justify-content: space-between !important;
-    }
-  }
-  
   .btn-reviews--save {
     color: white;
     background-color: rgb(26, 127, 100);
@@ -165,6 +51,175 @@
     &:disabled {
       opacity: 0.6;
       pointer-events:none;
+    }
+  }
+
+  .btn-reviews--control {
+    font-size: 16px;
+    padding: .75rem 2rem;
+    border-radius: 4px;
+    width: max-content;
+    transition: box-shadow 0.2s;
+  }
+
+  .btn-reviews--file {
+    font-size: 16px;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+
+    > span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+  }
+
+  .btn-reviews--submit {
+    margin-top: 0.5rem;
+    padding-block: 0.75rem;
+    border-radius: 0.5rem;
+    transition: box-shadow 0.2s;
+  }
+
+  .btn-reviews--play {
+    display: inline-flex;
+    color: black;
+    background-color: white;
+  }
+
+  .btn-reviews--transparent {
+    margin-bottom: 6px;
+    background-color: transparent;
+  }
+
+  
+  /*---------------------- INPUTS --------------------------*/
+  .input-reviews {
+    all: unset;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    transition: box-shadow 200ms;
+
+    &:focus-visible {
+      outline: none !important;
+    }
+  }
+
+
+  /*---------------------- CONTAINERS --------------------------*/
+  .contrast-container {
+    color: white;
+    background-color: rgba(128, 128, 128, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+  }
+
+  .error-container {
+    background-color: #f8d7da;
+    color: #58151c;
+  }
+
+  .info-container {
+    background-color: #fff3cd;
+    color: #664d03;
+  }
+
+  .success-container {
+    background-color: #d1e7dd;
+    color: #0a3622;
+  }
+
+
+  /*---------------------- SLIDER --------------------------*/
+  .reviews-slider {
+    display: flex;
+    align-items: start;  
+    gap: var(--slider-gap);
+  }
+
+  ul.reviews-slider {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .review-slide {
+    flex: none;
+    scroll-snap-align: start;
+    width: calc((100% - (var(--slider-columns) - 1) * var(--slider-gap)) / var(--slider-columns));
+    max-width: 100%;
+  }
+
+  :is(slider-element[type='manual'] > .reviews-slider, slider-element[type='auto'] > .reviews-slider) {
+    overflow: hidden;
+    scroll-behavior: smooth;
+  }
+
+  slider-element[type='snap'] > .reviews-slider {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .media-caption {
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+    z-index: 1;
+  }
+
+  
+  /*---------------------- COLLAPSIBLE --------------------------*/
+  collapsible-element {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms;
+
+    > .reviews-collapsible__content {
+      overflow: hidden;
+    }
+  }
+
+  collapsible-element[expanded] {
+    grid-template-rows: 1fr;
+  }
+
+
+  /*---------------------- ICONS --------------------------*/
+  .icon-reviews {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+  }
+
+  .icon-reviews--small {
+    width: 15px;
+    height: 15px;
+  }
+
+  .icon-reviews--large {
+    width: 30px;
+    height: 30px;
+  }
+}
+ 
+
+@layer ai-reviews {
+  /*#region Actions */
+  .reviews-actions {
+    justify-content: center;
+
+    & button {
+      font-size: 16px;
+      gap: 0.75rem;
+      padding: .5rem 1.5rem;
+      border-radius: 4px;
+    }
+
+    @media (width >= 750px) {
+      justify-content: space-between !important;
     }
   }
   /*#endregion*/
@@ -225,29 +280,9 @@
 
 
   /*#region Form */
-  .btn-reviews--control {
-    font-size: 16px;
-    padding: .75rem 2rem;
-    border-radius: 4px;
-    width: max-content;
-    transition: box-shadow 0.2s;
-  }
-
   .reviews-form__file {
     width: 350px;
     padding: 1rem;
-  }
-
-  .btn-reviews--file {
-    font-size: 16px;
-    padding: 1rem;
-    border-radius: 0.25rem;
-    cursor: pointer;
-
-    > span {
-      font-size: 14px;
-      font-weight: bold;
-    }
   }
 
   .reviews-form__slider {
@@ -288,27 +323,12 @@
     fill: currentColor;
   }
 
-  .btn-reviews--submit {
-    margin-top: 0.5rem;
-    padding-block: 0.75rem;
-    border-radius: 0.5rem;
-    transition: box-shadow 0.2s;
-  }
-
   .reviews-form__conditions {
     font-size: 12px;
     text-decoration: underline;
   }
 
   @media screen and (width >= 750px)  {
-    .btn-reviews--file {
-      font-size: 16px;
-
-      > span {
-        font-size: 14px;
-      }
-    }
-
     .reviews-form__content {
       & label {
         font-size: 16px;
@@ -331,6 +351,25 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .reviews-slider-controls {
+    display: flex;
+    justify-content: space-between;
+    padding-block: 1rem;
+
+    > button {
+      transition: scale 0.2s ease;
+
+      &:disabled {
+        opacity: 0.65;
+        pointer-events:none;
+      }
+  
+      &:not(:disabled):hover {
+        scale: 1.10;
+      }
+    }
   }
 
   .reviews-layout-2 {
@@ -376,6 +415,12 @@
 
 
   /*#region Review Slide */
+  :is(.reviews-form__slider, .reviews-dialog__slider) > button {
+    position: absolute;
+    top: 50%;
+    translate: 0px -50%;
+  }
+
   .review-slide-wrapper {
     position: relative;
 
@@ -392,7 +437,7 @@
     }
   }
 
-  .review-slide {
+  .review-card {
     cursor: pointer;
     box-shadow: 3px 4px 8px rgba(0, 0, 0, .2);
     transition: box-shadow 0.2s ease;
@@ -402,20 +447,14 @@
     }
   }
 
-  .btn-reviews--play {
-    display: inline-flex;
-    color: black;
-    background-color: white;
-  }
-
-  .review-slide__media-wrapper {
+  .review-card__media-wrapper {
     max-width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
-  .review-slide__media {
+  .review-card__media {
     display: inline-block;
     position: relative;
     border-radius: 0.5rem;
@@ -476,11 +515,6 @@
     }
   }
 
-  .btn-reviews--transparent {
-    margin-bottom: 6px;
-    background-color: transparent;
-  }
-
   .reviews-dialog__wrapper {
     align-items: start;
   }
@@ -533,6 +567,23 @@
 
 
 @layer utilities {
+  .hover-scale {
+    transition: scale 0.2s ease;
+
+    &:hover {
+      scale: 1.05;
+    }
+  }
+
+  .focus-border:focus-visible {
+    outline: 0;
+    outline-offset: 0.3rem;
+    box-shadow: 
+      0 0 0 .3rem rgb(255, 255, 255), 
+      0 0 0 .5rem rgba(18, 18, 18, .5), 
+      0 0 .5rem .4rem rgba(18, 18, 18, .3) !important;
+  }
+
   .relative {
     position: relative;
   }
@@ -598,6 +649,10 @@
 
   .w-full {
     width: 100%;
+  }
+
+  .w-max-full {
+    max-width: 100%;
   }
 
   .h-full {

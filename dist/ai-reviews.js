@@ -4,22 +4,6 @@
     return "message" in response;
   }
   var CollapsibleElement = class extends HTMLElement {
-    css = `
-    :host {
-      display: grid;
-      grid-template-rows: 0fr;
-      transition: grid-template-rows 300ms;
-
-      & ::slotted(:first-child) {
-        overflow: hidden;
-      }
-    }
-
-    :host([expanded]) {
-      grid-template-rows: 1fr;
-    }
-  `;
-    template = () => `<slot></slot>`;
     static observedAttributes = ["expanded", "control"];
     get expanded() {
       return this.getAttribute("expanded") === "";
@@ -29,17 +13,9 @@
     }
     constructor() {
       super();
-      this.attachShadow({ mode: "open" });
-      this.render();
     }
     connectedCallback() {
       if (this.control) this.setupControl();
-    }
-    render() {
-      this.shadowRoot.innerHTML = `
-      <style>${this.css.trim()}</style>
-      ${this.template().trim()}
-    `;
     }
     setupControl() {
       document.querySelector(`#${this.control}`)?.addEventListener("click", this.toggle.bind(this));
@@ -71,50 +47,10 @@
      */
     #slides;
     /**
-     * @type {HTMLSlotElement}
+     * @type {MutationObserver}
      * @private
      */
-    #slot;
-    /**
-     * @type {any}
-     * @private
-     */
-    #onSlotChangeListener;
-    css = `
-    ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .slider {
-      display: flex;
-      align-items: start;  
-      gap: var(--slider-gap);
-    }
-
-    ::slotted(*) {
-      flex: none;
-      scroll-snap-align: start;
-      width: calc((100% - (var(--slider-columns) - 1) * var(--slider-gap)) / var(--slider-columns));
-    }
-
-    :is(:host([type='manual']), :host([type='auto'])) > .slider {
-      overflow: hidden;
-      scroll-behavior: smooth;
-    }
-
-    :host([type='snap']) > .slider {
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-
-      &::-webkit-scrollbar {
-        display: none;
-      }
-    }
-  `;
-    template = () => `<ul class="slider"><slot></slot></ul>`;
+    observer;
     static observedAttributes = ["type", "previouscontrol", "nextcontrol"];
     get type() {
       return this.getAttribute("type") ?? "manual";
@@ -128,39 +64,38 @@
     get nextcontrol() {
       return this.getAttribute("nextcontrol");
     }
-    get columns() {
-      const columns = getComputedStyle(this).getPropertyValue("--slider-columns");
-      return parseInt(columns);
+    get maxLength() {
+      const columns = parseInt(getComputedStyle(this).getPropertyValue("--slider-columns"));
+      return this.#slides.length - columns;
     }
     constructor() {
       super();
-      this.attachShadow({ mode: "open" });
-      this.#onSlotChangeListener = this.#onSlotChange.bind(this);
       this.render();
     }
-    #onSlotChange() {
-      this.#slides = this.#slot.assignedElements();
-    }
     connectedCallback() {
-      this.#slider = this.shadowRoot.querySelector(".slider");
-      this.#slot = this.shadowRoot.querySelector("slot");
-      this.#slot.addEventListener("slotchange", this.#onSlotChangeListener);
+      this.#slider = this.shadowRoot.querySelector(".reviews-slider");
+      this.#slides = [...this.#slider.children];
       if (this.autoplay) this.#play();
       this.setupControls();
+      this.createObserver();
     }
     disconnectedCallback() {
-      this.#slot.removeEventListener("slotchange", this.#onSlotChangeListener);
+      this.observer.disconnect();
       this.#pause();
-    }
-    render() {
-      this.shadowRoot.innerHTML = `
-      <style>${this.css.trim()}</style>
-      ${this.template().trim()}
-    `;
     }
     setupControls() {
       document.querySelector(`#${this.previouscontrol}`)?.addEventListener("click", this.previousSlide.bind(this));
       document.querySelector(`#${this.nextcontrol}`)?.addEventListener("click", this.nextSlide.bind(this));
+    }
+    createObserver() {
+      this.observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.type === "childList") {
+            this.#slides = [...this.#slider.children];
+          }
+        }
+      });
+      this.observer.observe(this.#slider, { childList: true });
     }
     reset() {
       this.#currentSlide = 1;
@@ -170,19 +105,12 @@
      * @returns {Slide}
     */
     slideToIndex(index) {
-      let newSlide = index;
-      const maxLength = this.#slides.length - this.columns;
-      if (newSlide > maxLength) {
-        if (!this.autoplay) return { current: maxLength, start: false, end: true };
-        newSlide = 1;
-      } else if (newSlide < 1) {
-        return { current: 1, start: true, end: false };
-      }
-      ;
+      const newSlide = index;
+      const slide = this.#slides[newSlide];
+      if (!this.slide) return this.state;
       this.#currentSlide = newSlide;
-      const slide = this.#slides[this.#currentSlide];
       this.#slider.scrollLeft = slide.offsetLeft - this.#slider.offsetLeft;
-      return { current: newSlide, start: newSlide === 1, end: newSlide === maxLength };
+      return { current: newSlide, start: newSlide === 1, end: newSlide === this.maxLength };
     }
     nextSlide() {
       return this.slideToIndex(this.#currentSlide + 1);
@@ -878,7 +806,7 @@
       },
       reset() {
         this.loading = true;
-        this.info = "Generando...";
+        this.info = { message: "Generando..." };
         if (!this.success && !this.error) {
           state.collapsible.toggle();
         }
