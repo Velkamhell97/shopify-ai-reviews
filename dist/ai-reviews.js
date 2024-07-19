@@ -816,10 +816,12 @@
       },
       reset() {
         this.loading = true;
-        this.info = { message: "Generando..." };
-        if (!this.success && !this.error) {
+        if (!this.info) {
+          this.info = { message: "Generando..." };
           state.collapsible.toggle();
         }
+        this.error = null;
+        this.success = null;
       },
       async saveReviews() {
         if (this.loading) return;
