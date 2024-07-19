@@ -567,12 +567,10 @@
         const chunk = this.#media.slice(i, i + last);
         chunks.push(chunk);
       }
-      return;
       for (let i = 0; i < chunks.length; i++) {
         console.log(`------------ index: ${i} ----------`);
         console.log(reviews[i].media);
-        reviews[i].media = chunks[i];
-        reviews[i].single = chunks[i].length === 1;
+        reviews[i].media = "media";
       }
       console.log("sali");
     }
