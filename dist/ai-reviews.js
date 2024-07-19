@@ -563,10 +563,11 @@
         chunks.push(chunk);
       }
       console.log(chunks);
-      console.log(reviews);
+      console.log(reviews[0].media);
+      console.log(reviews[1].media);
+      console.log(reviews[2].media);
       for (let i = 0; i < chunks.length; i++) {
         console.log(`------------ index: ${i} ----------`);
-        console.log(reviews[i]);
         console.log(reviews[i].media);
         reviews[i].media = chunks[i];
         reviews[i].single = chunks[i].length === 1;
