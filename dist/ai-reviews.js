@@ -562,6 +562,7 @@
         const chunk = this.#media.slice(i, i + last);
         chunks.push(chunk);
       }
+      console.log(chunks);
       for (let i = 0; i < chunks.length; i++) {
         reviews[i].media = chunks[i];
         reviews[i].single = chunks[i].length === 1;
