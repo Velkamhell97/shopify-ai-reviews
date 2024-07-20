@@ -104,7 +104,7 @@
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
-            console.log(`entre: ${this.slider.children}`);
+            console.log(`entre: ${this.slider.children.length}`);
             this.slides = [...this.slider.children];
           }
         }
@@ -129,9 +129,6 @@
       const end = newSlide === maxSlide;
       this.previousControl.disabled = start;
       this.nextControl.disabled = end;
-      console.log(newSlide);
-      console.log(this.slider);
-      console.log(this.slides);
       const slide = this.slides[newSlide];
       this.slider.scrollLeft = slide.offsetLeft - this.slider.offsetLeft;
       this.state = { current: newSlide, start, end };
@@ -177,7 +174,6 @@
     }
     connectedCallback() {
       this.paginator = this.querySelector(".reviews-slider-paginator");
-      console.log(this.paginator);
       if (this.type === "text") {
         this.paginator.textContent = `0 / 0`;
       } else {
@@ -434,7 +430,6 @@
      * @param {number} index
      */
     show(index) {
-      console.log(index);
       this.dialog?.showModal();
       setTimeout(() => {
         this.slider?.scrollTo(index + 1);
@@ -823,7 +818,6 @@
       expand(review, index) {
         if (review) {
           this.expandedReview = review;
-          console.log(index);
           this.$nextTick(() => modal.show(index));
         } else {
           modal.hide();
