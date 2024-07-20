@@ -95,6 +95,7 @@
       const previouscontrolid = this.getAttribute("previouscontrol");
       if (previouscontrolid) this.previousControl = document.querySelector(`#${previouscontrolid}`);
       this.previousControl.addEventListener("click", this.previous.bind(this));
+      this.previousControl.disabled = true;
       const nextcontrolid = this.getAttribute("nextcontrol");
       if (nextcontrolid) this.nextControl = document.querySelector(`#${nextcontrolid}`);
       this.nextControl.addEventListener("click", this.next.bind(this));
@@ -103,7 +104,7 @@
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
-            console.log("entre");
+            console.log(`entre: ${this.slider.children}`);
             this.slides = [...this.slider.children];
           }
         }
@@ -148,6 +149,7 @@
     }
   };
   customElements.define("slider-element", SliderElement);
+  customElements.define("slider-paginator-element", SliderElement);
   var FormController = class {
     /**
      * @type {HTMLFormElement}
