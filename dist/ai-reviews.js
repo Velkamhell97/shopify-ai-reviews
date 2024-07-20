@@ -149,7 +149,50 @@
     }
   };
   customElements.define("slider-element", SliderElement);
-  customElements.define("slider-paginator-element", SliderElement);
+  var SliderPaginatorElement = class extends HTMLElement {
+    /**
+     * @type {SliderState}
+     */
+    state;
+    /**
+     * @type {SliderElement}
+     */
+    slider;
+    /**
+     * @type {HTMLElement}
+     */
+    paginator;
+    /**
+     * @type {HTMLElement[] | null}
+     */
+    indicators;
+    get type() {
+      return this.getAttribute("type") ?? "text";
+    }
+    constructor() {
+      super();
+    }
+    connectedCallback() {
+      this.paginator = this.querySelector(".reviews-slider-paginator");
+      if (this.type !== "text") {
+        this.indicators = [...this.paginator.children];
+      }
+      const sliderid = this.getAttribute("slider");
+      if (sliderid) {
+        this.slider = document.querySelector(`${sliderid}`);
+        this.slider.addEventListener("slidechange", this.onSliderChange.bind(this));
+      }
+    }
+    onSliderChange(e) {
+      const state = e.detail;
+      console.log(state);
+      if (this.type === "text") {
+        this.paginator.textContent = `${state.current} / ${this.slider.length}`;
+      } else {
+      }
+    }
+  };
+  customElements.define("slider-paginator-element", SliderPaginatorElement);
   var FormController = class {
     /**
      * @type {HTMLFormElement}
