@@ -72,21 +72,21 @@
     }
     get maxLength() {
       const columns = parseInt(getComputedStyle(this).getPropertyValue("--slider-columns"));
-      return this.slider.children.length - columns;
+      return this.slides.length - columns;
     }
     get length() {
-      return this.slider.children.length;
+      return this.slides.length;
     }
     constructor() {
       super();
     }
     connectedCallback() {
       this.slider = this.querySelector(".reviews-slider");
-      console.log(this.slider);
-      console.log(this.slider.children.length);
       this.slides = [...this.slider.children];
+      console.log(this.slides);
       if (this.autoplay) this.play();
       this.setup();
+      this.createObserver();
     }
     disconnectedCallback() {
       this.observer.disconnect();
@@ -105,11 +105,7 @@
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
-            const newLength = mutation.target.children.length;
-            if (newLength !== this.length) {
-              console.log("cambio");
-              this.dispatchEvent(new CustomEvent("slidechange", { detail: { current: this.state.current, length: newLength } }));
-            }
+            this.slides = [...mutation.target.children];
           }
         }
       });
@@ -123,10 +119,7 @@
     */
     scrollTo(index) {
       let newSlide = index;
-      console.log(newSlide);
       const maxSlide = this.maxLength;
-      console.log(maxSlide);
-      console.log(this.slides);
       if (newSlide < 1) return this.state;
       if (newSlide > maxSlide) {
         if (!this.autoplay) return this.state;
