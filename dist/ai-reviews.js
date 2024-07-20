@@ -129,20 +129,11 @@
     scrollTo(index) {
       let newSlide = index;
       const maxSlide = this.maxLength;
-      if (newSlide < 1) {
-        console.log(`moving: ${this.slider.scrollLeft} - ${this.slider.scrollWidth}`);
-        return;
-      }
-      ;
+      if (newSlide < 1) return;
       if (newSlide > maxSlide) {
-        if (!this.autoplay) {
-          console.log(`moving: ${this.slider.scrollLeft} - ${this.slider.scrollWidth}`);
-          return;
-        }
-        ;
+        if (!this.autoplay) return;
         newSlide = 1;
       }
-      console.log(`moving: ${this.slider.scrollLeft} - ${this.slider.scrollWidth}`);
       const start = newSlide === 1;
       const end = newSlide === maxSlide;
       this.previousControl.disabled = start;
@@ -444,25 +435,15 @@
      * @param {number} index
      */
     show(index) {
-      console.log(`open: ${this.slider?.left} - ${this.slider?.width}`);
-      setTimeout(() => {
-        this.dialog?.showModal();
-        console.log(`after open: ${this.slider?.left} - ${this.slider?.width}`);
-      }, 2e3);
+      this.dialog?.showModal();
+      this.slider?.scrollTo(index);
     }
     hide() {
-      console.log(`reset: ${this.slider?.left} - ${this.slider?.width}`);
       this.slider?.reset();
-      console.log(`after reset: ${this.slider?.left} - ${this.slider?.width}`);
-      console.log(`closed: ${this.slider?.left} - ${this.slider?.width}`);
-      setTimeout(() => {
-        this.dialog?.close();
-      }, 0);
-      setTimeout(() => {
-        console.log(`after closed: ${this.slider?.left} - ${this.slider?.width}`);
-      }, 2e3);
+      this.dialog?.close();
     }
     onDialogClose() {
+      this.slider?.reset();
     }
     /**
      * @param {Event} e
