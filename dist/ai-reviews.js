@@ -136,6 +136,8 @@
       this.previousControl.disabled = start;
       this.nextControl.disabled = end;
       const slide = this.slides[newSlide];
+      console.log(slide);
+      console.log(newSlide);
       this.slider.scrollLeft = slide.offsetLeft - this.slider.offsetLeft;
       this.state = { current: newSlide, start, end };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
