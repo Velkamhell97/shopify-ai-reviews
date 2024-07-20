@@ -410,14 +410,13 @@
     }
     reload() {
       this.dialog = document.querySelector("#reviews-dialog");
+      this.slider = document.querySelector("#dialog-slider");
       const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
       this.mainVariantSelector = mainSelector;
       this.secondaryVarianSelector = secondarySelector;
       this.setup();
     }
     setup() {
-      this.dialog?.removeEventListener("close", this.dialogCloseListener);
-      this.dialog?.addEventListener("close", this.dialogCloseListener);
       if (!this.mainVariantSelector || !this.secondaryVarianSelector) {
         console.info("DialogController -> setupVariants() -> Any variant picker found");
         return;
