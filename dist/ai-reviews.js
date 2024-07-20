@@ -114,6 +114,7 @@
       this.observer.observe(this.slider, { childList: true });
     }
     reset() {
+      this.slider.scrollLeft = 0;
       this.state = { current: 1, start: true, end: false };
     }
     /**
@@ -430,6 +431,7 @@
      * @param {number} index
      */
     show(index) {
+      console.log(index);
       this.dialog?.showModal();
       this.slider?.scrollTo(index + 1);
     }
