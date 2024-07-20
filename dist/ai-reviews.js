@@ -183,8 +183,7 @@
       }
       const sliderid = this.getAttribute("slider");
       if (sliderid) {
-        this.slider = document.querySelector(`${sliderid}`);
-        console.log(this.slider);
+        this.slider = document.querySelector(`#${sliderid}`);
         this.slider?.addEventListener("slidechange", this.onSliderChange.bind(this));
       }
     }
