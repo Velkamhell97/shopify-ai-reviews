@@ -105,20 +105,13 @@
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
             this.slides = [...mutation.target.children];
-            if (this.slides.length === 1) {
-              console.log("Mutation");
-            }
           }
         }
       });
       this.observer.observe(this.slider, { childList: true });
     }
     reset() {
-      console.log(this.slider);
-      console.log(this.slider.children.length);
-      console.log("reset");
-      console.log(this.slider.scrollLeft);
-      console.log(this.slides);
+      this.slider.scrollLeft = 0;
       this.state = { current: 1, start: true, end: false };
     }
     /**
