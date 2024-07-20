@@ -526,7 +526,7 @@
     }
     reload() {
       this.collapsible = document.querySelector("#request-collapsible");
-      const reviewsPerPage = parseInt(document.querySelector("reviews-per-page").value);
+      const reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
       if (reviewsPerPage !== this.chunk) this.page = 1;
       this.chunk = reviewsPerPage;
     }
