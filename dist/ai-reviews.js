@@ -109,14 +109,12 @@
       console.log(maxSlide);
       console.log(this.columns);
       console.log(this.length);
-      if (newSlide < 1) return;
+      if (newSlide < 1) {
+        newSlide = 1;
+      }
+      ;
       if (newSlide > maxSlide) {
-        if (newSlide < this.length) {
-          newSlide = maxSlide;
-        } else {
-          if (!this.autoplay) return;
-          newSlide = 1;
-        }
+        newSlide = this.autoplay ? 1 : maxSlide;
       }
       const start = newSlide === 1;
       const end = newSlide === maxSlide;
