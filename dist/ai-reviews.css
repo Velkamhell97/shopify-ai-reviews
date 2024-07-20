@@ -151,7 +151,7 @@
 
   :is(slider-element[type='manual'] > .reviews-slider, slider-element[type='auto'] > .reviews-slider) {
     overflow: hidden;
-    /* scroll-behavior: smooth; */
+    scroll-behavior: smooth;
   }
 
   slider-element[type='snap'] > .reviews-slider {

@@ -117,7 +117,9 @@
       this.observer.observe(this.slider, { childList: true });
     }
     reset() {
+      this.slider.style.scrollBehavior = "auto";
       this.slider.scrollLeft = 0;
+      this.slider.style.scrollBehavior = "smooth";
       this.state = { current: 1, start: true, end: false };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
     }
