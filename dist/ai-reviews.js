@@ -114,6 +114,7 @@
       this.observer.observe(this.slider, { childList: true });
     }
     reset() {
+      console.log("reset");
       this.slider.scrollLeft = 0;
       this.state = { current: 1, start: true, end: false };
     }
