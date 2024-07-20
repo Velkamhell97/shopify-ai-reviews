@@ -83,7 +83,6 @@
     connectedCallback() {
       this.slider = this.querySelector(".reviews-slider");
       this.slides = [...this.slider.children];
-      console.log(this.slides);
       if (this.autoplay) this.play();
       this.setup();
       this.createObserver();
@@ -105,6 +104,7 @@
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
+            console.log("cambio");
             this.slides = [...mutation.target.children];
           }
         }
@@ -120,6 +120,7 @@
     scrollTo(index) {
       let newSlide = index;
       const maxSlide = this.maxLength;
+      console.log(this.slides);
       if (newSlide < 1) return this.state;
       if (newSlide > maxSlide) {
         if (!this.autoplay) return this.state;
@@ -181,6 +182,7 @@
       const sliderid = this.getAttribute("slider");
       if (sliderid) {
         this.slider = document.querySelector(`#${sliderid}`);
+        console.log(this.slider);
         this.slider?.addEventListener("slidechange", this.onSliderChange.bind(this));
       }
     }
@@ -430,6 +432,7 @@
      */
     show(index) {
       this.dialog?.showModal();
+      console.log(index);
       this.slider?.scrollTo(index + 1);
     }
     hide() {
