@@ -823,6 +823,7 @@
       expand(review, index) {
         if (review) {
           this.expandedReview = review;
+          console.log(index);
           this.$nextTick(() => modal.show(index));
         } else {
           modal.hide();
