@@ -4,21 +4,25 @@
     return "message" in response;
   }
   var CollapsibleElement = class extends HTMLElement {
-    static observedAttributes = ["expanded", "control"];
+    /**
+     * @type {HTMLElement | null}
+     */
+    control;
     get expanded() {
       return this.getAttribute("expanded") !== null;
-    }
-    get control() {
-      return this.getAttribute("control");
     }
     constructor() {
       super();
     }
     connectedCallback() {
-      if (this.control) this.setupControl();
+      this.setup();
     }
-    setupControl() {
-      document.querySelector(`#${this.control}`)?.addEventListener("click", this.toggle.bind(this));
+    setup() {
+      const controlid = this.getAttribute("control");
+      if (controlid) {
+        this.control = document.querySelector(`#${controlid}`);
+        this.control.addEventListener("click", this.toggle.bind(this));
+      }
     }
     expand() {
       this.setAttribute("expanded", "");
@@ -33,168 +37,226 @@
   customElements.define("collapsible-element", CollapsibleElement);
   var SliderElement = class extends HTMLElement {
     /**
-     * @type {number}
-     * @private
+     * @type {SliderElement}
      */
-    #currentSlide = 1;
+    state = { current: 1, start: true, end: false };
     /**
      * @type {number | null}
-     * @private
      */
-    #interval = null;
+    interval = null;
     /**
      * @type {Element}
-     * @private
      */
-    #slider;
+    slider;
     /**
      * @type {Element[]}
-     * @private
      */
-    #slides;
+    slides;
     /**
      * @type {MutationObserver}
-     * @private
      */
     observer;
     /**
-     * @type {{current: number, start: boolean, end: boolean}}
+     * @type {Element}
      */
-    #state = { current: 1, start: true, end: false };
-    static observedAttributes = ["type", "previouscontrol", "nextcontrol"];
+    previousControl = document.createElement("button");
+    /**
+     * @type {Element}
+     */
+    nextControl = document.createElement("button");
     get type() {
       return this.getAttribute("type") ?? "manual";
     }
     get autoplay() {
       return this.type === "auto";
     }
-    get previouscontrol() {
-      return this.getAttribute("previouscontrol");
-    }
-    get nextcontrol() {
-      return this.getAttribute("nextcontrol");
-    }
     get maxLength() {
       const columns = parseInt(getComputedStyle(this).getPropertyValue("--slider-columns"));
-      return this.#slides.length - columns;
+      return this.slides.length - columns;
+    }
+    get length() {
+      return this.slides.length;
     }
     constructor() {
       super();
     }
     connectedCallback() {
-      this.#slider = this.querySelector(".reviews-slider");
-      this.#slides = [...this.#slider.children];
-      if (this.autoplay) this.#play();
-      this.setupControls();
+      this.slider = this.querySelector(".reviews-slider");
+      this.slides = [...this.slider.children];
+      if (this.autoplay) this.play();
+      this.setup();
       this.createObserver();
     }
     disconnectedCallback() {
       this.observer.disconnect();
-      this.#pause();
+      this.pause();
     }
-    setupControls() {
-      document.querySelector(`#${this.previouscontrol}`)?.addEventListener("click", this.previousSlide.bind(this));
-      document.querySelector(`#${this.nextcontrol}`)?.addEventListener("click", this.nextSlide.bind(this));
+    setup() {
+      const previouscontrolid = this.getAttribute("previouscontrol");
+      if (previouscontrolid) this.previousControl = document.querySelector(`#${previouscontrolid}`);
+      this.previousControl.addEventListener("click", this.previous.bind(this));
+      const nextcontrolid = this.getAttribute("nextcontrol");
+      if (nextcontrolid) this.nextControl = document.querySelector(`#${nextcontrolid}`);
+      this.nextControl.addEventListener("click", this.next.bind(this));
     }
     createObserver() {
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
-            this.#slides = [...this.#slider.children];
+            console.log("entre");
+            this.slides = [...this.slider.children];
           }
         }
       });
-      this.observer.observe(this.#slider, { childList: true });
+      this.observer.observe(this.slider, { childList: true });
     }
     reset() {
-      this.#currentSlide = 1;
+      this.state = { current: 1, start: true, end: false };
     }
     /**
      * @param {number} index
-     * @returns {Slide}
     */
-    slideToIndex(index) {
-      const newSlide = index;
-      const slide = this.#slides[newSlide];
-      if (!slide) return this.#state;
-      this.#currentSlide = newSlide;
-      this.#slider.scrollLeft = slide.offsetLeft - this.#slider.offsetLeft;
-      this.#state = { current: newSlide, start: newSlide === 1, end: newSlide === this.maxLength };
-      return this.#state;
+    scrollTo(index) {
+      let newSlide = index;
+      const maxSlide = this.maxLength;
+      if (newSlide < 1) return this.state;
+      if (newSlide > maxSlide) {
+        if (!this.autoplay) return this.state;
+        newSlide = 1;
+      }
+      const start = newSlide === 1;
+      const end = newSlide === maxSlide;
+      this.previousControl.disabled = start;
+      this.nextControl.disabled = end;
+      const slide = this.slides[newSlide];
+      this.slider.scrollLeft = slide.offsetLeft - this.slider.offsetLeft;
+      this.state = { current: newSlide, start, end };
+      this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
     }
-    nextSlide() {
-      return this.slideToIndex(this.#currentSlide + 1);
+    next() {
+      this.scrollTo(this.state.current + 1);
     }
-    previousSlide() {
-      return this.slideToIndex(this.#currentSlide - 1);
+    previous() {
+      this.scrollTo(this.state.current - 1);
     }
-    #play() {
-      clearInterval(this.#interval);
-      this.#interval = setInterval(this.nextSlide.bind(this, true), 3e3);
+    play() {
+      clearInterval(this.interval);
+      this.interval = setInterval(this.next.bind(this), 3e3);
     }
-    #pause() {
-      clearInterval(this.#interval);
+    pause() {
+      clearInterval(this.interval);
     }
   };
   customElements.define("slider-element", SliderElement);
   var FormController = class {
     /**
      * @type {HTMLFormElement}
-     * @private
      */
-    #form = null;
+    form;
     /**
      * @type {number}
-     * @private
      */
-    #maxFiles;
+    maxFiles;
     /**
      * @type {ReviewMedia[]}
-     * @private
      */
-    #media;
+    media;
     /**
      * @type {Review}
-     * @private
      */
-    #fields = { stars: 1, single: false };
+    fields = { stars: 1, single: false };
     /**
      * @type {boolean}
-     * @readonly
      */
     submitted = false;
     constructor() {
-      this.#maxFiles = 3;
+      this.maxFiles = 3;
       this.reload();
     }
     reload() {
-      this.#form = document.querySelector("#review-form");
+      this.form = document.querySelector("#review-form");
     }
     /**
      * @returns {Review?}
-     * @private
      */
-    #data() {
-      if (!this.#form) return null;
+    get data() {
+      if (!this.form) return null;
       const options = { year: "numeric", month: "long", day: "numeric" };
       const datetime = new Intl.DateTimeFormat("es", options);
       const date = datetime.format(/* @__PURE__ */ new Date());
-      const { author, description } = Object.fromEntries(new FormData(this.#form));
-      const review = { author, description, ...this.#fields, media: this.#media, date };
+      const { author, description } = Object.fromEntries(new FormData(this.form));
+      const review = { author, description, ...this.fields, media: this.media, date };
       return review;
     }
     /**
      * @param {number} value
      */
     set stars(value) {
-      this.#fields.stars = value;
+      this.fields.stars = value;
+    }
+    /**
+     * @param {Event} event
+     * @returns {Promise<ReviewMedia[]>}
+     */
+    async uploadMedia(event) {
+      const files = event.target.files;
+      if (!files.length) return [];
+      if (files.length > this.maxFiles) {
+        alert(`Solo pueden subirse ${this.maxFiles} archivo(s)`);
+        return [];
+      }
+      const promises = [];
+      for (let i = 0; i < files.length; i++) {
+        if (files[i].size > 4 * 1024 * 1024) {
+          alert("Uno de los archivos es muy grande, m\xE1ximo 4MB");
+          return [];
+        }
+        if (files[i].type.startsWith("image/")) {
+          promises.push(this.loadImage(files[i]));
+        } else if (files[i].type.startsWith("video/")) {
+          promises.push(this.loadVideo(files[i]));
+        } else {
+          alert("Solo puedes cargar imagenes o videos");
+          return [];
+        }
+      }
+      this.media = await Promise.all(promises);
+      this.fields.single = this.media.length === 1;
+      return [...this.media];
+    }
+    /**
+     * @param {number} index
+     */
+    deleteMedia(index) {
+      const sources = this.media[index].sources;
+      if (sources) {
+        URL.revokeObjectURL(sources[0].url);
+      }
+      this.media.splice(index, 1);
+      this.fields.single = this.media.length === 1;
+      if (!this.media.length) {
+        const file = this.form?.querySelector("input[type='file']");
+        if (file) file.value = "";
+      }
+    }
+    /**
+     * @returns {Review?}
+     */
+    submit() {
+      const review = this.data;
+      this.fields = { stars: 1, single: false };
+      this.media = [];
+      this.form?.reset();
+      if (review) {
+        this.submitted = true;
+      }
+      return review;
     }
     /**
      * @param {any} file
      * @returns {Promise<ReviewMedia>}
-     * @private
      */
-    #loadImage(file) {
+    loadImage(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
@@ -223,9 +285,8 @@
     /**
      * @param {any} file
      * @returns {Promise<ReviewMedia>}
-     * @private
      */
-    #loadVideo(file) {
+    loadVideo(file) {
       return new Promise((resolve, reject) => {
         const canvas = document.createElement("canvas");
         const video = document.createElement("video");
@@ -261,64 +322,6 @@
         };
       });
     }
-    /**
-     * @param {Event} event
-     * @returns {Promise<ReviewMedia[]>}
-     */
-    async uploadFiles(event) {
-      const files = event.target.files;
-      if (!files.length) return [];
-      if (files.length > this.#maxFiles) {
-        alert(`Solo pueden subirse ${this.#maxFiles} archivo(s)`);
-        return [];
-      }
-      const promises = [];
-      for (let i = 0; i < files.length; i++) {
-        if (files[i].size > 4 * 1024 * 1024) {
-          alert("Uno de los archivos es muy grande, m\xE1ximo 4MB");
-          return [];
-        }
-        if (files[i].type.startsWith("image/")) {
-          promises.push(this.#loadImage(files[i]));
-        } else if (files[i].type.startsWith("video/")) {
-          promises.push(this.#loadVideo(files[i]));
-        } else {
-          alert("Solo puedes cargar imagenes o videos");
-          return [];
-        }
-      }
-      this.#media = await Promise.all(promises);
-      this.#fields.single = this.#media.length === 1;
-      return [...this.#media];
-    }
-    /**
-     * @param {number} index
-     */
-    deleteMedia(index) {
-      const sources = this.#media[index].sources;
-      if (sources) {
-        URL.revokeObjectURL(sources[0].url);
-      }
-      this.#media.splice(index, 1);
-      this.#fields.single = this.#media.length === 1;
-      if (!this.#media.length) {
-        const file = this.#form?.querySelector("input[type='file']");
-        if (file) file.value = "";
-      }
-    }
-    /**
-     * @returns {Review?}
-     */
-    submit() {
-      const review = this.#data();
-      this.#fields = { stars: 1, single: false };
-      this.#media = [];
-      this.#form?.reset();
-      if (review) {
-        this.submitted = true;
-      }
-      return review;
-    }
   };
   var form = new FormController();
   var DialogController = class {
@@ -327,95 +330,102 @@
      */
     dialog;
     /**
-     * @type {HTMLElement}
-     * @private
+     * @type {any}
      */
-    #mainSelector;
+    dialogCloseListener;
     /**
-     * @type {HTMLElement}
-     * @private
-     */
-    #secondarySelector;
-    /**
-     * @type {HTMLElement}
+     * @type {SliderElement}
      */
     slider;
     /**
-     * @type {any}
-     * @private
+     * @type {HTMLElement}
      */
-    #mainSelectorListener;
+    mainVariantSelector;
+    /**
+     * @type {HTMLElement}
+     */
+    secondaryVarianSelector;
     /**
      * @type {any}
-     * @private
      */
-    #secondarySelectorListener;
+    mainVariantSelectorChangeListener;
+    /**
+     * @type {any}
+     */
+    secondaryVariantSelectorChangeListener;
     constructor() {
-      this.#mainSelectorListener = this.#mainSelectorHandler.bind(this);
-      this.#secondarySelectorListener = this.#secondarySelectorHandler.bind(this);
+      this.dialogCloseListener = this.onDialogClose.bind(this);
+      this.mainVariantSelectorChangeListener = this.onMainVariantSelectorChange.bind(this);
+      this.secondaryVariantSelectorChangeListener = this.onSecondaryVariantSelectorChange.bind(this);
       this.reload();
     }
     reload() {
       this.dialog = document.querySelector("#reviews-dialog");
-      const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
-      this.#mainSelector = mainSelector;
-      this.#secondarySelector = secondarySelector;
       this.slider = document.querySelector("#dialog-slider");
-      this.#setupVariants();
+      const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
+      this.mainVariantSelector = mainSelector;
+      this.secondaryVarianSelector = secondarySelector;
+      this.setup();
     }
-    show() {
+    setup() {
+      this.dialog?.removeEventListener("close", this.dialogCloseListener);
+      this.dialog?.addEventListener("close", this.dialogCloseListener);
+      if (!this.mainVariantSelector || !this.secondaryVarianSelector) {
+        console.info("DialogController -> setupVariants() -> Any variant picker found");
+        return;
+      }
+      this.mainVariantSelector.removeEventListener("change", this.mainVariantSelectorChangeListener);
+      this.mainVariantSelector.addEventListener("change", this.mainVariantSelectorChangeListener);
+      this.secondaryVarianSelector.removeEventListener("change", this.secondaryVariantSelectorChangeListener);
+      this.secondaryVarianSelector.addEventListener("change", this.secondaryVariantSelectorChangeListener);
+    }
+    /**
+     * @param {number} index
+     */
+    show(index) {
       this.dialog?.showModal();
+      this.slider?.scrollTo(index + 1);
     }
     hide() {
       this.dialog?.close();
     }
+    onDialogClose() {
+      this.slider?.reset();
+    }
     /**
      * @param {Event} e
-     * @private
      */
-    #mainSelectorHandler(e) {
-      const mainInputs = this.#mainSelector.querySelectorAll("input");
-      const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
+    onMainVariantSelectorChange(e) {
+      const mainInputs = this.mainVariantSelector.querySelectorAll("input");
+      const secondaryInputs = this.secondaryVarianSelector.querySelectorAll("input");
       const index = [...mainInputs].indexOf(e.target);
       secondaryInputs[index].checked = true;
     }
     /**
      * @param {Event} e
-     * @private
      */
-    #secondarySelectorHandler(e) {
+    onSecondaryVariantSelectorChange(e) {
       e.stopImmediatePropagation();
-      const mainInputs = this.#mainSelector.querySelectorAll("input");
-      const secondaryInputs = this.#secondarySelector.querySelectorAll("input");
+      const mainInputs = this.mainVariantSelector.querySelectorAll("input");
+      const secondaryInputs = this.secondaryVarianSelector.querySelectorAll("input");
       const index = [...secondaryInputs].indexOf(e.target);
       mainInputs[index].click();
-    }
-    /**
-     * @private
-     */
-    #setupVariants() {
-      if (!this.#mainSelector || !this.#secondarySelector) {
-        console.info("DialogController -> setupVariants() -> Any variant picker found");
-        return;
-      }
-      this.#mainSelector.removeEventListener("change", this.#mainSelectorListener);
-      this.#mainSelector.addEventListener("change", this.#mainSelectorListener);
-      this.#secondarySelector.removeEventListener("change", this.#secondarySelectorListener);
-      this.#secondarySelector.addEventListener("change", this.#secondarySelectorListener);
     }
   };
   var modal = new DialogController();
   var State = class {
     /**
      * @type {Database}
-     * @private
      */
-    #database;
+    database;
+    /**
+     * @type {CollapsibleElement}
+     */
+    collapsible;
     /**
      * @type {boolean}
-     * @private
      */
-    #fetched = false;
+    fetched = false;
     /**
      * @type {string}
      */
@@ -430,14 +440,12 @@
     page = 1;
     /**
      * @type {Rating}
-     * @private
      */
-    #rating = { average: "0.0", individuals: [{ v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }] };
+    _rating = { average: "0.0", individuals: [{ v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }, { v: 0, p: 0 }] };
     /**
      * @type {Review[]}
-     * @private
      */
-    #defaultReviews = [
+    defaultReviews = [
       { author: "Mar\xEDa Gonz\xE1lez", stars: 5, description: "Desde que compr\xE9 este producto, he ahorrado tanto tiempo como dinero. La entrega lleg\xF3 rapid\xEDsimo y en perfectas condiciones. Es incre\xEDble c\xF3mo facilita mi d\xEDa a d\xEDa. \xA1Definitivamente vale la pena probarlo, no me arrepiento de la compra!" },
       { author: "Carlos Ram\xEDrez", stars: 4, description: "Llevaba meses buscando algo as\xED y finalmente lo encontr\xE9 aqu\xED. La atenci\xF3n al cliente fue muy buena, despejaron todas mis dudas con rapidez y profesionalismo. Muy satisfecho con la compra, es justo lo que necesitaba para resolver mi problema" },
       { author: "Laura Fern\xE1ndez", stars: 5, description: "No esperaba que este producto fuera de tanta calidad, pero ahora estoy muy satisfecha. La entrega fue r\xE1pida y sin complicaciones, lo que me dio mucha tranquilidad. Recomiendo este producto sin dudarlo, realmente super\xF3 mis expectativas iniciales." },
@@ -461,32 +469,25 @@
     ];
     /**
      * @type {ReviewMedia[]}
-     * @private
      */
-    #media = [];
+    media = [];
     /**
      * @type {number[]}
-     * @private
      */
-    #pattern;
+    pattern;
     /**
      * @type {Review[]}
-     * @private
      */
-    #reviews = [];
-    /**
-     * @type {Element}
-     */
-    slider;
-    /**
-     * @type {Element}
-     */
-    collapsible;
+    _reviews = [];
     /**
      * @param {Database} database
      */
     constructor(database) {
-      this.#database = database;
+      this.database = database;
+      this.init();
+      this.reload();
+    }
+    init() {
       const media = JSON.parse(document.querySelector("#reviews-media").textContent);
       if (!media) return;
       for (let i = 0; i < media.length; i++) {
@@ -507,6 +508,7 @@
           delete resource.preview_image;
         }
       }
+      this.media = media;
       const textPattern = document.querySelector("#media-pattern").value.replace(/ /g, "");
       let values = textPattern.split(",").map(Number);
       const pattern = [...values];
@@ -520,52 +522,95 @@
           }
         }
       }
-      this.reload();
-      this.#pattern = pattern;
-      this.#media = media;
-    }
-    /**
-     * @returns {Promise<void>}
-     */
-    async init() {
-      await this.#fetchReviews();
+      this.pattern = pattern;
     }
     reload() {
-      this.slider = document.querySelector("#reviews-slider");
       this.collapsible = document.querySelector("#request-collapsible");
-      const reviewsPerPage = parseInt(document.querySelector("#reviews-per-page").value);
+      const reviewsPerPage = parseInt(document.querySelector("reviews-per-page").value);
       if (reviewsPerPage !== this.chunk) this.page = 1;
       this.chunk = reviewsPerPage;
+    }
+    /**
+     * @returns {Review[]}
+     */
+    get reviews() {
+      return structuredClone(this._reviews);
+    }
+    /**
+     * @param {string[]} value
+     */
+    set reviews(value) {
+      const reviews = [];
+      const diff = value.length - this._reviews.length;
+      for (let i = 0; i < Math.min(value.length, this._reviews.length); i++) {
+        const author = this._reviews[i].author;
+        reviews.push({ author, description: value[i] });
+      }
+      if (diff > 0) {
+        for (let i = value.length - diff; i < value.length; i++) {
+          reviews.push({ description: value[i] });
+        }
+      }
+      this._reviews = reviews;
+      this.group();
+      this.rate();
+      this.date();
+    }
+    /**
+     * @returns {Rating}
+     */
+    get rating() {
+      return structuredClone(this._rating);
+    }
+    /**
+     * @returns {Review[]}
+     */
+    get raw() {
+      const reviews = structuredClone(this._reviews);
+      const raw = [];
+      for (let i = 0; i < reviews.length; i++) {
+        const { author, description, stars } = reviews[i];
+        raw.push({ author, description, stars });
+      }
+      return raw;
+    }
+    /**
+     * @param {string[]} value
+     */
+    set names(value) {
+      for (let i = 0; i < Math.min(value.length, this._reviews.length); i++) {
+        this._reviews[i].author = value[i];
+      }
     }
     /**
      * @param {Review} review
      */
     add(review) {
-      this.#reviews.unshift(review);
+      this._reviews.unshift(review);
       this.rate(true);
     }
     /**
      * @param {number} index
      */
     remove(index) {
-      this.#reviews.splice(index, 1);
+      this._reviews.splice(index, 1);
       this.rate(true);
     }
     group() {
-      if (!this.#media.length) {
+      if (!this.media.length) {
         return;
       }
-      const reviews = this.#reviews;
+      const reviews = this._reviews;
       const chunks = [];
-      const last = this.#pattern[this.#pattern.length - 1];
+      const last = this.pattern[this.pattern.length - 1];
       let acc = 0;
-      for (let i = 0; i < this.#pattern.length - 1; i++) {
-        const chunk = this.#media.slice(acc, acc + this.#pattern[i]);
+      for (let i = 0; i < this.pattern.length - 1; i++) {
+        const chunk = this.media.slice(acc, acc + this.pattern[i]);
         chunks.push(chunk);
-        acc += this.#pattern[i];
+        acc += this.pattern[i];
       }
-      for (let i = acc; i < this.#media.length; i += last) {
-        const chunk = this.#media.slice(i, i + last);
+      for (let i = acc; i < this.media.length; i += last) {
+        const chunk = this.media.slice(i, i + last);
         chunks.push(chunk);
       }
       for (let i = 0; i < Math.min(reviews.length, chunks.length); i++) {
@@ -577,7 +622,7 @@
      * @param {boolean} keepOld
      */
     rate(keepOld) {
-      const reviews = this.#reviews;
+      const reviews = this._reviews;
       let sum = 0;
       const starsAcc = [0, 0, 0, 0, 0];
       if (keepOld) {
@@ -598,13 +643,13 @@
       for (let i = 0; i < 5; i++) {
         const v = starsAcc[i];
         const p = Math.round(v / reviews.length * 100);
-        this.#rating.individuals[i] = { v, p };
+        this._rating.individuals[i] = { v, p };
       }
       const average = sum / reviews.length;
-      this.#rating.average = average.toFixed(1);
+      this._rating.average = average.toFixed(1);
     }
     date() {
-      const reviews = this.#reviews;
+      const reviews = this._reviews;
       const now = /* @__PURE__ */ new Date();
       const dayinMillis = 864e5;
       const options = { year: "numeric", month: "long", day: "numeric" };
@@ -616,79 +661,26 @@
       }
     }
     /**
-     * @returns {Rating}
-     */
-    get rating() {
-      return structuredClone(this.#rating);
-    }
-    /**
-     * @returns {Review[]}
-     */
-    get reviews() {
-      return structuredClone(this.#reviews);
-    }
-    /**
-     * @returns {Review[]}
-     */
-    get raw() {
-      const reviews = structuredClone(this.#reviews);
-      const raw = [];
-      for (let i = 0; i < reviews.length; i++) {
-        const { author, description, stars } = reviews[i];
-        raw.push({ author, description, stars });
-      }
-      return raw;
-    }
-    /**
-     * @param {string[]} value
-     */
-    set reviews(value) {
-      const reviews = [];
-      const diff = value.length - this.#reviews.length;
-      for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
-        const author = this.#reviews[i].author;
-        reviews.push({ author, description: value[i] });
-      }
-      if (diff > 0) {
-        for (let i = value.length - diff; i < value.length; i++) {
-          reviews.push({ description: value[i] });
-        }
-      }
-      this.#reviews = reviews;
-      this.group();
-      this.rate();
-      this.date();
-    }
-    /**
-     * @param {string[]} value
-     */
-    set names(value) {
-      for (let i = 0; i < Math.min(value.length, this.#reviews.length); i++) {
-        this.#reviews[i].author = value[i];
-      }
-    }
-    /**
      * @returns {Promise<void>}
-     * @private
      */
-    async #fetchReviews() {
-      if (!this.#fetched) {
+    async fetchReviews() {
+      if (!this.fetched) {
         const storeId = document.querySelector("#store-id").value;
         const productId = document.querySelector("#product-id").value;
-        const response = await this.#database.reviews(storeId, productId);
+        const response = await this.database.reviews(storeId, productId);
         if (hasError(response)) {
           throw response;
         }
         let reviews = response.reviews;
         if (!response.exists) {
-          reviews = this.#defaultReviews;
+          reviews = this.defaultReviews;
         }
         this.country = response.country;
-        this.#reviews = reviews;
+        this._reviews = reviews;
         this.group();
         this.rate(true);
         this.date();
-        this.#fetched = true;
+        this.fetched = true;
       }
     }
   };
@@ -704,42 +696,14 @@
       document.addEventListener("shopify:section:load", refresh);
     }
     ;
-    Alpine.data("slider", () => ({
-      paginator: { current: 1, start: true, end: false },
-      previousSlide() {
-        this.paginator = state.slider?.previousSlide();
-      },
-      nextSlide() {
-        this.paginator = state.slider?.nextSlide();
-      }
-    }));
-    Alpine.data("dialog", () => ({
-      paginator: { current: 1, start: true, end: false },
-      init() {
-        modal.dialog?.addEventListener("close", () => {
-          modal.slider?.reset();
-          this.paginator = { current: 1, start: true, end: false };
-        });
-      },
-      customSlide(e) {
-        if (!e?.detail?.index) return;
-        this.paginator = modal.slider?.slideToIndex(e.detail.index + 1);
-      },
-      previousSlide() {
-        this.paginator = modal.slider?.previousSlide();
-      },
-      nextSlide() {
-        this.paginator = modal.slider?.nextSlide();
-      }
-    }));
     Alpine.data("form", () => ({
       media: [],
       single: true,
       submitted: false,
       lastStar: null,
-      async uploadFiles(e) {
+      async uploadMedia(e) {
         try {
-          const media = await form.uploadFiles(e);
+          const media = await form.uploadMedia(e);
           this.single = media.length === 1;
           this.media = media;
         } catch (error) {
@@ -762,7 +726,7 @@
         this.lastStar?.classList?.remove("active");
         this.single = false, this.media = [];
         if (!review) {
-          console.error("FormController -> submit() -> this.#form is undefined");
+          console.error("FormController -> submit() -> this.form is undefined");
           alert("Ocurri\xF3 un error al momento de subir la rese\xF1a. Por favor, recargue la p\xE1gina.");
           return;
         }
@@ -783,15 +747,14 @@
       info: null,
       error: null,
       async init() {
-        const collapsible = document.querySelector("#request-collapsible");
         this.$watch("success", (value) => {
-          if (value) collapsible.expand();
+          if (value) state.collapsible.expand();
         });
         this.$watch("error", (value) => {
-          if (value) collapsible.expand();
+          if (value) state.collapsible.expand();
         });
         try {
-          await state.init();
+          await state.fetchReviews();
           this.reviews = state.reviews;
           this.country = state.country;
           this.rating = state.rating;
@@ -806,11 +769,9 @@
       expand(review, index) {
         if (review) {
           this.expandedReview = review;
-          this.$nextTick(() => this.$dispatch("dialog-open", { index }));
-          modal.show();
+          this.$nextTick(() => modal.show(index));
         } else {
           modal.hide();
-          this.$dispatch("dialog-close");
           this.expandedReview = null;
         }
       },
@@ -886,9 +847,9 @@
             throw json;
           }
           state.reviews = json.reviews;
-          this.goToPage(1);
           this.reviews = state.reviews;
           this.rating = state.rating;
+          this.goToPage(1);
           this.success = { message: `\xA1${json.reviews.length} rese\xF1as generadas exitosamente!. Si faltan nombres presionar el boton 'Nombres'` };
         } catch (error) {
           console.error(error);
