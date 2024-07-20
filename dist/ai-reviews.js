@@ -62,9 +62,12 @@
     get autoplay() {
       return this.type === "auto";
     }
+    get columns() {
+      const columns = getComputedStyle(this).getPropertyValue("--slider-columns");
+      return parseInt(columns);
+    }
     get maxLength() {
-      const columns = parseInt(getComputedStyle(this).getPropertyValue("--slider-columns"));
-      return this.slider.children.length - columns;
+      return this.slider.children.length - this.columns;
     }
     get length() {
       return this.slider.children.length;
@@ -117,10 +120,10 @@
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
     }
     next() {
-      this.scrollTo(this.state.current + 1);
+      this.scrollTo(this.state.current + this.columns);
     }
     previous() {
-      this.scrollTo(this.state.current - 1);
+      this.scrollTo(this.state.current - this.columns);
     }
     play() {
       clearInterval(this.interval);
