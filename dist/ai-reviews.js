@@ -104,7 +104,11 @@
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
+            console.log(`added: ${mutation.addedNodes}`);
+            console.log(`removed: ${mutation.removedNodes}`);
             console.log(`entre: ${this.slider.children.length}`);
+            console.log(`target: ${mutation.target}`);
+            console.log(`target child: ${mutation.target?.children?.length}`);
             this.slides = [...this.slider.children];
           }
         }
