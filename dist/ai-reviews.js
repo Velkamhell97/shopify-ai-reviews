@@ -80,6 +80,9 @@
     get left() {
       return this.slider.scrollLeft;
     }
+    get width() {
+      return this.slider.scrollWidth;
+    }
     constructor() {
       super();
     }
@@ -430,23 +433,22 @@
      * @param {number} index
      */
     show(index) {
-      console.log(`open: ${this.slider?.left}`);
+      console.log(`open: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
       setTimeout(() => {
-        console.log(`after open: ${this.slider?.left}`);
+        console.log(`after open: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
         this.dialog?.showModal();
-        this.slider?.scrollTo(index + 1);
       }, 2e3);
     }
     hide() {
-      console.log(`reset: ${this.slider?.left}`);
+      console.log(`reset: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
       this.slider?.reset();
-      console.log(`after reset: ${this.slider?.left}`);
-      console.log(`closed: ${this.slider?.left}`);
+      console.log(`after reset: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
+      console.log(`closed: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
       setTimeout(() => {
         this.dialog?.close();
       }, 0);
       setTimeout(() => {
-        console.log(`after closed: ${this.slider?.left}`);
+        console.log(`after closed: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
       }, 2e3);
     }
     onDialogClose() {
