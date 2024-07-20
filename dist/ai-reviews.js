@@ -104,8 +104,10 @@
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
-            console.log("cambio");
-            this.slides = [...mutation.target.children];
+            if (this.slides.length === 1) {
+              console.log("cambio");
+              this.slides = [...mutation.target.children];
+            }
           }
         }
       });
@@ -120,7 +122,6 @@
     scrollTo(index) {
       let newSlide = index;
       const maxSlide = this.maxLength;
-      console.log(this.slides);
       if (newSlide < 1) return this.state;
       if (newSlide > maxSlide) {
         if (!this.autoplay) return this.state;
@@ -175,7 +176,7 @@
     connectedCallback() {
       this.paginator = this.querySelector(".reviews-slider-paginator");
       if (this.type === "text") {
-        this.paginator.textContent = `0 / 0`;
+        this.paginator.textContent = `1 / 1`;
       } else {
         this.indicators = [...this.paginator.children];
       }
