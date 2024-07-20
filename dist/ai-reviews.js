@@ -446,7 +446,7 @@
       setTimeout(() => {
         console.log(`after open: ${this.slider?.left} - ${this.slider?.width}`);
         this.dialog?.showModal();
-        this.slider?.scrollTo(0);
+        this.slider?.scrollTo(1);
       }, 2e3);
     }
     hide() {
