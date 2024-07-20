@@ -112,7 +112,7 @@
     }
     reset() {
       console.log("reset");
-      this.slider.offsetLeft = 0;
+      console.log(this.slider);
       this.slider.scrollLeft = 0;
       this.state = { current: 1, start: true, end: false };
     }
@@ -435,12 +435,11 @@
      * @param {number} index
      */
     show(index) {
-      console.log(index);
       this.dialog?.showModal();
       this.slider?.scrollTo(index + 1);
     }
     hide() {
-      this.dialog?.close();
+      this.reset();
     }
     onDialogClose() {
       this.slider?.reset();
@@ -825,7 +824,6 @@
           this.$nextTick(() => modal.show(index));
         } else {
           modal.hide();
-          this.expandedReview = null;
         }
       },
       reset() {
