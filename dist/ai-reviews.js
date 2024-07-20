@@ -105,7 +105,7 @@
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
             if (this.slides.length === 1) {
-              console.log("cambio");
+              console.log("Mutation");
               this.slides = [...mutation.target.children];
             }
           }
@@ -122,9 +122,9 @@
     scrollTo(index) {
       let newSlide = index;
       const maxSlide = this.maxLength;
-      if (newSlide < 1) return this.state;
+      if (newSlide < 1) return;
       if (newSlide > maxSlide) {
-        if (!this.autoplay) return this.state;
+        if (!this.autoplay) return;
         newSlide = 1;
       }
       const start = newSlide === 1;
