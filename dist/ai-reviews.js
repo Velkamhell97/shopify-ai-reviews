@@ -51,11 +51,11 @@
     /**
      * @type {Element}
      */
-    previousControl;
+    previousControl = document.createElement("button");
     /**
      * @type {Element}
      */
-    nextControl;
+    nextControl = document.createElement("button");
     get type() {
       return this.getAttribute("type") ?? "manual";
     }
@@ -74,9 +74,6 @@
     }
     constructor() {
       super();
-      this.previousControl = document.createElement("button");
-      this.nextControl = document.createElement("button");
-      console.log(this.state);
     }
     connectedCallback() {
       this.slider = this.querySelector(".reviews-slider");
@@ -87,14 +84,15 @@
       this.pause();
     }
     setup() {
-      const previouscontrolid = this.getAttribute("previouscontrol");
-      if (previouscontrolid) this.previousControl = document.querySelector(`#${previouscontrolid}`);
-      console.log(this.previousControl);
-      this.previousControl.addEventListener("click", this.previous.bind(this));
-      this.previousControl.disabled = true;
-      const nextcontrolid = this.getAttribute("nextcontrol");
-      if (nextcontrolid) this.nextControl = document.querySelector(`#${nextcontrolid}`);
-      this.nextControl.addEventListener("click", this.next.bind(this));
+      if (!this.autoplay) {
+        const previouscontrolid = this.getAttribute("previouscontrol");
+        if (previouscontrolid) this.previousControl = document.querySelector(`#${previouscontrolid}`);
+        this.previousControl.addEventListener("click", this.previous.bind(this));
+        this.previousControl.disabled = true;
+        const nextcontrolid = this.getAttribute("nextcontrol");
+        if (nextcontrolid) this.nextControl = document.querySelector(`#${nextcontrolid}`);
+        this.nextControl.addEventListener("click", this.next.bind(this));
+      }
     }
     reset() {
       this.slider.style.scrollBehavior = "auto";
@@ -122,8 +120,10 @@
       }
       const start = newSlide === 1;
       const end = newSlide === maxSlide;
-      this.previousControl.disabled = start;
-      this.nextControl.disabled = end;
+      if (!this.autoplay) {
+        this.previousControl.disabled = start;
+        this.nextControl.disabled = end;
+      }
       const slide = this.slider.children[newSlide];
       this.slider.scrollLeft = slide.offsetLeft - this.slider.offsetLeft;
       this.state = { current: newSlide, start, end };
