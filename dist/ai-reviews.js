@@ -111,9 +111,7 @@
       this.observer.observe(this.slider, { childList: true });
     }
     reset() {
-      console.log(`before: ${this.slider.scrollLeft}`);
       this.slider.scrollLeft = 0;
-      console.log(`after: ${this.slider.scrollLeft}`);
       this.state = { current: 1, start: true, end: false };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
     }
@@ -439,7 +437,10 @@
       }, 2e3);
     }
     hide() {
+      console.log(`reset: ${this.slider?.scrollLeft}`);
       this.slider?.reset();
+      console.log(`after reset: ${this.slider?.scrollLeft}`);
+      console.log(`closed: ${this.slider?.scrollLeft}`);
       setTimeout(() => {
         this.dialog?.close();
       }, 0);
