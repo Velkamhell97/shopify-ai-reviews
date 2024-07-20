@@ -49,14 +49,6 @@
      */
     slider;
     /**
-     * @type {Element[]}
-     */
-    slides;
-    /**
-     * @type {MutationObserver}
-     */
-    observer;
-    /**
      * @type {Element}
      */
     previousControl = document.createElement("button");
@@ -82,13 +74,10 @@
     }
     connectedCallback() {
       this.slider = this.querySelector(".reviews-slider");
-      this.slides = [...this.slider.children];
       if (this.autoplay) this.play();
       this.setup();
-      this.createObserver();
     }
     disconnectedCallback() {
-      this.observer.disconnect();
       this.pause();
     }
     setup() {
@@ -99,16 +88,6 @@
       const nextcontrolid = this.getAttribute("nextcontrol");
       if (nextcontrolid) this.nextControl = document.querySelector(`#${nextcontrolid}`);
       this.nextControl.addEventListener("click", this.next.bind(this));
-    }
-    createObserver() {
-      this.observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.type === "childList") {
-            this.slides = [...mutation.target.children];
-          }
-        }
-      });
-      this.observer.observe(this.slider, { childList: true });
     }
     reset() {
       this.slider.style.scrollBehavior = "auto";
@@ -161,10 +140,6 @@
      * @type {HTMLElement}
      */
     paginator;
-    /**
-     * @type {HTMLElement[] | null}
-     */
-    indicators;
     get type() {
       return this.getAttribute("type") ?? "text";
     }
@@ -176,15 +151,15 @@
     }
     connectedCallback() {
       this.paginator = this.querySelector(".reviews-slider-paginator");
-      if (this.type === "text") {
-        this.paginator.textContent = `1 / 1`;
-      } else {
-        this.indicators = [...this.paginator.children];
-      }
+      this.setup();
+    }
+    setup() {
       const sliderid = this.getAttribute("slider");
-      if (sliderid) {
-        this.slider = document.querySelector(`#${sliderid}`);
-        this.slider?.addEventListener("slidechange", this.onSliderChange.bind(this));
+      if (!sliderid) return;
+      this.slider = document.querySelector(`#${sliderid}`);
+      this.slider?.addEventListener("slidechange", this.onSliderChange.bind(this));
+      if (this.type === "text") {
+        this.paginator.textContent = `1 / ${this.length}`;
       }
     }
     onSliderChange(e) {
@@ -378,10 +353,6 @@
      */
     dialog;
     /**
-     * @type {any}
-     */
-    dialogCloseListener;
-    /**
      * @type {SliderElement}
      */
     slider;
@@ -402,7 +373,6 @@
      */
     secondaryVariantSelectorChangeListener;
     constructor() {
-      this.dialogCloseListener = this.onDialogClose.bind(this);
       this.mainVariantSelectorChangeListener = this.onMainVariantSelectorChange.bind(this);
       this.secondaryVariantSelectorChangeListener = this.onSecondaryVariantSelectorChange.bind(this);
       this.reload();
@@ -435,9 +405,6 @@
     hide() {
       this.slider?.reset();
       this.dialog?.close();
-    }
-    onDialogClose() {
-      this.slider?.reset();
     }
     /**
      * @param {Event} e
