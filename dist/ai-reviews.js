@@ -114,7 +114,7 @@
       }
       ;
       if (newSlide > maxSlide) {
-        newSlide = this.autoplay ? 1 : maxSlide;
+        newSlide = this.autoplay && newSlide === this.length - 1 ? 1 : maxSlide;
       }
       const start = newSlide === 1;
       const end = newSlide === maxSlide;
