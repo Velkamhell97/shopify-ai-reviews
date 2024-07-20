@@ -180,14 +180,14 @@
       const sliderid = this.getAttribute("slider");
       if (sliderid) {
         this.slider = document.querySelector(`${sliderid}`);
-        this.slider.addEventListener("slidechange", this.onSliderChange.bind(this));
+        this.slider?.addEventListener("slidechange", this.onSliderChange.bind(this));
       }
     }
     onSliderChange(e) {
       const state = e.detail;
       console.log(state);
       if (this.type === "text") {
-        this.paginator.textContent = `${state.current} / ${this.slider.length}`;
+        this.paginator.textContent = `${state.current} / ${this.slider?.length ?? 0}`;
       } else {
       }
     }
