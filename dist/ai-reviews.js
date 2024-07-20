@@ -132,7 +132,7 @@
       const end = newSlide === maxSlide;
       this.previousControl.disabled = start;
       this.nextControl.disabled = end;
-      const slide = this.slides[newSlide];
+      const slide = [...this.slider.children][newSlide];
       this.slider.scrollLeft = slide.offsetLeft - this.slider.offsetLeft;
       this.state = { current: newSlide, start, end };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
@@ -184,7 +184,7 @@
       const sliderid = this.getAttribute("slider");
       if (sliderid) {
         this.slider = document.querySelector(`${sliderid}`);
-        console.log(slider);
+        console.log(this.slider);
         this.slider?.addEventListener("slidechange", this.onSliderChange.bind(this));
       }
     }
