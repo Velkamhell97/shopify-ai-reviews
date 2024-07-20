@@ -51,11 +51,11 @@
     /**
      * @type {Element}
      */
-    previousControl = document.createElement("button");
+    previousControl;
     /**
      * @type {Element}
      */
-    nextControl = document.createElement("button");
+    nextControl;
     get type() {
       return this.getAttribute("type") ?? "manual";
     }
@@ -74,6 +74,9 @@
     }
     constructor() {
       super();
+      this.previousControl = document.createElement("button");
+      this.nextControl = document.createElement("button");
+      console.log(this.state);
     }
     connectedCallback() {
       this.slider = this.querySelector(".reviews-slider");
