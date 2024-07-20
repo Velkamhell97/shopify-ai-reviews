@@ -443,7 +443,7 @@
       this.slider?.reset();
       setTimeout(() => {
         this.dialog?.close();
-      });
+      }, 2e3);
     }
     onDialogClose() {
     }
