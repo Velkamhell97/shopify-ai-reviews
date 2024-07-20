@@ -86,6 +86,7 @@
     setup() {
       const previouscontrolid = this.getAttribute("previouscontrol");
       if (previouscontrolid) this.previousControl = document.querySelector(`#${previouscontrolid}`);
+      console.log(this.previousControl);
       this.previousControl.addEventListener("click", this.previous.bind(this));
       this.previousControl.disabled = true;
       const nextcontrolid = this.getAttribute("nextcontrol");
