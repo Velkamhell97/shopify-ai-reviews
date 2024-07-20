@@ -104,6 +104,7 @@
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
+            console.log("entre");
             if (this.slides.length === 1) {
               console.log("Mutation");
               this.slides = [...mutation.target.children];
