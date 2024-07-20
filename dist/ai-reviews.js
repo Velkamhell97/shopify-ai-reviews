@@ -104,10 +104,10 @@
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
-            console.log("entre");
             if (mutation.target.children.length !== this.length) {
+              console.log("cambio");
               console.log(`mutation: ${mutation.target.children.length}`);
-              console.log(`slides: ${this.slider}`);
+              console.log(`slides: ${this.length}`);
               this.slides = [...this.slider.children];
             }
           }
