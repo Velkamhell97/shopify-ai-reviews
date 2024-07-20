@@ -72,7 +72,7 @@
     }
     get maxLength() {
       const columns = parseInt(getComputedStyle(this).getPropertyValue("--slider-columns"));
-      return this.slides.length - columns;
+      return this.slider.children.length - columns;
     }
     get length() {
       return this.slider.children.length;
@@ -124,12 +124,12 @@
       console.log(newSlide);
       const maxSlide = this.maxLength;
       console.log(maxSlide);
+      console.log(this.slides);
       if (newSlide < 1) return this.state;
       if (newSlide > maxSlide) {
         if (!this.autoplay) return this.state;
         newSlide = 1;
       }
-      console.log(this.length);
       const start = newSlide === 1;
       const end = newSlide === maxSlide;
       this.previousControl.disabled = start;
