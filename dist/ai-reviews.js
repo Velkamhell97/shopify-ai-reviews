@@ -111,7 +111,10 @@
       this.observer.observe(this.slider, { childList: true });
     }
     reset() {
+      console.log(this.slider);
+      console.log(`inside: ${this.scrollLeft}`);
       this.slider.scrollLeft = 0;
+      console.log(`after inside: ${this.scrollLeft}`);
       this.state = { current: 1, start: true, end: false };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
     }
@@ -407,7 +410,6 @@
     }
     reload() {
       this.dialog = document.querySelector("#reviews-dialog");
-      this.slider = document.querySelector("#dialog-slider");
       const [mainSelector, secondarySelector] = document.querySelectorAll("variant-selects");
       this.mainVariantSelector = mainSelector;
       this.secondaryVarianSelector = secondarySelector;
@@ -432,11 +434,13 @@
       console.log(`open: ${this.slider?.scrollLeft}`);
       setTimeout(() => {
         console.log(`after open: ${this.slider?.scrollLeft}`);
+        console.log(this.slider);
         this.dialog?.showModal();
         this.slider?.scrollTo(index + 1);
       }, 2e3);
     }
     hide() {
+      console.log(this.slider);
       console.log(`reset: ${this.slider?.scrollLeft}`);
       this.slider?.reset();
       console.log(`after reset: ${this.slider?.scrollLeft}`);
