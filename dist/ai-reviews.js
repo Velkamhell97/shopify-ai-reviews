@@ -82,6 +82,8 @@
     }
     connectedCallback() {
       this.slider = this.querySelector(".reviews-slider");
+      console.log(this.slider);
+      console.log(this.slider.children.length);
       this.slides = [...this.slider.children];
       if (this.autoplay) this.play();
       this.setup();
