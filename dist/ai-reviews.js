@@ -115,6 +115,8 @@
     }
     reset() {
       console.log("reset");
+      console.log(this.slider.scrollLeft);
+      console.log(this.slides);
       this.slider.scrollLeft = 0;
       this.state = { current: 1, start: true, end: false };
     }
@@ -133,7 +135,7 @@
       const end = newSlide === maxSlide;
       this.previousControl.disabled = start;
       this.nextControl.disabled = end;
-      const slide = [...this.slider.children][newSlide];
+      const slide = this.slides[newSlide];
       this.slider.scrollLeft = slide.offsetLeft - this.slider.offsetLeft;
       this.state = { current: newSlide, start, end };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
