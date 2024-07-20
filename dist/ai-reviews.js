@@ -105,6 +105,7 @@
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
             this.slides = [...mutation.target.children];
+            console.log(this.slider.scrollLeft);
           }
         }
       });
@@ -113,6 +114,7 @@
     reset() {
       console.log("reset");
       console.log(this.slider);
+      console.log(this.slider.scrollLeft);
       this.slider.scrollLeft = 0;
       this.state = { current: 1, start: true, end: false };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
@@ -195,6 +197,7 @@
     onSliderChange(e) {
       const { current } = e.detail;
       if (this.type === "text") {
+        console.log(this.slider?.scrollLeft);
         this.paginator.textContent = `${current} / ${this.length - 1}`;
       } else {
       }
@@ -437,6 +440,7 @@
      */
     show(index) {
       this.dialog?.showModal();
+      console.log(this.slider.scrollLeft);
       this.slider?.scrollTo(index + 1);
     }
     hide() {
