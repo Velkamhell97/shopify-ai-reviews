@@ -85,7 +85,7 @@
       this.slides = [...this.slider.children];
       if (this.autoplay) this.play();
       this.setup();
-      this.createObserver();
+      setTimeout(() => this.createObserver(), 0);
     }
     disconnectedCallback() {
       this.observer.disconnect();
@@ -104,12 +104,12 @@
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
-            console.log(`added: ${mutation.addedNodes.length}`);
-            console.log(`removed: ${mutation.removedNodes.length}`);
-            console.log(`entre: ${this.slider.children.length}`);
-            console.log(`target: ${mutation.target}`);
-            console.log(`target child: ${mutation.target?.children?.length}`);
-            this.slides = [...this.slider.children];
+            console.log("entre");
+            if (mutation.target.children.length !== this.length) {
+              console.log(`mutation: ${mutation.target.children.length}`);
+              console.log(`slides: ${this.slider}`);
+              this.slides = [...this.slider.children];
+            }
           }
         }
       });
