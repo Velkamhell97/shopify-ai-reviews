@@ -115,6 +115,7 @@
       console.log(this.slider);
       this.slider.scrollLeft = 0;
       this.state = { current: 1, start: true, end: false };
+      this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
     }
     /**
      * @param {number} index
@@ -440,9 +441,11 @@
     }
     hide() {
       this.slider?.reset();
+      setTimeout(() => {
+        this.dialog?.close();
+      });
     }
     onDialogClose() {
-      this.slider?.reset();
     }
     /**
      * @param {Event} e
