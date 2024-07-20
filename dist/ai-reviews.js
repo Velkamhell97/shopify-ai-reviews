@@ -129,6 +129,9 @@
       const end = newSlide === maxSlide;
       this.previousControl.disabled = start;
       this.nextControl.disabled = end;
+      console.log(newSlide);
+      console.log(this.slider);
+      console.log(this.slides);
       const slide = this.slides[newSlide];
       this.slider.scrollLeft = slide.offsetLeft - this.slider.offsetLeft;
       this.state = { current: newSlide, start, end };
@@ -174,7 +177,10 @@
     }
     connectedCallback() {
       this.paginator = this.querySelector(".reviews-slider-paginator");
-      if (this.type !== "text") {
+      console.log(this.paginator);
+      if (this.type === "text") {
+        this.paginator.textContent = `0 / 0`;
+      } else {
         this.indicators = [...this.paginator.children];
       }
       const sliderid = this.getAttribute("slider");
@@ -428,8 +434,11 @@
      * @param {number} index
      */
     show(index) {
+      console.log(index);
       this.dialog?.showModal();
-      this.slider?.scrollTo(index + 1);
+      setTimeout(() => {
+        this.slider?.scrollTo(index + 1);
+      }, 3e3);
     }
     hide() {
       this.dialog?.close();
