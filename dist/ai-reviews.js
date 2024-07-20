@@ -121,13 +121,15 @@
     */
     scrollTo(index) {
       let newSlide = index;
-      console.log(this.length);
+      console.log(newSlide);
       const maxSlide = this.maxLength;
+      console.log(maxSlide);
       if (newSlide < 1) return this.state;
       if (newSlide > maxSlide) {
         if (!this.autoplay) return this.state;
         newSlide = 1;
       }
+      console.log(this.length);
       const start = newSlide === 1;
       const end = newSlide === maxSlide;
       this.previousControl.disabled = start;
