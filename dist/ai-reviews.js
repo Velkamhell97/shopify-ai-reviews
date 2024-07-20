@@ -129,14 +129,11 @@
     scrollTo(index) {
       let newSlide = index;
       const maxSlide = this.maxLength;
-      console.log(newSlide);
-      console.log(maxSlide);
       if (newSlide < 1) return;
       if (newSlide > maxSlide) {
         if (!this.autoplay) return;
         newSlide = 1;
       }
-      console.log("pase");
       const start = newSlide === 1;
       const end = newSlide === maxSlide;
       this.previousControl.disabled = start;
@@ -439,7 +436,7 @@
      */
     show(index) {
       this.dialog?.showModal();
-      this.slider?.scrollTo(index);
+      this.slider?.scrollTo(index + 1);
     }
     hide() {
       this.slider?.reset();
