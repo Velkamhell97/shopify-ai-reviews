@@ -169,6 +169,9 @@
     get type() {
       return this.getAttribute("type") ?? "text";
     }
+    get length() {
+      return this.slider?.length ?? 0;
+    }
     constructor() {
       super();
     }
@@ -189,7 +192,7 @@
       const { current, length } = e.detail;
       console.log(e.detail);
       if (this.type === "text") {
-        this.paginator.textContent = `${current} / ${length ?? this.slider?.length ?? 0}`;
+        this.paginator.textContent = `${current} / ${length ?? this.length}`;
       } else {
       }
     }
