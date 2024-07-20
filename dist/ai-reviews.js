@@ -107,10 +107,6 @@
     scrollTo(index) {
       let newSlide = index;
       const maxSlide = this.maxLength;
-      console.log(newSlide);
-      console.log(maxSlide);
-      console.log(this.columns);
-      console.log(this.length);
       if (newSlide < 1) {
         newSlide = 1;
       }
