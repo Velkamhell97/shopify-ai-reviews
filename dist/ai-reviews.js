@@ -104,11 +104,10 @@
       this.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
-            if (mutation.target.children.length !== this.length) {
+            const newLength = mutation.target.children.length;
+            if (newLength !== this.length) {
               console.log("cambio");
-              console.log(`mutation: ${mutation.target.children.length}`);
-              console.log(`slides: ${this.length}`);
-              this.slides = [...this.slider.children];
+              this.dispatchEvent(new CustomEvent("slidechange", { detail: { current: this.state.current, length: newLength } }));
             }
           }
         }
@@ -123,6 +122,7 @@
     */
     scrollTo(index) {
       let newSlide = index;
+      console.log(this.length);
       const maxSlide = this.maxLength;
       if (newSlide < 1) return this.state;
       if (newSlide > maxSlide) {
@@ -155,10 +155,6 @@
   customElements.define("slider-element", SliderElement);
   var SliderPaginatorElement = class extends HTMLElement {
     /**
-     * @type {SliderState}
-     */
-    state;
-    /**
      * @type {SliderElement}
      */
     slider;
@@ -190,10 +186,10 @@
       }
     }
     onSliderChange(e) {
-      const state = e.detail;
-      console.log(state);
+      const { current, length } = e.detail;
+      console.log(e.detail);
       if (this.type === "text") {
-        this.paginator.textContent = `${state.current} / ${this.slider?.length ?? 0}`;
+        this.paginator.textContent = `${current} / ${length ?? this.slider?.length ?? 0}`;
       } else {
       }
     }
