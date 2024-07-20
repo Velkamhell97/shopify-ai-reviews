@@ -127,6 +127,8 @@
     scrollTo(index) {
       let newSlide = index;
       const maxSlide = this.maxLength;
+      console.log(`moving: ${this.slider.scrollLeft} - ${this.slider.scrollWidth}`);
+      return;
       if (newSlide < 1) return;
       if (newSlide > maxSlide) {
         if (!this.autoplay) return;
@@ -433,22 +435,23 @@
      * @param {number} index
      */
     show(index) {
-      console.log(`open: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
+      console.log(`open: ${this.slider?.left} - ${this.slider?.width}`);
       setTimeout(() => {
-        console.log(`after open: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
+        console.log(`after open: ${this.slider?.left} - ${this.slider?.width}`);
         this.dialog?.showModal();
+        this.slider?.scrollTo(0);
       }, 2e3);
     }
     hide() {
-      console.log(`reset: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
+      console.log(`reset: ${this.slider?.left} - ${this.slider?.width}`);
       this.slider?.reset();
-      console.log(`after reset: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
-      console.log(`closed: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
+      console.log(`after reset: ${this.slider?.left} - ${this.slider?.width}`);
+      console.log(`closed: ${this.slider?.left} - ${this.slider?.width}`);
       setTimeout(() => {
         this.dialog?.close();
       }, 0);
       setTimeout(() => {
-        console.log(`after closed: ${this.slider?.left} - ${this.slider?.scrollWidth}`);
+        console.log(`after closed: ${this.slider?.left} - ${this.slider?.width}`);
       }, 2e3);
     }
     onDialogClose() {
