@@ -419,6 +419,11 @@
     position: absolute;
     top: 50%;
     translate: 0px -50%;
+
+    &:disabled {
+      opacity: 0.65;
+      pointer-events: none;
+    }
   }
 
   .review-card-wrapper {
