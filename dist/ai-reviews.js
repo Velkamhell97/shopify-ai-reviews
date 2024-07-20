@@ -130,6 +130,8 @@
       this.previousControl.disabled = start;
       this.nextControl.disabled = end;
       const slide = this.slides[newSlide];
+      console.log(this.slider.scrollLeft);
+      console.log(this.slider.offsetLeft);
       console.log(slide);
       console.log(newSlide);
       console.log(slide.offsetLeft);
