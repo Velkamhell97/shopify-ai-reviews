@@ -127,13 +127,20 @@
     scrollTo(index) {
       let newSlide = index;
       const maxSlide = this.maxLength;
-      console.log(`moving: ${this.slider.scrollLeft} - ${this.slider.scrollWidth}`);
-      return;
-      if (newSlide < 1) return;
+      if (newSlide < 1) {
+        console.log(`moving: ${this.slider.scrollLeft} - ${this.slider.scrollWidth}`);
+        return;
+      }
+      ;
       if (newSlide > maxSlide) {
-        if (!this.autoplay) return;
+        if (!this.autoplay) {
+          console.log(`moving: ${this.slider.scrollLeft} - ${this.slider.scrollWidth}`);
+          return;
+        }
+        ;
         newSlide = 1;
       }
+      console.log(`moving: ${this.slider.scrollLeft} - ${this.slider.scrollWidth}`);
       const start = newSlide === 1;
       const end = newSlide === maxSlide;
       this.previousControl.disabled = start;
