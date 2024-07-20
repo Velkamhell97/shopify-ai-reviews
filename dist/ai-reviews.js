@@ -452,7 +452,7 @@
       this.slider?.reset();
       setTimeout(() => {
         this.dialog?.close();
-      }, 0);
+      }, 500);
     }
     onDialogClose() {
     }
