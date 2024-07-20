@@ -105,8 +105,15 @@
     scrollTo(index) {
       let newSlide = index;
       const maxSlide = this.maxLength;
+      console.log(maxSlide);
+      console.log(this.columns);
+      console.log(this.length);
       if (newSlide < 1) return;
       if (newSlide > maxSlide) {
+        if (newSlide < this.length) {
+          console.log("menor");
+          newSlide = maxSlide - 1;
+        }
         if (!this.autoplay) return;
         newSlide = 1;
       }
