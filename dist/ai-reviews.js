@@ -439,7 +439,7 @@
       this.slider?.scrollTo(index + 1);
     }
     hide() {
-      this.reset();
+      slider.reset();
     }
     onDialogClose() {
       this.slider?.reset();
