@@ -72,16 +72,10 @@
     }
     get maxLength() {
       const columns = parseInt(getComputedStyle(this).getPropertyValue("--slider-columns"));
-      return this.slides.length - columns;
+      return this.slider.children.length - columns;
     }
     get length() {
-      return this.slides.length;
-    }
-    get left() {
-      return this.slider.scrollLeft;
-    }
-    get width() {
-      return this.slider.scrollWidth;
+      return this.slider.children.length;
     }
     constructor() {
       super();
@@ -138,7 +132,7 @@
       const end = newSlide === maxSlide;
       this.previousControl.disabled = start;
       this.nextControl.disabled = end;
-      const slide = [...this.slider.children][newSlide];
+      const slide = this.slider.children[newSlide];
       this.slider.scrollLeft = slide.offsetLeft - this.slider.offsetLeft;
       this.state = { current: newSlide, start, end };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
