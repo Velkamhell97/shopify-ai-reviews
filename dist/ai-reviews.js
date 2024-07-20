@@ -105,21 +105,15 @@
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
             this.slides = [...mutation.target.children];
-            console.log(this.slider.scrollLeft);
-            if (this.slides.length === 1) {
-              this.slider.scrollLeft = 0;
-            }
           }
         }
       });
       this.observer.observe(this.slider, { childList: true });
     }
     reset() {
-      console.log("reset");
-      console.log(this.slider);
-      console.log(this.slider.scrollLeft);
+      console.log(`before: ${this.slider.scrollLeft}`);
       this.slider.scrollLeft = 0;
-      console.log(this.slider.scrollLeft);
+      console.log(`after: ${this.slider.scrollLeft}`);
       this.state = { current: 1, start: true, end: false };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
     }
@@ -139,11 +133,6 @@
       this.previousControl.disabled = start;
       this.nextControl.disabled = end;
       const slide = this.slides[newSlide];
-      console.log(this.slider.scrollLeft);
-      console.log(this.slider.offsetLeft);
-      console.log(slide);
-      console.log(newSlide);
-      console.log(slide.offsetLeft);
       this.slider.scrollLeft = slide.offsetLeft - this.slider.offsetLeft;
       this.state = { current: newSlide, start, end };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
@@ -201,7 +190,6 @@
     onSliderChange(e) {
       const { current } = e.detail;
       if (this.type === "text") {
-        console.log(this.slider?.scrollLeft);
         this.paginator.textContent = `${current} / ${this.length - 1}`;
       } else {
       }
@@ -443,16 +431,21 @@
      * @param {number} index
      */
     show(index) {
-      this.dialog?.showModal();
-      console.log(this.slider.scrollLeft);
-      console.log(this.slider);
-      this.slider?.scrollTo(index + 1);
+      console.log(`open: ${this.slider?.scrollLeft}`);
+      setTimeout(() => {
+        console.log(`after open: ${this.slider?.scrollLeft}`);
+        this.dialog?.showModal();
+        this.slider?.scrollTo(index + 1);
+      }, 2e3);
     }
     hide() {
       this.slider?.reset();
       setTimeout(() => {
         this.dialog?.close();
       }, 0);
+      setTimeout(() => {
+        console.log(`after closed: ${this.slider?.scrollLeft}`);
+      }, 2e3);
     }
     onDialogClose() {
     }
