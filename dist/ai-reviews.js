@@ -77,6 +77,9 @@
     get length() {
       return this.slides.length;
     }
+    get left() {
+      return this.slider.scrollLeft;
+    }
     constructor() {
       super();
     }
@@ -111,10 +114,7 @@
       this.observer.observe(this.slider, { childList: true });
     }
     reset() {
-      console.log(this.slider);
-      console.log(`inside: ${this.scrollLeft}`);
       this.slider.scrollLeft = 0;
-      console.log(`after inside: ${this.scrollLeft}`);
       this.state = { current: 1, start: true, end: false };
       this.dispatchEvent(new CustomEvent("slidechange", { detail: this.state }));
     }
@@ -430,25 +430,23 @@
      * @param {number} index
      */
     show(index) {
-      console.log(`open: ${this.slider?.scrollLeft}`);
+      console.log(`open: ${this.slider?.left}`);
       setTimeout(() => {
-        console.log(`after open: ${this.slider?.scrollLeft}`);
-        console.log(this.slider);
+        console.log(`after open: ${this.slider?.left}`);
         this.dialog?.showModal();
         this.slider?.scrollTo(index + 1);
       }, 2e3);
     }
     hide() {
-      console.log(this.slider);
-      console.log(`reset: ${this.slider?.scrollLeft}`);
+      console.log(`reset: ${this.slider?.left}`);
       this.slider?.reset();
-      console.log(`after reset: ${this.slider?.scrollLeft}`);
-      console.log(`closed: ${this.slider?.scrollLeft}`);
+      console.log(`after reset: ${this.slider?.left}`);
+      console.log(`closed: ${this.slider?.left}`);
       setTimeout(() => {
         this.dialog?.close();
       }, 0);
       setTimeout(() => {
-        console.log(`after closed: ${this.slider?.scrollLeft}`);
+        console.log(`after closed: ${this.slider?.left}`);
       }, 2e3);
     }
     onDialogClose() {
