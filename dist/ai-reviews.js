@@ -168,7 +168,7 @@
       return this.getAttribute("type") ?? "text";
     }
     get length() {
-      return this.slider?.length ?? 0;
+      return this.slider?.length ?? 1;
     }
     constructor() {
       super();
@@ -183,15 +183,13 @@
       const sliderid = this.getAttribute("slider");
       if (sliderid) {
         this.slider = document.querySelector(`#${sliderid}`);
-        console.log(this.slider);
         this.slider?.addEventListener("slidechange", this.onSliderChange.bind(this));
       }
     }
     onSliderChange(e) {
-      const { current, length } = e.detail;
-      console.log(`de paginator: ${e.details}`);
+      const { current } = e.detail;
       if (this.type === "text") {
-        this.paginator.textContent = `${current} / ${length ?? this.length}`;
+        this.paginator.textContent = `${current} / ${this.length - 1}`;
       } else {
       }
     }
@@ -433,7 +431,6 @@
      */
     show(index) {
       this.dialog?.showModal();
-      console.log(index);
       this.slider?.scrollTo(index + 1);
     }
     hide() {
