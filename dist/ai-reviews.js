@@ -51,11 +51,11 @@
     /**
      * @type {Element}
      */
-    previousControl = document.createElement("button");
+    previousControl;
     /**
      * @type {Element}
      */
-    nextControl = document.createElement("button");
+    nextControl;
     get type() {
       return this.getAttribute("type") ?? "manual";
     }
@@ -116,7 +116,7 @@
       }
       ;
       if (newSlide > maxSlide) {
-        newSlide = this.autoplay && newSlide === this.length - 1 ? 1 : maxSlide;
+        newSlide = this.autoplay && newSlide === this.length ? 1 : maxSlide;
       }
       const start = newSlide === 1;
       const end = newSlide === maxSlide;
