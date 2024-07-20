@@ -444,9 +444,8 @@
     show(index) {
       console.log(`open: ${this.slider?.left} - ${this.slider?.width}`);
       setTimeout(() => {
-        console.log(`after open: ${this.slider?.left} - ${this.slider?.width}`);
         this.dialog?.showModal();
-        this.slider?.scrollTo(1);
+        console.log(`after open: ${this.slider?.left} - ${this.slider?.width}`);
       }, 2e3);
     }
     hide() {
