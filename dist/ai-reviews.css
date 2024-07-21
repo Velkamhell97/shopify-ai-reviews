@@ -7,12 +7,20 @@
     font: inherit;
     cursor: pointer;
     border: none;
+
+    &:disabled {
+      pointer-events: none;
+    }
   }
 
   .btn-reviews--circle {
     padding: 0.75rem;
     border-radius: 50%;
     z-index: 2;
+
+    &:disabled {
+      opacity: 0.65;
+    }
   }
 
   .btn-reviews--save {
@@ -22,7 +30,6 @@
 
     &:disabled {
       background-color: rgba(26, 127, 100, 0.5);
-      pointer-events:none;
     }
 
     &:not(:disabled):hover {
@@ -37,7 +44,6 @@
 
     &:disabled {
       background-color: rgba(0,0,0, 0.6);
-      pointer-events:none;
     }
 
     &:not(:disabled):hover {
@@ -50,7 +56,6 @@
 
     &:disabled {
       opacity: 0.6;
-      pointer-events:none;
     }
   }
 
@@ -85,6 +90,16 @@
     display: inline-flex;
     color: black;
     background-color: white;
+  }
+
+  .btn-reviews--paginator {
+    transition: background-color 0.2s;
+    padding: 0 1rem;
+    border-radius: 0.5rem;
+
+    &:disabled {
+      opacity: 0.65;
+    }
   }
 
   .btn-reviews--transparent {
@@ -224,6 +239,12 @@
     padding-block: 1rem;
   }
 
+  .reviews-header__title {
+    color: inherit;
+    margin: 0;
+    font-weight: bold;
+  }
+
   .reviews-header__summary-average {
     font-size: 30px;
     font-weight: bold;
@@ -285,7 +306,6 @@
   .reviews-form__file {
     max-width: 350px;
     width: 100%;
-    padding: 1rem;
   }
 
   .reviews-form__slider {
@@ -361,25 +381,6 @@
     gap: 1rem;
   }
 
-  .reviews-slider-controls {
-    display: flex;
-    justify-content: space-between;
-    padding-block: 1rem;
-
-    > button {
-      transition: scale 0.2s ease;
-
-      &:disabled {
-        opacity: 0.65;
-        pointer-events:none;
-      }
-  
-      &:not(:disabled):hover {
-        scale: 1.10;
-      }
-    }
-  }
-
   .reviews-layout-2 {
     --slider-gap: 0rem;
     --slider-padding: 10px;
@@ -427,11 +428,6 @@
     position: absolute;
     top: 50%;
     translate: 0px -50%;
-
-    &:disabled {
-      opacity: 0.65;
-      pointer-events: none;
-    }
   }
 
   .review-card-wrapper {
@@ -451,6 +447,10 @@
   }
 
   .review-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-radius: 0.5rem;
     cursor: pointer;
     box-shadow: 3px 4px 8px rgba(0, 0, 0, .2);
     transition: box-shadow 0.2s ease;
@@ -506,12 +506,6 @@
   ul.reviews-paginator {
     list-style-type: none;
     padding: 0;
-
-    & button {
-      transition: background-color 0.2s;
-      padding: 0 1rem;
-      border-radius: 0.5rem;
-    }
   }
   /*#endregion */
 
@@ -529,8 +523,8 @@
 
   .reviews-dialog__wrapper {
     align-items: start;
-    display: flex;
-    flex-direction: column;
+    column-gap: 2rem;
+    row-gap: 1rem;
   }
 
   .reviews-dialog__media {
@@ -556,10 +550,6 @@
     .reviews-dialog__media {
       width: 45%;
     }
-
-    .reviews-dialog__content {
-      padding-inline: 1rem;
-    }
   }
 
   @media screen and (width >= 990px) {
@@ -579,7 +569,7 @@
   .hover-scale {
     transition: scale 0.2s ease;
 
-    &:hover {
+    &:not(:disabled):hover {
       scale: 1.05;
     }
   }
