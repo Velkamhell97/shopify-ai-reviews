@@ -24,10 +24,9 @@
   }
 
   .btn.reviews--action {
-    font-size: 16px;
     border-radius: 0.25rem;
     gap: 0.75rem;
-    padding: .5rem 1.5rem;
+    padding: 0.5rem 1.5rem;
   }
 
   .btn-reviews--save {
@@ -67,7 +66,6 @@
   }
 
   .btn-reviews--control {
-    font-size: 16px;
     border-radius: 0.25rem;
     padding: .75rem 2rem;
     width: max-content;
@@ -75,7 +73,6 @@
   }
 
   .btn-reviews--file {
-    font-size: 16px;
     border-radius: 0.25rem;
     padding: 1rem;
     cursor: pointer;
@@ -253,6 +250,10 @@
     font-weight: bold;
   }
 
+  .reviews-header__summary {
+    gap: 2rem;
+  }
+
   .reviews-header__summary-average {
     font-size: 30px;
     font-weight: bold;
@@ -265,7 +266,7 @@
 
   .reviews-header__summary-bars {
     position: relative;
-    flex: 0 1 150px;
+    width: 150px;
     height: 10px;
     border-radius: 20px;
 
@@ -522,7 +523,7 @@
   }
 
   .reviews-dialog__wrapper {
-    align-items: start;
+    align-items: stretch;
     column-gap: 2rem;
     row-gap: 1rem;
   }
