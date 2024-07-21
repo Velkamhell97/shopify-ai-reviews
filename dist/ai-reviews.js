@@ -49,6 +49,10 @@
      */
     slider;
     /**
+     * @type {boolean}
+     */
+    autoplay;
+    /**
      * @type {Element}
      */
     previousControl;
@@ -59,40 +63,35 @@
     get type() {
       return this.getAttribute("type") ?? "manual";
     }
-    get autoplay() {
-      return this.type === "auto";
-    }
     get columns() {
       const columns = getComputedStyle(this).getPropertyValue("--slider-columns");
       return parseInt(columns);
     }
-    get maxLength() {
-      return this.slider.children.length - this.columns;
-    }
     get length() {
       return this.slider.children.length;
     }
+    get maxLength() {
+      return this.slider.children.length - this.columns;
+    }
     constructor() {
       super();
+      this.autoplay = this.type === "auto";
     }
     connectedCallback() {
       this.slider = this.querySelector(".reviews-slider");
-      if (this.autoplay) this.play();
-      this.setup();
+      this.autoplay ? this.play() : this.setup();
     }
     disconnectedCallback() {
       this.pause();
     }
     setup() {
-      if (!this.autoplay) {
-        const previouscontrolid = this.getAttribute("previouscontrol");
-        if (previouscontrolid) this.previousControl = document.querySelector(`#${previouscontrolid}`);
-        this.previousControl.addEventListener("click", this.previous.bind(this));
-        this.previousControl.disabled = true;
-        const nextcontrolid = this.getAttribute("nextcontrol");
-        if (nextcontrolid) this.nextControl = document.querySelector(`#${nextcontrolid}`);
-        this.nextControl.addEventListener("click", this.next.bind(this));
-      }
+      const previouscontrolid = this.getAttribute("previouscontrol");
+      if (previouscontrolid) this.previousControl = document.querySelector(`#${previouscontrolid}`);
+      this.previousControl.addEventListener("click", this.previous.bind(this));
+      this.previousControl.disabled = true;
+      const nextcontrolid = this.getAttribute("nextcontrol");
+      if (nextcontrolid) this.nextControl = document.querySelector(`#${nextcontrolid}`);
+      this.nextControl.addEventListener("click", this.next.bind(this));
     }
     reset() {
       this.slider.style.scrollBehavior = "auto";
@@ -109,11 +108,10 @@
       const maxSlide = this.maxLength;
       if (newSlide < 1) {
         newSlide = 1;
-      }
-      ;
-      if (newSlide > maxSlide) {
+      } else if (newSlide > maxSlide) {
         newSlide = this.autoplay && newSlide === this.length ? 1 : maxSlide;
       }
+      ;
       const start = newSlide === 1;
       const end = newSlide === maxSlide;
       if (!this.autoplay) {
@@ -352,6 +350,7 @@
           };
           resolve(loadedVideo);
         };
+        video.onerror = reject;
       });
     }
   };
