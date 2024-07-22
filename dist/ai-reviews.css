@@ -485,6 +485,7 @@
   }
 
   .review-card__thumbnail {
+    position: relative;
     border-radius: 0.5rem;
     overflow: hidden;
     width: 115px !important;
