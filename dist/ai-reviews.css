@@ -416,7 +416,7 @@
     column-gap: 12px;
   
     & .review-card-wrapper {
-      width: 100%;
+      max-width: 100%;
       margin-bottom: 1.5rem;
       display: inline-flex !important;
     }
