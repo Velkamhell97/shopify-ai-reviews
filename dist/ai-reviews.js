@@ -514,7 +514,7 @@
         const storeId = document.querySelector("#store-id").value;
         const productId = document.querySelector("#product-id").value;
         const response = await this.database.reviews(storeId, productId);
-        if (hasError(response)) {
+        if (this.hasError(response)) {
           throw response;
         }
         let reviews = response.reviews;
