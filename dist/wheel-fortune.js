@@ -58,108 +58,112 @@
       if (_rsi.dss.currentOffer.disForDisc) {
         _rsi.dss.disOtherDisc = true;
       }
-      if (!_rsi.productPage.optionsHandlers.blockBuyClick()) {
-        let o2 = function(t) {
-          t = t || "update";
-          let o3 = !!(window.AwesomeQuantityBreak && document.querySelector("#awesome-quantity-data") || window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS);
-          if (t == "update" && !o3) {
-            try {
-              a = a.replace("&&", "&");
-              let s = _rsi.u.queryStringToJSON(a);
-              if (!s.quantity) {
-                let i = 1;
-                document.querySelectorAll('[name="quantity"]').forEach((e) => {
-                  if (e.value > i) i = e.value;
-                });
-                s.quantity = i;
+      try {
+        if (!_rsi.productPage.optionsHandlers.blockBuyClick()) {
+          let o2 = function(t) {
+            t = t || "update";
+            let o3 = !!(window.AwesomeQuantityBreak && document.querySelector("#awesome-quantity-data") || window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS);
+            if (t == "update" && !o3) {
+              try {
+                a = a.replace("&&", "&");
+                let s = _rsi.u.queryStringToJSON(a);
+                if (!s.quantity) {
+                  let i = 1;
+                  document.querySelectorAll('[name="quantity"]').forEach((e) => {
+                    if (e.value > i) i = e.value;
+                  });
+                  s.quantity = i;
+                }
+                if (!s.id && s.variant_id) {
+                  s.id = s.variant_id;
+                }
+                if (s.id && s.quantity) {
+                  window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS_INTERNAL = [{ id: s.id, quantity: s.quantity }];
+                  o3 = true;
+                } else {
+                  _rsi.u.sendReport({ msg: "Could not find id or quantity while generating jsonAddData on addToCart popup in product page. addData: " + a });
+                  t = "add";
+                }
+              } catch (e) {
+                _rsi.u.sendReport({ msg: "Error while generating jsonAddData on addToCart popup in product page. Error: " + e + " addData: " + a }), t = "add";
               }
-              if (!s.id && s.variant_id) {
-                s.id = s.variant_id;
-              }
-              if (s.id && s.quantity) {
-                window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS_INTERNAL = [{ id: s.id, quantity: s.quantity }];
-                o3 = true;
-              } else {
-                _rsi.u.sendReport({ msg: "Could not find id or quantity while generating jsonAddData on addToCart popup in product page. addData: " + a });
-                t = "add";
-              }
-            } catch (e) {
-              _rsi.u.sendReport({ msg: "Error while generating jsonAddData on addToCart popup in product page. Error: " + e + " addData: " + a }), t = "add";
             }
-          }
-          if (o3) {
-            let e = [];
-            if (window.AwesomeQuantityBreak) {
-              e = window.AwesomeQuantityBreak.selectedVariants;
-            } else if (window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS) {
-              e = window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS;
-            } else if (window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS_INTERNAL) {
-              e = window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS_INTERNAL;
-            }
-            if (!Array.isArray(e)) {
-              if (window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS) {
+            if (o3) {
+              let e = [];
+              if (window.AwesomeQuantityBreak) {
+                e = window.AwesomeQuantityBreak.selectedVariants;
+              } else if (window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS) {
                 e = window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS;
               } else if (window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS_INTERNAL) {
                 e = window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS_INTERNAL;
               }
-            }
-            let r = {};
-            if (t === "update") {
-              r.updates = {};
-              e.forEach(function(e2) {
-                r.updates[e2.id + ""] = e2.quantity;
-              });
-            } else {
-              r.items = e;
-            }
-            _rsi.u.ajax(
-              "POST",
-              _rsi.rootShopifyRoute + "cart/" + t + ".js",
-              JSON.stringify(r),
-              function(e2) {
-                try {
-                  if (t === "update") {
-                    e2 = JSON.parse(e2);
-                    _rsi.form.open(false, false, false, e2);
-                    return;
-                  }
-                } catch (e3) {
-                  _rsi.u.sendReport({ msg: "Error while parsing data on update.js on addToCart in product page. Error: " + e3 });
+              if (!Array.isArray(e)) {
+                if (window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS) {
+                  e = window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS;
+                } else if (window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS_INTERNAL) {
+                  e = window._RSI_COD_FORM_OVERWRITE_ATC_ITEMS_INTERNAL;
                 }
-                _rsi.form.open();
-              },
-              null,
-              { "Content-Type": "application/json" },
-              true
-            );
-          }
-        };
-        var o = o2;
-        let a = _rsi.u.serializeForm('form[method="post"][action*="/cart/add"]', '[name="form_type"][value="product"]');
-        try {
-          if (_rsi.form.deferLoading) {
-            _rsi.form.mode = "productCart";
-            _rsi.form.open(false, false, false, false, a || "product=true");
-            if (_rsi.productPage.oldCart === "empty") {
-              _rsi.productPage.oldCart = false;
+              }
+              let r = {};
+              if (t === "update") {
+                r.updates = {};
+                e.forEach(function(e2) {
+                  r.updates[e2.id + ""] = e2.quantity;
+                });
+              } else {
+                r.items = e;
+              }
+              _rsi.u.ajax(
+                "POST",
+                _rsi.rootShopifyRoute + "cart/" + t + ".js",
+                JSON.stringify(r),
+                function(e2) {
+                  try {
+                    if (t === "update") {
+                      e2 = JSON.parse(e2);
+                      _rsi.form.open(false, false, false, e2);
+                      return;
+                    }
+                  } catch (e3) {
+                    _rsi.u.sendReport({ msg: "Error while parsing data on update.js on addToCart in product page. Error: " + e3 });
+                  }
+                  _rsi.form.open();
+                },
+                null,
+                { "Content-Type": "application/json" },
+                true
+              );
             }
-            return;
+          };
+          var o = o2;
+          let a = _rsi.u.serializeForm('form[method="post"][action*="/cart/add"]', '[name="form_type"][value="product"]');
+          try {
+            if (_rsi.form.deferLoading) {
+              _rsi.form.mode = "productCart";
+              _rsi.form.open(false, false, false, false, a || "product=true");
+              if (_rsi.productPage.oldCart === "empty") {
+                _rsi.productPage.oldCart = false;
+              }
+              return;
+            }
+          } catch (e) {
+            console.log(e);
           }
-        } catch (e) {
-          console.log(e);
+          _rsi.form.mode = "productCart";
+          _rsi.form.open(true);
+          _rsi.cartManager.clearCart(
+            function() {
+              _rsi.u.clearCartCookies();
+              o2();
+            },
+            function() {
+              _rsi.u.clearCartCookies();
+              o2();
+            }
+          );
         }
-        _rsi.form.mode = "productCart";
-        _rsi.form.open(true);
-        _rsi.cartManager.clearCart(
-          function() {
-            _rsi.u.clearCartCookies();
-            o2();
-          },
-          function() {
-            _rsi.u.clearCartCookies();
-            o2();
-          }
-        );
+      } catch (error) {
+        console.error(error);
       }
     }
     createObserver() {
