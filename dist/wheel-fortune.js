@@ -30,8 +30,7 @@
       this.wheel = this.dialog.querySelector("#wheel");
       this.closer = this.dialog.querySelector(".wheel-dialog__closer");
       this.setup();
-      if (keepOpen) ;
-      this.dialog.showModal();
+      if (keepOpen) this.dialog.showModal();
     }
     setup() {
       this.wheel.removeEventListener("wheel-stopped", this.wheelStoppedListener);
