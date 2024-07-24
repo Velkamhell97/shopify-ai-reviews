@@ -168,7 +168,7 @@
   };
   var wheel = new WheelController();
   if (Shopify.designMode) {
-    document.addEventListener("shopify:section:load", reload);
+    document.addEventListener("shopify:section:load", wheel.reload);
   }
   wheel.createObserver();
 })();
