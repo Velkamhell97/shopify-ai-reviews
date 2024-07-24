@@ -36,7 +36,7 @@
     setup() {
       this.wheel.removeEventListener("wheel-stopped", this.wheelStoppedListener);
       this.wheel.addEventListener("wheel-stopped", this.wheelStoppedListener);
-      this.closer.addEventListener("click", this.dialog.close);
+      this.closer.addEventListener("click", () => this.dialog.close());
     }
     async onWheelStopped(e) {
       const party = this.dialog?.querySelector(".wheel-dialog__party");
