@@ -152,7 +152,7 @@
       }
     }
     createObserver() {
-      const sectionid = dialog.querySelector("#wheel-section-id")?.value ?? "null";
+      const sectionid = this.dialog.querySelector("#wheel-section-id")?.value ?? "null";
       const section = document.querySelector(`#${sectionid}`);
       if (section) {
         const observer = new IntersectionObserver((entries, observer2) => {
