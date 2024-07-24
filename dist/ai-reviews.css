@@ -159,7 +159,7 @@
 
   .reviews-layout-2 {
     --slider-gap: 0rem;
-    --slider-padding: 10px;
+    --slider-padding: 6px;
     --slider-columns: 1;
 
     & .review-card-wrapper {
@@ -167,11 +167,11 @@
       box-sizing: border-box !important;
     }
     
-    @media (width >= 750px) {
+    @media (width >= 600px) {
       --slider-columns: 2;
     }
 
-    @media (width >= 990px) {
+    @media (width >= 900px) {
       --slider-columns: 3;
     }
   }
@@ -263,7 +263,7 @@
     position: relative;
     border-radius: 0.5rem;
     overflow: hidden;
-    width: 115px !important;
+    width: 100px;
     aspect-ratio: 4 / 5;
     
     & img {
@@ -271,6 +271,10 @@
       height: 100%;
       width: 100%;
       object-fit: cover;
+    }
+
+    @media (width >= 750px) {
+      width: 115px;
     }
   }
 
