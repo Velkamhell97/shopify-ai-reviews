@@ -171,12 +171,14 @@
               t = e;
             }
           }
-          if (t.className.indexOf("-floating") > -1 || t.className.indexOf("_rsi-buy-now-button-product-in-description") > -1) {
-            if (document.querySelector("._rsi-buy-now-button._rsi-buy-now-button-product:not(._rsi-buy-now-button-product-in-description)")) {
-              t = document.querySelector("._rsi-buy-now-button._rsi-buy-now-button-product:not(._rsi-buy-now-button-product-in-description)");
+          if (t) {
+            if (t.className.indexOf("-floating") > -1 || t.className.indexOf("_rsi-buy-now-button-product-in-description") > -1) {
+              if (document.querySelector("._rsi-buy-now-button._rsi-buy-now-button-product:not(._rsi-buy-now-button-product-in-description)")) {
+                t = document.querySelector("._rsi-buy-now-button._rsi-buy-now-button-product:not(._rsi-buy-now-button-product-in-description)");
+              }
             }
           }
-          a = t.closest('form[method="post"][action*="/cart/add"]') ? _rsi.u.serializeForm(false, false, t.closest('form[method="post"][action*="/cart/add"]')) : _rsi.u.serializeForm('form[method="post"][action*="/cart/add"]', '[name="form_type"][value="product"]');
+          a = t?.closest('form[method="post"][action*="/cart/add"]') ? _rsi.u.serializeForm(false, false, t.closest('form[method="post"][action*="/cart/add"]')) : _rsi.u.serializeForm('form[method="post"][action*="/cart/add"]', '[name="form_type"][value="product"]');
           try {
             if (_rsi.appBlockCurrentProduct) {
               a = a.replace("&&", "&");
