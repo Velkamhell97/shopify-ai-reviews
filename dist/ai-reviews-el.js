@@ -42,7 +42,7 @@
      */
     interval = null;
     /**
-     * @type {Element}
+     * @type {HTMLElement}
      */
     slider;
     /**
@@ -50,11 +50,11 @@
      */
     autoplay;
     /**
-     * @type {Element}
+     * @type {HTMLElement}
      */
     previousControl;
     /**
-     * @type {Element}
+     * @type {HTMLElement}
      */
     nextControl;
     get type() {
@@ -83,12 +83,16 @@
     }
     setup() {
       const previouscontrolid = this.getAttribute("previouscontrol");
-      if (previouscontrolid) this.previousControl = document.querySelector(`#${previouscontrolid}`);
-      this.previousControl.addEventListener("click", this.previous.bind(this));
-      this.previousControl.disabled = true;
+      if (previouscontrolid) {
+        this.previousControl = document.querySelector(`#${previouscontrolid}`);
+        this.previousControl.addEventListener("click", this.previous.bind(this));
+        this.previousControl.disabled = true;
+      }
       const nextcontrolid = this.getAttribute("nextcontrol");
-      if (nextcontrolid) this.nextControl = document.querySelector(`#${nextcontrolid}`);
-      this.nextControl.addEventListener("click", this.next.bind(this));
+      if (nextcontrolid) {
+        this.nextControl = document.querySelector(`#${nextcontrolid}`);
+        this.nextControl.addEventListener("click", this.next.bind(this));
+      }
     }
     reset() {
       this.slider.style.scrollBehavior = "auto";
@@ -148,7 +152,7 @@
       return this.getAttribute("type") ?? "text";
     }
     get length() {
-      return this.slider?.length ?? 1;
+      return this.slider.length;
     }
     constructor() {
       super();
@@ -158,10 +162,10 @@
       this.setup();
     }
     setup() {
-      const sliderid = this.getAttribute("slider");
-      if (!sliderid) return;
+      const sliderid = this.getAttribute("slider") ?? "undefined";
       this.slider = document.querySelector(`#${sliderid}`);
-      this.slider?.addEventListener("slidechange", this.onSliderChange.bind(this));
+      if (!this.slider) return;
+      this.slider.addEventListener("slidechange", this.onSliderChange.bind(this));
       if (this.type === "text") {
         this.paginator.textContent = `1 / ${this.length}`;
       }
