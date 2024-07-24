@@ -26,7 +26,7 @@
       this.reload();
     }
     reload() {
-      this.form = document.querySelector("#review-form");
+      this.form = document.querySelector("#reviews-form");
     }
     /**
      * @returns {Review?}
@@ -625,6 +625,7 @@
           this.$nextTick(() => modal.show(index));
         } else {
           modal.hide();
+          this.expandedReview = null;
         }
       },
       reset() {

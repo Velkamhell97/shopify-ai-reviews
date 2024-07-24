@@ -1,5 +1,5 @@
 @layer ai-reviews {
-  /*#region Actions */
+  /*-- ACTIONS --*/
   .reviews-actions {
     justify-content: center;
 
@@ -7,10 +7,9 @@
       justify-content: space-between !important;
     }
   }
-  /*#endregion*/
 
 
-  /*#region Header | Rating */
+  /*-- HEADER --*/
   .reviews-header {
     padding-block: 1rem;
   }
@@ -71,11 +70,10 @@
       font-size: 16px;
     }
   }
-  /*#endregion*/
+  
 
-
-  /*#region Form */
-  .reviews-form {
+  /*-- FORM --*/
+  .form-reviews {
     padding-block: 1rem;
   }
 
@@ -137,10 +135,9 @@
       font-size: 14px;
     }
   }
-  /*#endregion*/
 
 
-  /*#region Layouts */
+  /*-- LAYOUTS --*/
   .reviews-placeholder {
     height: 100px;
   }
@@ -196,10 +193,9 @@
       --columns: 3;
     }
   }
-  /*#endregion */
 
 
-  /*#region Review Slide */
+  /*-- SLIDER --*/
   :is(.reviews-form__slider, .reviews-dialog__slider) > button {
     position: absolute;
     top: 50%;
@@ -291,10 +287,9 @@
     list-style-type: none;
     padding: 0;
   }
-  /*#endregion */
 
   
-  /*#region Dialog */
+  /*-- DIALOG --*/
   .dialog-reviews {
     max-width: min(90%, 400px);
     overflow-y: auto;
@@ -340,11 +335,10 @@
       width: 45%;
     }
   }
-  /*#endregion */
 }
 
 @layer components {
-  /*---------------------- BUTTONS --------------------------*/
+  /*-- BUTTONS --*/
   .btn-reviews {
     display: inline-flex;
     align-items: center;
@@ -406,7 +400,7 @@
     transition: border-color 0.2s, background-color 0.2s;
 
     &:disabled {
-      opacity: 0.6;
+      opacity: 0.65;
     }
   }
 
@@ -465,7 +459,7 @@
   }
 
   
-  /*---------------------- INPUTS --------------------------*/
+  /*-- INPUTS --*/
   .input-reviews {
     all: unset;
     padding: 1rem;
@@ -478,7 +472,7 @@
   }
 
 
-  /*---------------------- CONTAINERS --------------------------*/
+  /*-- CONTAINERS --*/
   .contrast-container {
     color: white;
     background-color: rgba(128, 128, 128, 0.5);
@@ -500,7 +494,7 @@
     color: #0a3622;
   }
 
-  /*---------------------- COLLAPSIBLE --------------------------*/
+  /*-- COLLAPSIBLE --*/
   collapsible-element {
     display: grid;
     grid-template-rows: 0fr;
@@ -515,7 +509,7 @@
     grid-template-rows: 1fr;
   }
 
-  /*---------------------- SLIDER --------------------------*/
+  /*-- SLIDER --*/
   slider-element {
     display: block;
   }
@@ -553,7 +547,7 @@
     }
   }
 
-  /*---------------------- ICONS --------------------------*/
+  /*-- ICONS --*/
   .icon-reviews {
     display: inline-flex;
     width: 20px;
@@ -648,10 +642,6 @@
     width: 100%;
   }
 
-  .h-full {
-    height: 100%;
-  }
-
   .leading-sm {
     line-height: 1.375;
   }
@@ -695,10 +685,6 @@
   .m-0 {
     margin: 0;
   }  
-
-  .text-inherit {
-    color: inherit !important;
-  }
 
   .bold {
     font-weight: bold !important;
