@@ -43,7 +43,7 @@
       await new Promise((resolve) => setTimeout(resolve, 2e3));
       this.dialog?.close();
       const discount = e.detail;
-      applyDiscount(discount);
+      this.applyDiscount(discount);
     }
     applyDiscount(discount) {
       if (!_rsi.cart) return false;
