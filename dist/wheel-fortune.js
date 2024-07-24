@@ -136,6 +136,18 @@
         };
         var o = o2;
         let a = _rsi.u.serializeForm('form[method="post"][action*="/cart/add"]', '[name="form_type"][value="product"]');
+        try {
+          if (_rsi.form.deferLoading) {
+            _rsi.form.mode = "productCart";
+            _rsi.form.open(false, false, false, false, a || "product=true");
+            if (_rsi.productPage.oldCart === "empty") {
+              _rsi.productPage.oldCart = false;
+            }
+            return;
+          }
+        } catch (e) {
+          console.log(e);
+        }
         _rsi.form.mode = "productCart";
         _rsi.form.open(true);
         _rsi.cartManager.clearCart(
