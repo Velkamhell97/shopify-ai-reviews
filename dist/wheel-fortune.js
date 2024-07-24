@@ -46,19 +46,19 @@
       this.applyDiscount(discount);
     }
     applyDiscount(discount) {
-      if (!_rsi.cart) return false;
-      if (typeof _RSI_COD_FORM_DOWNSELLS === "undefined") return false;
-      if (_rsi.dss.offerShown || _rsi.dss.activeDiscount) return false;
-      _rsi.dss.currentOffer = _RSI_COD_FORM_DOWNSELLS[0];
-      _rsi.dss.activeDiscount = {
-        type: _rsi.dss.currentOffer.ds.t,
-        value: discount * 100,
-        downsellId: _rsi.dss.currentOffer.id
-      };
-      if (_rsi.dss.currentOffer.disForDisc) {
-        _rsi.dss.disOtherDisc = true;
-      }
       try {
+        if (!_rsi.cart) return false;
+        if (typeof _RSI_COD_FORM_DOWNSELLS === "undefined") return false;
+        if (_rsi.dss.offerShown || _rsi.dss.activeDiscount) return false;
+        _rsi.dss.currentOffer = _RSI_COD_FORM_DOWNSELLS[0];
+        _rsi.dss.activeDiscount = {
+          type: _rsi.dss.currentOffer.ds.t,
+          value: discount * 100,
+          downsellId: _rsi.dss.currentOffer.id
+        };
+        if (_rsi.dss.currentOffer.disForDisc) {
+          _rsi.dss.disOtherDisc = true;
+        }
         let e = null;
         e?.preventDefault();
         if (typeof _COD_FORM_ON_PRODUCT_PAGE_BUY_NOW_CLICK === "function") {
