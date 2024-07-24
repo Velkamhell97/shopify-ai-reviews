@@ -1,6 +1,6 @@
 require('esbuild').build({
-  entryPoints: ['src/wheel-fortune.js'],
-  outfile: "dist/wheel-fortune.js",
+  entryPoints: ['src/ai-reviews.js'],
+  outfile: "dist/ai-reviews.js",
   bundle: true,
   // minify: true,
   // treeShaking: true,

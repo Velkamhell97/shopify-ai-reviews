@@ -1,8 +1,5 @@
 (() => {
   // src/ai-reviews.js
-  function hasError(response) {
-    return "message" in response;
-  }
   var FormController = class {
     /**
      * @type {HTMLFormElement}
@@ -232,10 +229,12 @@
      * @param {number} index
      */
     show(index) {
+      document.body.style.overflow = "hidden";
       this.dialog?.showModal();
       this.slider?.scrollTo(index + 1);
     }
     hide() {
+      document.body.style.overflow = "auto";
       this.slider?.reset();
       this.dialog?.close();
     }
@@ -529,6 +528,13 @@
         this.date();
         this.fetched = true;
       }
+    }
+    /**
+     * @param {SucessReviewsResponse | ErrorReviewsResponse} response
+     * @returns {response is ErrorReviewsResponse}
+     */
+    hasError(response) {
+      return "message" in response;
     }
   };
   document.addEventListener("alpine:init", () => {

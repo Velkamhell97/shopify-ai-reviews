@@ -329,10 +329,6 @@
     }
   }
   /*#endregion */
-
-  body:has(dialog[open]) {
-    overflow: hidden;
-  }
 }
 
 @layer components {
