@@ -73,10 +73,15 @@ wheel-of-fortune {
   }
   
   > button.wheel-button {
-    width: 20cqi;
+    width: 18cqi;
     aspect-ratio: 1;
     border: 0;
     cursor: pointer;
+    transition: scale 0.2s;
+
+    &:hover {
+      scale: 1.05;
+    }
   }
 }
 
@@ -150,7 +155,7 @@ wheel-of-fortune {
       top: 50%;
       left: 50%;
       translate: -50% -50%;
-      font-size: 5cqi;
+      font-size: 4cqi;
       z-index: 3;
       color: inherit;
       border-radius: inherit;

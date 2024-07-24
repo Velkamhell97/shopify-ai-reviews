@@ -158,7 +158,7 @@
             }
           };
           var o = o2;
-          _rsi.calculateAppBlockProduct(e.target);
+          _rsi.calculateAppBlockProduct(e?.target);
           var a;
           var t = e?.target;
           var r = true;
