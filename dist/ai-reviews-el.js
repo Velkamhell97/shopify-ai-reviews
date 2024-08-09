@@ -1,5 +1,24 @@
 (() => {
   // src/ai-reviews-el.js
+  var AiWrapper = class extends HTMLElement {
+    button;
+    get type() {
+      return this.getAttribute("type");
+    }
+    constructor() {
+      super();
+    }
+    connectedCallback() {
+      this.button = this.querySelector("button");
+      this.button?.addEventListener("click", this.generate.bind(this));
+    }
+    generate() {
+      if (!this.type) return;
+      console.log(document.querySelectorAll(".p-title"));
+      console.log(document.querySelectorAll(".p-description"));
+    }
+  };
+  customElements.define("ai-wrapper", AiWrapper);
   var CollapsibleElement = class extends HTMLElement {
     /**
      * @type {HTMLElement | null}
